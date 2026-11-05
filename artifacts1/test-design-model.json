@@ -1,0 +1,2271 @@
+{
+  "artifact_id": "test-design-model-360449-v0.2",
+  "requirement_version": "0.2",
+  "timestamp": "2026-11-03T12:05:00Z",
+  "qase_params": {
+    "project": "TEST",
+    "suite": "QEMU Manager — v0.2"
+  },
+  "cases": [
+    {
+      "temp_id": "REQ-01-POS-01",
+      "title": "REQ-01: Activation on onStartupFinished and QEMU: Connect available in Command Palette",
+      "precondition": "Extension installed; no .qemu-manager.json in workspace; libvirt/QEMU runtime reachable.",
+      "steps": [
+        {
+          "action": "Start VS Code (triggers onStartupFinished)",
+          "expected": "Extension activates without blocking VS Code startup."
+        },
+        {
+          "action": "Open Command Palette and search for the command",
+          "expected": "Command `QEMU: Connect` is present and executable."
+        }
+      ],
+      "expected": "Extension is active after startup and `QEMU: Connect` is available in the Command Palette.",
+      "type": "positive",
+      "requirement_ref": "REQ-01"
+    },
+    {
+      "temp_id": "REQ-01-POS-02",
+      "title": "REQ-01: Activation on invoking any extension command before startup activation",
+      "precondition": "Extension installed but not yet activated; runtime reachable.",
+      "steps": [
+        {
+          "action": "Invoke an extension command before the extension has activated",
+          "expected": "Extension activates via the onCommand trigger and the command runs."
+        }
+      ],
+      "expected": "Extension activates when any of its commands is invoked.",
+      "type": "positive",
+      "requirement_ref": "REQ-01"
+    },
+    {
+      "temp_id": "REQ-01-POS-03",
+      "title": "REQ-01: Activation when .qemu-manager.json exists in the workspace",
+      "precondition": "Extension installed and not activated; a file named `.qemu-manager.json` is placed in the workspace root.",
+      "steps": [
+        {
+          "action": "Open the workspace containing .qemu-manager.json",
+          "expected": "Extension activates due to the file-presence trigger."
+        }
+      ],
+      "expected": "Extension activates when `.qemu-manager.json` is present in the workspace.",
+      "type": "positive",
+      "requirement_ref": "REQ-01",
+      "comment": "A-01 (deferred risk): the purpose/content of .qemu-manager.json is undefined. Case asserts only the literal activation trigger and does not assume any config role."
+    },
+    {
+      "temp_id": "REQ-01-POS-04",
+      "title": "REQ-01: Cold activation within 1.5 s on reference hardware",
+      "precondition": "Cold start; reference hardware (4 cores, 8 GB RAM); extension installed.",
+      "steps": [
+        {
+          "action": "Measure time from VS Code start to extension activation",
+          "expected": "Cold activation completes within 1.5 s."
+        }
+      ],
+      "expected": "Cold activation ≤ 1.5 s.",
+      "type": "positive",
+      "requirement_ref": "REQ-01"
+    },
+    {
+      "temp_id": "REQ-01-BND-01",
+      "title": "REQ-01: Cold activation at the 1.5 s boundary (just-inside / just-outside)",
+      "precondition": "Reference hardware (4 cores, 8 GB RAM); cold start; injection to simulate the timing values.",
+      "steps": [
+        {
+          "action": "Measure activation at exactly 1.50 s",
+          "expected": "Considered within limit (≤ 1.5 s) — passes."
+        },
+        {
+          "action": "Measure activation at 1.51 s",
+          "expected": "Exceeds the 1.5 s limit — boundary violation."
+        }
+      ],
+      "expected": "1.50 s passes the ≤ 1.5 s limit; 1.51 s fails it.",
+      "type": "boundary",
+      "requirement_ref": "REQ-01"
+    },
+    {
+      "temp_id": "REQ-01-NEG-01",
+      "title": "REQ-01: Activation error goes to degraded with notification and Retry (no silent fail)",
+      "precondition": "Extension installed; an activation failure is induced.",
+      "steps": [
+        {
+          "action": "Trigger activation with an induced error",
+          "expected": "Extension transitions to `degraded` state."
+        },
+        {
+          "action": "Observe the notification",
+          "expected": "Notification «QEMU Manager: activation failed» is shown with a «Retry» action; activation does not fail silently."
+        },
+        {
+          "action": "Do not press Retry",
+          "expected": "Extension waits for an explicit re-launch."
+        }
+      ],
+      "expected": "On activation error: degraded state, notification with «Retry», no silent fail.",
+      "type": "negative",
+      "requirement_ref": "REQ-01",
+      "comment": "A-07 (deferred risk): the exact 'explicit re-launch' trigger is undefined. Case asserts only the literal notification/action behavior."
+    },
+    {
+      "temp_id": "REQ-02-POS-01",
+      "title": "REQ-02: Add a valid connection stored only in workspace settings",
+      "precondition": "Extension active; fewer than 10 connections configured; runtime reachable.",
+      "steps": [
+        {
+          "action": "Add a connection with name `prod-1` and URI `qemu:///system`",
+          "expected": "Connection is accepted and added."
+        },
+        {
+          "action": "Inspect storage location",
+          "expected": "Connection is stored only in workspace settings, never in user/global settings."
+        }
+      ],
+      "expected": "Valid connection added and persisted in workspace settings only.",
+      "type": "positive",
+      "requirement_ref": "REQ-02"
+    },
+    {
+      "temp_id": "REQ-02-POS-02",
+      "title": "REQ-02: Edit an existing connection",
+      "precondition": "At least one connection exists.",
+      "steps": [
+        {
+          "action": "Edit the existing connection name/URI and save",
+          "expected": "The connection is updated with the new values."
+        }
+      ],
+      "expected": "Existing connection can be edited and the change is stored.",
+      "type": "positive",
+      "requirement_ref": "REQ-02",
+      "comment": "G-03 (deferred risk): edit rules and acceptance criteria are missing. Case asserts only the literal edit capability."
+    },
+    {
+      "temp_id": "REQ-02-POS-03",
+      "title": "REQ-02: Delete an existing connection",
+      "precondition": "At least one connection exists.",
+      "steps": [
+        {
+          "action": "Delete the existing connection",
+          "expected": "The connection is removed from workspace settings."
+        }
+      ],
+      "expected": "Existing connection can be deleted.",
+      "type": "positive",
+      "requirement_ref": "REQ-02",
+      "comment": "G-03 (deferred risk): delete rules and acceptance criteria are missing. Case asserts only the literal delete capability."
+    },
+    {
+      "temp_id": "REQ-02-POS-04",
+      "title": "REQ-02: Connections restored after VS Code reload",
+      "precondition": "At least one valid connection configured in workspace settings.",
+      "steps": [
+        {
+          "action": "Reload the VS Code window",
+          "expected": "Configured connections are restored after reload."
+        }
+      ],
+      "expected": "Connections are restored after reload.",
+      "type": "positive",
+      "requirement_ref": "REQ-02"
+    },
+    {
+      "temp_id": "REQ-02-POS-05",
+      "title": "REQ-02: Unreachable connection shows disconnected status with Retry",
+      "precondition": "A configured connection whose host/URI is unreachable.",
+      "steps": [
+        {
+          "action": "Connect / refresh the unreachable connection",
+          "expected": "Connection is displayed with status `disconnected` and a «Retry» action."
+        }
+      ],
+      "expected": "Unreachable connection → `disconnected` + «Retry».",
+      "type": "positive",
+      "requirement_ref": "REQ-02"
+    },
+    {
+      "temp_id": "REQ-02-NEG-01",
+      "title": "REQ-02: Adding a connection without mandatory fields is blocked",
+      "precondition": "Extension active.",
+      "steps": [
+        {
+          "action": "Attempt to add a connection leaving name and/or URI empty",
+          "expected": "Add is blocked; mandatory-field validation prevents saving."
+        }
+      ],
+      "expected": "Adding without mandatory fields is blocked.",
+      "type": "negative",
+      "requirement_ref": "REQ-02"
+    },
+    {
+      "temp_id": "REQ-02-NEG-02",
+      "title": "REQ-02: Duplicate connection name → inline error «Connection name already exists»",
+      "precondition": "A connection named `prod-1` already exists.",
+      "steps": [
+        {
+          "action": "Add a new connection with the same name `prod-1`",
+          "expected": "Inline error «Connection name already exists» is shown; duplicate is not saved."
+        }
+      ],
+      "expected": "Duplicate name produces the inline error and is not added.",
+      "type": "negative",
+      "requirement_ref": "REQ-02"
+    },
+    {
+      "temp_id": "REQ-02-NEG-03",
+      "title": "REQ-02: Connection name with characters outside [a-zA-Z0-9 _-] is rejected",
+      "precondition": "Extension active.",
+      "steps": [
+        {
+          "action": "Enter a name containing a disallowed character, e.g. `prod@1`",
+          "expected": "Input is rejected because it violates the allowed character set."
+        }
+      ],
+      "expected": "Names outside [a-zA-Z0-9 _-] are rejected.",
+      "type": "negative",
+      "requirement_ref": "REQ-02"
+    },
+    {
+      "temp_id": "REQ-02-NEG-04",
+      "title": "REQ-02: Invalid URI and QMP socket path not ending in .sock are rejected",
+      "precondition": "Extension active.",
+      "steps": [
+        {
+          "action": "Enter an unsupported URI, e.g. `qemu:///bogus`",
+          "expected": "Rejected — not one of the supported URI forms."
+        },
+        {
+          "action": "Enter an absolute path not ending in `.sock`, e.g. `/tmp/qmp`, as the socket",
+          "expected": "Rejected — QMP socket paths must end in `.sock`."
+        }
+      ],
+      "expected": "Unsupported URI forms and socket paths not ending in `.sock` are rejected.",
+      "type": "negative",
+      "requirement_ref": "REQ-02"
+    },
+    {
+      "temp_id": "REQ-02-BND-01",
+      "title": "REQ-02: Connection name length boundaries 1–32 (empty/33 rejected)",
+      "precondition": "Extension active.",
+      "steps": [
+        {
+          "action": "Use a 1-character name (min)",
+          "expected": "Accepted."
+        },
+        {
+          "action": "Use a 32-character name (max)",
+          "expected": "Accepted."
+        },
+        {
+          "action": "Use a 0-character (empty) name",
+          "expected": "Rejected."
+        },
+        {
+          "action": "Use a 33-character name (just outside max)",
+          "expected": "Rejected."
+        }
+      ],
+      "expected": "Length 1 and 32 accepted; empty and 33 rejected.",
+      "type": "boundary",
+      "requirement_ref": "REQ-02"
+    },
+    {
+      "temp_id": "REQ-02-BND-02",
+      "title": "REQ-02: Connection count limit of 10 (10 accepted, 11th behavior undefined)",
+      "precondition": "9 connections already configured.",
+      "steps": [
+        {
+          "action": "Add the 10th connection",
+          "expected": "Accepted — 10 connections are supported."
+        },
+        {
+          "action": "Attempt to add an 11th connection",
+          "expected": "Per literal text 'no more than 10 simultaneously'; requirement does NOT define whether the 11th is blocked with an inline error or an error notification."
+        }
+      ],
+      "expected": "Exactly 10 connections supported (literal). Behavior of the 11th is unspecified and captured as an open question, not an invented expected result.",
+      "type": "boundary",
+      "requirement_ref": "REQ-02",
+      "comment": "A-04 (deferred risk): limit-reached behavior is undefined and has no acceptance criterion. Assert literal limit only."
+    },
+    {
+      "temp_id": "REQ-03-POS-01",
+      "title": "REQ-03: VMs grouped by connection in sidebar with name, state, vCPU, RAM",
+      "precondition": "Connections configured; at least one connection with VMs.",
+      "steps": [
+        {
+          "action": "Open the QEMU Manager sidebar",
+          "expected": "VMs are listed grouped by their connections."
+        },
+        {
+          "action": "Inspect each VM entry",
+          "expected": "Each VM shows name, state, vCPU and RAM in MB."
+        }
+      ],
+      "expected": "Tree shows VMs grouped by connection with the required fields.",
+      "type": "positive",
+      "requirement_ref": "REQ-03"
+    },
+    {
+      "temp_id": "REQ-03-POS-02",
+      "title": "REQ-03: Default sort by name, case-insensitive, ascending",
+      "precondition": "A connection with VMs whose names differ in case and order, e.g. `beta`, `Alpha`, `gamma`.",
+      "steps": [
+        {
+          "action": "View the tree with default sorting",
+          "expected": "VMs ordered ascending by name, ignoring case (Alpha, beta, gamma)."
+        }
+      ],
+      "expected": "Default ordering is ascending, case-insensitive by name.",
+      "type": "positive",
+      "requirement_ref": "REQ-03"
+    },
+    {
+      "temp_id": "REQ-03-POS-03",
+      "title": "REQ-03: Connection without VMs shows placeholder «No VMs»",
+      "precondition": "A connection with no VMs.",
+      "steps": [
+        {
+          "action": "Expand a connection that has no VMs",
+          "expected": "Placeholder «No VMs» is shown."
+        }
+      ],
+      "expected": "Empty connection renders «No VMs».",
+      "type": "positive",
+      "requirement_ref": "REQ-03"
+    },
+    {
+      "temp_id": "REQ-03-POS-04",
+      "title": "REQ-03: Sorting and grouping preserved after a state update",
+      "precondition": "Tree visible with multiple VMs across connections.",
+      "steps": [
+        {
+          "action": "Let state refresh (REQ-13) change one VM state",
+          "expected": "Grouping and case-insensitive ascending sort are still respected after the update."
+        }
+      ],
+      "expected": "Sorting/grouping remain correct after state refresh.",
+      "type": "positive",
+      "requirement_ref": "REQ-03"
+    },
+    {
+      "temp_id": "REQ-03-NEG-01",
+      "title": "REQ-03: Temporarily unavailable VM data shows last known state with (stale) suffix",
+      "precondition": "VM data becomes temporarily unavailable for a connection.",
+      "steps": [
+        {
+          "action": "Trigger a refresh while VM data is temporarily unavailable",
+          "expected": "Last known state is displayed with suffix `(stale)`; no raw error is forced into the tree."
+        }
+      ],
+      "expected": "Unavailable data → last known state + `(stale)` suffix.",
+      "type": "negative",
+      "requirement_ref": "REQ-03"
+    },
+    {
+      "temp_id": "REQ-03-BND-01",
+      "title": "REQ-03: State value coverage incl. `suspended` (display-only vs commands)",
+      "precondition": "VMs exist in each state: running, stopped, paused, suspended, crashed.",
+      "steps": [
+        {
+          "action": "Observe a VM in `suspended` state",
+          "expected": "State `suspended` is rendered in the tree per REQ-03."
+        },
+        {
+          "action": "Check which commands apply to `suspended`",
+          "expected": "REQ-11 maps Pause only to `running` and Resume only to `paused`; requirement does not define any command for `suspended`."
+        }
+      ],
+      "expected": "`suspended` is displayed; no command owner is defined — captured as open question rather than an invented behavior.",
+      "type": "boundary",
+      "requirement_ref": "REQ-03",
+      "comment": "A-02 (deferred risk): `suspended` has no producing/consuming requirement and no command assignment."
+    },
+    {
+      "temp_id": "REQ-04-POS-01",
+      "title": "REQ-04: Successful VM creation with all valid fields",
+      "precondition": "Valid connection; runtime reachable; name not yet used in the connection.",
+      "steps": [
+        {
+          "action": "Fill valid fields: name `vm-01`, vcpu 2, ramMb 2048, one qcow2 disk (valid absolute path, 20 GB), network user-nat",
+          "expected": "Form is valid; «Create» is enabled."
+        },
+        {
+          "action": "Click «Create»",
+          "expected": "Form is sent to libvirt and the VM appears in the tree within 3 s."
+        }
+      ],
+      "expected": "Valid form creates the VM and it appears in the tree within 3 s.",
+      "type": "positive",
+      "requirement_ref": "REQ-04"
+    },
+    {
+      "temp_id": "REQ-04-POS-02",
+      "title": "REQ-04: VM creation with optional iso path",
+      "precondition": "Valid connection; a valid absolute iso path exists on the hypervisor.",
+      "steps": [
+        {
+          "action": "Provide valid mandatory fields plus an existing absolute `iso` path",
+          "expected": "iso is accepted (validated via libvirt) and creation succeeds."
+        }
+      ],
+      "expected": "Creation succeeds with optional iso provided.",
+      "type": "positive",
+      "requirement_ref": "REQ-04"
+    },
+    {
+      "temp_id": "REQ-04-NEG-01",
+      "title": "REQ-04: Duplicate VM name → inline error, no auto-suffix, form not sent",
+      "precondition": "A VM named `vm-01` already exists in the target connection.",
+      "steps": [
+        {
+          "action": "Attempt to create a VM named `vm-01`",
+          "expected": "Inline error «A VM with this name already exists in the connection»; no auto-suffix is applied; form is not sent to libvirt."
+        }
+      ],
+      "expected": "Duplicate name blocks creation with the exact inline error and no auto-suffix.",
+      "type": "negative",
+      "requirement_ref": "REQ-04",
+      "comment": "C-03 (deferred risk): REQ-04 rejects duplicates while REQ-20 offers 'Overwrite?'. This case asserts only the REQ-04 create path."
+    },
+    {
+      "temp_id": "REQ-04-NEG-02",
+      "title": "REQ-04: VM name with characters outside [a-zA-Z0-9-] rejected",
+      "precondition": "Valid connection.",
+      "steps": [
+        {
+          "action": "Enter a name containing `_` or `.`, e.g. `vm_01`",
+          "expected": "Inline error — character set violation."
+        }
+      ],
+      "expected": "Invalid name characters rejected.",
+      "type": "negative",
+      "requirement_ref": "REQ-04"
+    },
+    {
+      "temp_id": "REQ-04-NEG-03",
+      "title": "REQ-04: VM name starting or ending with `-` rejected",
+      "precondition": "Valid connection.",
+      "steps": [
+        {
+          "action": "Enter `-vm01`",
+          "expected": "Inline error — must not start with `-`."
+        },
+        {
+          "action": "Enter `vm01-`",
+          "expected": "Inline error — must not end with `-`."
+        }
+      ],
+      "expected": "Leading/trailing dash rejected.",
+      "type": "negative",
+      "requirement_ref": "REQ-04"
+    },
+    {
+      "temp_id": "REQ-04-NEG-04",
+      "title": "REQ-04: vcpu outside 1–32 → inline error with rule",
+      "precondition": "Valid connection.",
+      "steps": [
+        {
+          "action": "Enter vcpu = 0",
+          "expected": "Inline error referencing the 1–32 rule."
+        },
+        {
+          "action": "Enter vcpu = 33",
+          "expected": "Inline error referencing the 1–32 rule."
+        }
+      ],
+      "expected": "Out-of-range vcpu produces an inline rule error.",
+      "type": "negative",
+      "requirement_ref": "REQ-04"
+    },
+    {
+      "temp_id": "REQ-04-NEG-05",
+      "title": "REQ-04: ramMb outside 256–262144 → inline error with rule",
+      "precondition": "Valid connection.",
+      "steps": [
+        {
+          "action": "Enter ramMb = 255",
+          "expected": "Inline error referencing the 256–262144 range."
+        },
+        {
+          "action": "Enter ramMb = 262145",
+          "expected": "Inline error referencing the 256–262144 range."
+        }
+      ],
+      "expected": "Out-of-range RAM rejected with inline rule error.",
+      "type": "negative",
+      "requirement_ref": "REQ-04"
+    },
+    {
+      "temp_id": "REQ-04-NEG-06",
+      "title": "REQ-04: ramMb not a multiple of 128 → inline error",
+      "precondition": "Valid connection.",
+      "steps": [
+        {
+          "action": "Enter ramMb = 300 (in range but not a multiple of 128)",
+          "expected": "Inline error referencing the 'multiple of 128' rule."
+        }
+      ],
+      "expected": "Non-multiple-of-128 RAM rejected.",
+      "type": "negative",
+      "requirement_ref": "REQ-04"
+    },
+    {
+      "temp_id": "REQ-04-NEG-07",
+      "title": "REQ-04: disks count outside 1–8 → inline error",
+      "precondition": "Valid connection.",
+      "steps": [
+        {
+          "action": "Configure 0 disks",
+          "expected": "Inline error — at least 1 disk required."
+        },
+        {
+          "action": "Configure 9 disks",
+          "expected": "Inline error — at most 8 disks."
+        }
+      ],
+      "expected": "Disk count outside 1–8 rejected.",
+      "type": "negative",
+      "requirement_ref": "REQ-04"
+    },
+    {
+      "temp_id": "REQ-04-NEG-08",
+      "title": "REQ-04: Disk path not absolute or parent directory missing (libvirt check)",
+      "precondition": "Valid connection; runtime reachable.",
+      "steps": [
+        {
+          "action": "Provide a relative disk path",
+          "expected": "Rejected — path must be absolute on the hypervisor."
+        },
+        {
+          "action": "Provide an absolute path whose parent directory does not exist",
+          "expected": "Rejected via libvirt parent-directory existence check."
+        }
+      ],
+      "expected": "Invalid disk paths rejected (client for absolute form, libvirt for parent-dir existence).",
+      "type": "negative",
+      "requirement_ref": "REQ-04",
+      "comment": "C-04 (deferred risk): REQ-16 says all fields are client-validated but parent-dir existence is a libvirt-side check that cannot be done client-side."
+    },
+    {
+      "temp_id": "REQ-04-NEG-09",
+      "title": "REQ-04: Disk size outside 1–2000 GB → inline error",
+      "precondition": "Valid connection.",
+      "steps": [
+        {
+          "action": "Enter disk size 0 GB",
+          "expected": "Inline error referencing the 1–2000 GB rule."
+        },
+        {
+          "action": "Enter disk size 2001 GB",
+          "expected": "Inline error referencing the 1–2000 GB rule."
+        }
+      ],
+      "expected": "Out-of-range disk size rejected.",
+      "type": "negative",
+      "requirement_ref": "REQ-04"
+    },
+    {
+      "temp_id": "REQ-04-NEG-10",
+      "title": "REQ-04: Disk format other than qcow2 rejected",
+      "precondition": "Valid connection.",
+      "steps": [
+        {
+          "action": "Set disk format to `raw`",
+          "expected": "Inline error — only `qcow2` is allowed."
+        }
+      ],
+      "expected": "Non-qcow2 format rejected.",
+      "type": "negative",
+      "requirement_ref": "REQ-04"
+    },
+    {
+      "temp_id": "REQ-04-NEG-11",
+      "title": "REQ-04: iso path missing on the hypervisor is rejected",
+      "precondition": "Valid connection; runtime reachable.",
+      "steps": [
+        {
+          "action": "Provide an absolute iso path that does not exist on the hypervisor",
+          "expected": "Validation via libvirt rejects the iso path."
+        }
+      ],
+      "expected": "Non-existent iso path rejected.",
+      "type": "negative",
+      "requirement_ref": "REQ-04"
+    },
+    {
+      "temp_id": "REQ-04-NEG-12",
+      "title": "REQ-04: libvirt error on create → notification (REQ-14), raw text in log (REQ-15), no tree entry",
+      "precondition": "Valid form; libvirt induced to return an error.",
+      "steps": [
+        {
+          "action": "Submit a valid form and have libvirt return an error",
+          "expected": "Notification per REQ-14; full raw text written to the Output Channel per REQ-15."
+        },
+        {
+          "action": "Inspect the tree",
+          "expected": "VM is NOT added to the tree."
+        }
+      ],
+      "expected": "libvirt error → notification + full log, VM absent from tree.",
+      "type": "negative",
+      "requirement_ref": "REQ-04"
+    },
+    {
+      "temp_id": "REQ-04-BND-01",
+      "title": "REQ-04: name length boundaries 1/63 accepted, 0/64 rejected",
+      "precondition": "Valid connection.",
+      "steps": [
+        {
+          "action": "Enter a 1-character name",
+          "expected": "Accepted."
+        },
+        {
+          "action": "Enter a 63-character name",
+          "expected": "Accepted."
+        },
+        {
+          "action": "Enter an empty (0-character) name",
+          "expected": "Rejected."
+        },
+        {
+          "action": "Enter a 64-character name",
+          "expected": "Rejected."
+        }
+      ],
+      "expected": "1 and 63 accepted; 0 and 64 rejected.",
+      "type": "boundary",
+      "requirement_ref": "REQ-04"
+    },
+    {
+      "temp_id": "REQ-04-BND-02",
+      "title": "REQ-04: vcpu boundaries 1/32 accepted, 0/33 rejected",
+      "precondition": "Valid connection.",
+      "steps": [
+        {
+          "action": "Enter vcpu 1 (min) and vcpu 32 (max)",
+          "expected": "Both accepted."
+        },
+        {
+          "action": "Enter vcpu 0 and 33",
+          "expected": "Both rejected."
+        }
+      ],
+      "expected": "1 and 32 accepted; 0 and 33 rejected.",
+      "type": "boundary",
+      "requirement_ref": "REQ-04"
+    },
+    {
+      "temp_id": "REQ-04-BND-03",
+      "title": "REQ-04: ramMb boundaries 256/262144 accepted, 255/262145 rejected",
+      "precondition": "Valid connection.",
+      "steps": [
+        {
+          "action": "Enter ramMb 256 (min)",
+          "expected": "Accepted (multiple of 128)."
+        },
+        {
+          "action": "Enter ramMb 262144 (max = 2048×128)",
+          "expected": "Accepted (multiple of 128)."
+        },
+        {
+          "action": "Enter ramMb 255 and 262145",
+          "expected": "Both rejected."
+        }
+      ],
+      "expected": "256 and 262144 accepted; 255 and 262145 rejected.",
+      "type": "boundary",
+      "requirement_ref": "REQ-04"
+    },
+    {
+      "temp_id": "REQ-04-BND-04",
+      "title": "REQ-04: ramMb multiple-of-128 boundaries",
+      "precondition": "Valid connection.",
+      "steps": [
+        {
+          "action": "Enter 256, 384, 262144, 262016",
+          "expected": "All accepted (multiples of 128 within range)."
+        },
+        {
+          "action": "Enter 262272",
+          "expected": "Rejected (out of range, > 262144)."
+        },
+        {
+          "action": "Enter 260 (just above a multiple, not a multiple)",
+          "expected": "Rejected — not a multiple of 128."
+        }
+      ],
+      "expected": "Only multiples of 128 within 256–262144 accepted.",
+      "type": "boundary",
+      "requirement_ref": "REQ-04"
+    },
+    {
+      "temp_id": "REQ-04-BND-05",
+      "title": "REQ-04: disks count boundaries 1/8 accepted, 0/9 rejected",
+      "precondition": "Valid connection.",
+      "steps": [
+        {
+          "action": "Configure 1 disk and 8 disks",
+          "expected": "Both accepted."
+        },
+        {
+          "action": "Configure 0 disks and 9 disks",
+          "expected": "Both rejected."
+        }
+      ],
+      "expected": "1 and 8 accepted; 0 and 9 rejected.",
+      "type": "boundary",
+      "requirement_ref": "REQ-04"
+    },
+    {
+      "temp_id": "REQ-04-BND-06",
+      "title": "REQ-04: disk size boundaries 1/2000 GB accepted, 0/2001 rejected",
+      "precondition": "Valid connection.",
+      "steps": [
+        {
+          "action": "Set disk size 1 GB and 2000 GB",
+          "expected": "Both accepted."
+        },
+        {
+          "action": "Set disk size 0 GB and 2001 GB",
+          "expected": "Both rejected."
+        }
+      ],
+      "expected": "1 and 2000 accepted; 0 and 2001 rejected.",
+      "type": "boundary",
+      "requirement_ref": "REQ-04"
+    },
+    {
+      "temp_id": "REQ-04-BND-07",
+      "title": "REQ-04: name dash rule boundary (interior dash accepted, edge dash rejected)",
+      "precondition": "Valid connection.",
+      "steps": [
+        {
+          "action": "Enter `a-b`",
+          "expected": "Accepted — dash allowed inside."
+        },
+        {
+          "action": "Enter `-a` and `a-`",
+          "expected": "Rejected — dash not allowed at either end."
+        }
+      ],
+      "expected": "Interior dash accepted; leading/trailing dash rejected.",
+      "type": "boundary",
+      "requirement_ref": "REQ-04"
+    },
+    {
+      "temp_id": "REQ-05-POS-01",
+      "title": "REQ-05: Rename a stopped VM to a valid unique name",
+      "precondition": "VM in `stopped` state; target name unused in the connection.",
+      "steps": [
+        {
+          "action": "Invoke «Rename» on the stopped VM and enter a valid unique name",
+          "expected": "Rename is accepted and sent to libvirt."
+        },
+        {
+          "action": "Observe the tree",
+          "expected": "New name appears in the tree within 3 s."
+        }
+      ],
+      "expected": "Stopped VM renamed; new name in tree within 3 s.",
+      "type": "positive",
+      "requirement_ref": "REQ-05"
+    },
+    {
+      "temp_id": "REQ-05-NEG-01",
+      "title": "REQ-05: Rename disabled for a running VM with tooltip «VM must be stopped»",
+      "precondition": "VM in `running` state.",
+      "steps": [
+        {
+          "action": "Hover/inspect «Rename» for the running VM",
+          "expected": "Command is disabled with tooltip «VM must be stopped»."
+        }
+      ],
+      "expected": "Running VM → Rename disabled with tooltip.",
+      "type": "negative",
+      "requirement_ref": "REQ-05"
+    },
+    {
+      "temp_id": "REQ-05-NEG-02",
+      "title": "REQ-05: Rename disabled for other non-stopped states",
+      "precondition": "VMs in `paused`, `crashed`, `suspended` states.",
+      "steps": [
+        {
+          "action": "Check «Rename» for each non-stopped state",
+          "expected": "Command is disabled in each case (only `stopped` is allowed)."
+        }
+      ],
+      "expected": "Rename allowed only for `stopped`.",
+      "type": "negative",
+      "requirement_ref": "REQ-05"
+    },
+    {
+      "temp_id": "REQ-05-NEG-03",
+      "title": "REQ-05: Rename to a duplicate name → inline error, nothing sent to libvirt",
+      "precondition": "Stopped VM; another VM already uses the target name in the connection.",
+      "steps": [
+        {
+          "action": "Rename to the already-used name",
+          "expected": "Inline error; no change is sent to libvirt."
+        }
+      ],
+      "expected": "Duplicate rename name rejected, no libvirt change.",
+      "type": "negative",
+      "requirement_ref": "REQ-05"
+    },
+    {
+      "temp_id": "REQ-05-NEG-04",
+      "title": "REQ-05: Rename to a name violating REQ-04 rules → inline error",
+      "precondition": "Stopped VM.",
+      "steps": [
+        {
+          "action": "Rename to a name with invalid chars or leading/trailing dash, e.g. `-x_1`",
+          "expected": "Inline error per REQ-04 name rules."
+        }
+      ],
+      "expected": "Names violating REQ-04 rules rejected.",
+      "type": "negative",
+      "requirement_ref": "REQ-05"
+    },
+    {
+      "temp_id": "REQ-05-BND-01",
+      "title": "REQ-05: Rename name length boundaries (REQ-04 limits) 1/63 accepted, 64 rejected",
+      "precondition": "Stopped VM.",
+      "steps": [
+        {
+          "action": "Rename to a 1-character and a 63-character name",
+          "expected": "Both accepted."
+        },
+        {
+          "action": "Rename to a 64-character name",
+          "expected": "Rejected."
+        }
+      ],
+      "expected": "Rename honours REQ-04 name length limits (1–63).",
+      "type": "boundary",
+      "requirement_ref": "REQ-05"
+    },
+    {
+      "temp_id": "REQ-06-POS-01",
+      "title": "REQ-06: Clone a stopped VM with full disk copy → new stopped VM in tree",
+      "precondition": "Source VM in `stopped` state; valid unique new name available; sufficient host disk.",
+      "steps": [
+        {
+          "action": "Invoke «Clone» with a valid unique name",
+          "expected": "Clone proceeds; disks are copied in full."
+        },
+        {
+          "action": "Wait for completion",
+          "expected": "New VM appears in the tree in `stopped` state."
+        }
+      ],
+      "expected": "Stopped VM cloned; new VM in tree in `stopped`.",
+      "type": "positive",
+      "requirement_ref": "REQ-06"
+    },
+    {
+      "temp_id": "REQ-06-POS-02",
+      "title": "REQ-06: Clone shows a cancellable progress notification",
+      "precondition": "Source VM stopped; clone startable.",
+      "steps": [
+        {
+          "action": "Start clone",
+          "expected": "A progress notification is shown in VS Code and offers cancellation."
+        }
+      ],
+      "expected": "Progress notification shown and cancellable.",
+      "type": "positive",
+      "requirement_ref": "REQ-06"
+    },
+    {
+      "temp_id": "REQ-06-NEG-01",
+      "title": "REQ-06: Clone disabled for a running VM with tooltip",
+      "precondition": "VM in `running` state.",
+      "steps": [
+        {
+          "action": "Inspect «Clone» for the running VM",
+          "expected": "Command is disabled with a tooltip (only `stopped` allowed)."
+        }
+      ],
+      "expected": "Running VM → Clone disabled.",
+      "type": "negative",
+      "requirement_ref": "REQ-06"
+    },
+    {
+      "temp_id": "REQ-06-NEG-02",
+      "title": "REQ-06: Cancel during clone → partial VM deleted, source unchanged",
+      "precondition": "Clone of a stopped VM in progress.",
+      "steps": [
+        {
+          "action": "Cancel the clone while it is running",
+          "expected": "Partially created VM is deleted and the source VM is unchanged."
+        }
+      ],
+      "expected": "Cancel rolls back the partial clone without touching the source.",
+      "type": "negative",
+      "requirement_ref": "REQ-06"
+    },
+    {
+      "temp_id": "REQ-06-NEG-03",
+      "title": "REQ-06: Clone to a duplicate name → inline error (uniqueness per REQ-04)",
+      "precondition": "Stopped VM; target name already used in the connection.",
+      "steps": [
+        {
+          "action": "Clone specifying an existing name",
+          "expected": "Inline error; uniqueness rule from REQ-04 applied."
+        }
+      ],
+      "expected": "Duplicate clone name rejected.",
+      "type": "negative",
+      "requirement_ref": "REQ-06",
+      "comment": "G-04 (deferred risk): no edge/error handling for clone (disk space, path collision, per-disk copy failure) is defined; such cases are intentionally not invented."
+    },
+    {
+      "temp_id": "REQ-07-POS-01",
+      "title": "REQ-07: Delete with confirmation, checkbox off → VM undefined, disks remain",
+      "precondition": "VM in `stopped` state.",
+      "steps": [
+        {
+          "action": "Invoke «Delete», leave «Also delete disk files» unchecked, confirm",
+          "expected": "VM is undefined in libvirt; disk files remain."
+        }
+      ],
+      "expected": "Confirm without checkbox → VM undefined, disks kept.",
+      "type": "positive",
+      "requirement_ref": "REQ-07"
+    },
+    {
+      "temp_id": "REQ-07-POS-02",
+      "title": "REQ-07: Delete with «Also delete disk files» checked → VM undefined and disks deleted",
+      "precondition": "VM in `stopped` state.",
+      "steps": [
+        {
+          "action": "Invoke «Delete», check «Also delete disk files», confirm",
+          "expected": "VM is undefined in libvirt and the disk files are deleted from the hypervisor."
+        }
+      ],
+      "expected": "Confirm with checkbox → VM undefined + disk files deleted.",
+      "type": "positive",
+      "requirement_ref": "REQ-07"
+    },
+    {
+      "temp_id": "REQ-07-NEG-01",
+      "title": "REQ-07: Cancel the delete dialog → no changes",
+      "precondition": "VM in `stopped` state.",
+      "steps": [
+        {
+          "action": "Open «Delete» dialog and press Cancel",
+          "expected": "No changes are made to the VM or its disks."
+        }
+      ],
+      "expected": "Cancel → no changes.",
+      "type": "negative",
+      "requirement_ref": "REQ-07"
+    },
+    {
+      "temp_id": "REQ-07-NEG-02",
+      "title": "REQ-07: libvirt error during delete → VM remains in tree, error shown",
+      "precondition": "VM in `stopped` state; libvirt induced to fail.",
+      "steps": [
+        {
+          "action": "Confirm delete while libvirt returns an error",
+          "expected": "VM remains in the tree and the error is shown per REQ-14."
+        }
+      ],
+      "expected": "Error → VM remains; error displayed (rollback per literal text).",
+      "type": "negative",
+      "requirement_ref": "REQ-07",
+      "comment": "C-05 (deferred risk): 'rollback on any error' contradicts irreversible disk deletion when the checkbox is used; case asserts the literal error/VM-remains outcome only."
+    },
+    {
+      "temp_id": "REQ-07-NEG-03",
+      "title": "REQ-07: Delete disabled for a non-stopped VM",
+      "precondition": "VM in `running` state.",
+      "steps": [
+        {
+          "action": "Inspect «Delete» for the running VM",
+          "expected": "Command is disabled (only `stopped` allowed)."
+        }
+      ],
+      "expected": "Delete allowed only for `stopped`.",
+      "type": "negative",
+      "requirement_ref": "REQ-07"
+    },
+    {
+      "temp_id": "REQ-08-POS-01",
+      "title": "REQ-08: Start a stopped VM → running within 5 s",
+      "precondition": "VM in `stopped` state.",
+      "steps": [
+        {
+          "action": "Invoke «Start»",
+          "expected": "Command executes and the state becomes `running` within 5 s."
+        }
+      ],
+      "expected": "Stopped VM starts and reaches `running` within 5 s.",
+      "type": "positive",
+      "requirement_ref": "REQ-08"
+    },
+    {
+      "temp_id": "REQ-08-POS-02",
+      "title": "REQ-08: Start a crashed VM → running within 5 s",
+      "precondition": "VM in `crashed` state.",
+      "steps": [
+        {
+          "action": "Invoke «Start»",
+          "expected": "State becomes `running` within 5 s."
+        }
+      ],
+      "expected": "Crashed VM can be started.",
+      "type": "positive",
+      "requirement_ref": "REQ-08"
+    },
+    {
+      "temp_id": "REQ-08-NEG-01",
+      "title": "REQ-08: Start disabled for non-eligible states",
+      "precondition": "VMs in `running`, `paused`, `suspended` states.",
+      "steps": [
+        {
+          "action": "Inspect «Start» for each non-eligible state",
+          "expected": "Command is disabled in each case."
+        }
+      ],
+      "expected": "Start enabled only for `stopped`/`crashed`.",
+      "type": "negative",
+      "requirement_ref": "REQ-08"
+    },
+    {
+      "temp_id": "REQ-08-NEG-02",
+      "title": "REQ-08: libvirt error on start → state unchanged, notification with «Show log»",
+      "precondition": "Stopped VM; libvirt induced to fail.",
+      "steps": [
+        {
+          "action": "Invoke «Start» while libvirt returns an error",
+          "expected": "State does not change; notification with «Show log» is shown."
+        }
+      ],
+      "expected": "Error → no state change + notification with «Show log».",
+      "type": "negative",
+      "requirement_ref": "REQ-08"
+    },
+    {
+      "temp_id": "REQ-08-BND-01",
+      "title": "REQ-08: 5 s state-change threshold and eligible-state matrix",
+      "precondition": "Stopped VMs; controllable state transition timing.",
+      "steps": [
+        {
+          "action": "Transition completes at 5.0 s",
+          "expected": "Within the ≤ 5 s limit — passes."
+        },
+        {
+          "action": "Transition completes at 5.1 s",
+          "expected": "Exceeds the 5 s limit — fails."
+        },
+        {
+          "action": "Attempt start from `stopped`, `crashed`, `running`, `paused`, `suspended`, `stopped`(again)",
+          "expected": "Allowed for `stopped`/`crashed`; disabled for the others."
+        }
+      ],
+      "expected": "5 s boundary enforced and eligibility matrix respected.",
+      "type": "boundary",
+      "requirement_ref": "REQ-08"
+    },
+    {
+      "temp_id": "REQ-09-POS-01",
+      "title": "REQ-09: Shutdown sends an ACPI completion request",
+      "precondition": "VM in `running` state.",
+      "steps": [
+        {
+          "action": "Invoke «Shutdown»",
+          "expected": "An ACPI shutdown request is sent to the VM."
+        }
+      ],
+      "expected": "Shutdown issues the ACPI request.",
+      "type": "positive",
+      "requirement_ref": "REQ-09"
+    },
+    {
+      "temp_id": "REQ-09-POS-02",
+      "title": "REQ-09: Dialog appears after the configured timeout",
+      "precondition": "VM running; workspace timeout set to a value in 5–300 s.",
+      "steps": [
+        {
+          "action": "Invoke «Shutdown» and wait for the timeout",
+          "expected": "Dialog with «Force stop» / «Wait more» / «Cancel» appears after the timeout elapses."
+        }
+      ],
+      "expected": "Dialog shown on timeout.",
+      "type": "positive",
+      "requirement_ref": "REQ-09"
+    },
+    {
+      "temp_id": "REQ-09-POS-03",
+      "title": "REQ-09: «Wait more» restarts the timer with the same value",
+      "precondition": "Timeout dialog is shown.",
+      "steps": [
+        {
+          "action": "Press «Wait more»",
+          "expected": "Timer restarts with the same configured value and the dialog closes."
+        }
+      ],
+      "expected": "«Wait more» restarts the timer with the same value.",
+      "type": "positive",
+      "requirement_ref": "REQ-09"
+    },
+    {
+      "temp_id": "REQ-09-POS-04",
+      "title": "REQ-09: «Force stop» invokes REQ-10",
+      "precondition": "Timeout dialog is shown.",
+      "steps": [
+        {
+          "action": "Press «Force stop»",
+          "expected": "REQ-10 Force stop flow is invoked (with its confirmation per REQ-10)."
+        }
+      ],
+      "expected": "«Force stop» delegates to REQ-10.",
+      "type": "positive",
+      "requirement_ref": "REQ-09"
+    },
+    {
+      "temp_id": "REQ-09-NEG-01",
+      "title": "REQ-09: «Cancel» closes the dialog and leaves VM state unchanged",
+      "precondition": "Timeout dialog is shown.",
+      "steps": [
+        {
+          "action": "Press «Cancel»",
+          "expected": "Dialog closes; VM state does not change."
+        }
+      ],
+      "expected": "«Cancel» → dialog closed, state unchanged.",
+      "type": "negative",
+      "requirement_ref": "REQ-09"
+    },
+    {
+      "temp_id": "REQ-09-NEG-02",
+      "title": "REQ-09: Timeout setting outside 5–300 is not a valid value",
+      "precondition": "Ability to edit the workspace timeout setting.",
+      "steps": [
+        {
+          "action": "Set timeout to 4",
+          "expected": "Rejected as below the 5 s minimum."
+        },
+        {
+          "action": "Set timeout to 301",
+          "expected": "Rejected as above the 300 s maximum."
+        }
+      ],
+      "expected": "Out-of-range timeout values invalid; literal range 5–300 enforced.",
+      "type": "negative",
+      "requirement_ref": "REQ-09",
+      "comment": "Requirement states the range but not the rejection mechanism; aligned strictly to the literal 5–300 range."
+    },
+    {
+      "temp_id": "REQ-09-BND-01",
+      "title": "REQ-09: Timeout boundaries 5/300 accepted, 4/301 rejected, default 30",
+      "precondition": "Ability to edit the workspace timeout setting.",
+      "steps": [
+        {
+          "action": "Set timeout to 5 (min) and 300 (max)",
+          "expected": "Both accepted."
+        },
+        {
+          "action": "Set timeout to 4 and 301",
+          "expected": "Both rejected."
+        },
+        {
+          "action": "Leave the setting at default",
+          "expected": "Default value is 30 s."
+        }
+      ],
+      "expected": "Min/max 5/300 accepted; 4/301 rejected; default 30.",
+      "type": "boundary",
+      "requirement_ref": "REQ-09"
+    },
+    {
+      "temp_id": "REQ-10-POS-01",
+      "title": "REQ-10: Force stop with confirmation → stopped within 3 s; dialog shows name + warning",
+      "precondition": "VM running; `qemuManager.confirmForceStop` = true (default).",
+      "steps": [
+        {
+          "action": "Invoke «Force stop»",
+          "expected": "Confirmation is shown containing the VM name and the warning «Unsaved data may be lost»."
+        },
+        {
+          "action": "Confirm",
+          "expected": "VM process is terminated immediately; state becomes `stopped` within 3 s."
+        }
+      ],
+      "expected": "Confirmation contains name + warning; confirm → `stopped` within 3 s.",
+      "type": "positive",
+      "requirement_ref": "REQ-10"
+    },
+    {
+      "temp_id": "REQ-10-POS-02",
+      "title": "REQ-10: Confirmation can be disabled via qemuManager.confirmForceStop=false",
+      "precondition": "VM running; setting `qemuManager.confirmForceStop` = false.",
+      "steps": [
+        {
+          "action": "Invoke «Force stop»",
+          "expected": "No confirmation dialog; force stop executes immediately."
+        }
+      ],
+      "expected": "With confirmation disabled, force stop runs without a dialog.",
+      "type": "positive",
+      "requirement_ref": "REQ-10"
+    },
+    {
+      "temp_id": "REQ-10-NEG-01",
+      "title": "REQ-10: Cancelling the force-stop confirmation leaves state unchanged",
+      "precondition": "VM running; confirmation enabled.",
+      "steps": [
+        {
+          "action": "Invoke «Force stop» and press Cancel",
+          "expected": "VM state does not change."
+        }
+      ],
+      "expected": "Cancel → state unchanged.",
+      "type": "negative",
+      "requirement_ref": "REQ-10"
+    },
+    {
+      "temp_id": "REQ-10-BND-01",
+      "title": "REQ-10: 3 s completion threshold and confirmForceStop boolean boundary",
+      "precondition": "VM running.",
+      "steps": [
+        {
+          "action": "Force stop completes at 3.0 s",
+          "expected": "Within the ≤ 3 s limit — passes."
+        },
+        {
+          "action": "Force stop completes at 3.1 s",
+          "expected": "Exceeds the 3 s limit — fails."
+        },
+        {
+          "action": "Toggle `qemuManager.confirmForceStop` between true and false",
+          "expected": "true → confirmation shown; false → confirmation skipped."
+        }
+      ],
+      "expected": "3 s boundary enforced; boolean toggle behaves per literal.",
+      "type": "boundary",
+      "requirement_ref": "REQ-10"
+    },
+    {
+      "temp_id": "REQ-11-POS-01",
+      "title": "REQ-11: Pause a running VM → paused within 3 s",
+      "precondition": "VM in `running` state.",
+      "steps": [
+        {
+          "action": "Invoke «Pause»",
+          "expected": "State becomes `paused` within 3 s."
+        }
+      ],
+      "expected": "Pause works for running VM.",
+      "type": "positive",
+      "requirement_ref": "REQ-11"
+    },
+    {
+      "temp_id": "REQ-11-POS-02",
+      "title": "REQ-11: Resume a paused VM → running within 3 s",
+      "precondition": "VM in `paused` state.",
+      "steps": [
+        {
+          "action": "Invoke «Resume»",
+          "expected": "State becomes `running` within 3 s."
+        }
+      ],
+      "expected": "Resume works for paused VM.",
+      "type": "positive",
+      "requirement_ref": "REQ-11"
+    },
+    {
+      "temp_id": "REQ-11-NEG-01",
+      "title": "REQ-11: Pause/Resume disabled for ineligible states",
+      "precondition": "VMs in `stopped`, `crashed`, `suspended` states; `paused` for Pause, `running` for Resume.",
+      "steps": [
+        {
+          "action": "Check «Pause» for non-running states",
+          "expected": "Disabled."
+        },
+        {
+          "action": "Check «Resume» for non-paused states",
+          "expected": "Disabled."
+        }
+      ],
+      "expected": "Pause only for `running`, Resume only for `paused`.",
+      "type": "negative",
+      "requirement_ref": "REQ-11"
+    },
+    {
+      "temp_id": "REQ-11-NEG-02",
+      "title": "REQ-11: libvirt error on pause/resume → state unchanged, error shown",
+      "precondition": "Running/paused VM; libvirt induced to fail.",
+      "steps": [
+        {
+          "action": "Invoke Pause/Resume while libvirt returns an error",
+          "expected": "State does not change and the error is shown."
+        }
+      ],
+      "expected": "Error → no state change + error displayed.",
+      "type": "negative",
+      "requirement_ref": "REQ-11"
+    },
+    {
+      "temp_id": "REQ-11-BND-01",
+      "title": "REQ-11: 3 s state-change threshold and eligibility matrix",
+      "precondition": "Running/paused VMs with controllable transition timing.",
+      "steps": [
+        {
+          "action": "Pause completes at 3.0 s / Resume completes at 3.0 s",
+          "expected": "Within ≤ 3 s — passes."
+        },
+        {
+          "action": "Pause/Resume completes at 3.1 s",
+          "expected": "Exceeds the 3 s limit — fails."
+        },
+        {
+          "action": "Check command availability across all states",
+          "expected": "Pause enabled only for `running`; Resume enabled only for `paused`."
+        }
+      ],
+      "expected": "3 s boundary enforced; eligibility matrix respected.",
+      "type": "boundary",
+      "requirement_ref": "REQ-11"
+    },
+    {
+      "temp_id": "REQ-12-POS-01",
+      "title": "REQ-12: Default user-nat; definable IP shown in the tree",
+      "precondition": "Valid connection; libvirt returns a determinable IP for the VM.",
+      "steps": [
+        {
+          "action": "Create a VM leaving networkType default",
+          "expected": "networkType defaults to `user-nat`."
+        },
+        {
+          "action": "View the tree",
+          "expected": "The VM's IP is displayed in the tree."
+        }
+      ],
+      "expected": "user-nat is default and a definable IP is shown.",
+      "type": "positive",
+      "requirement_ref": "REQ-12"
+    },
+    {
+      "temp_id": "REQ-12-POS-02",
+      "title": "REQ-12: Bridged with a selected interface → VM created with that bridge",
+      "precondition": "Libvirt returns at least one bridge; VM creation form open.",
+      "steps": [
+        {
+          "action": "Select networkType `bridged` and choose an interface from the list",
+          "expected": "VM is created with the specified bridge."
+        }
+      ],
+      "expected": "Bridged VM created with the selected bridge.",
+      "type": "positive",
+      "requirement_ref": "REQ-12"
+    },
+    {
+      "temp_id": "REQ-12-NEG-01",
+      "title": "REQ-12: Bridged disabled with tooltip when no bridges are available",
+      "precondition": "Libvirt returns an empty bridge list.",
+      "steps": [
+        {
+          "action": "Open the network field",
+          "expected": "The `bridged` option is disabled with tooltip «No bridges available on host»."
+        }
+      ],
+      "expected": "No bridges → bridged disabled with tooltip.",
+      "type": "negative",
+      "requirement_ref": "REQ-12",
+      "comment": "C-01 (deferred risk): Non-Goals declare network/bridge management out of scope while REQ-12 requires bridge selection; case asserts REQ-12 literal behavior."
+    },
+    {
+      "temp_id": "REQ-12-NEG-02",
+      "title": "REQ-12: user-nat with undefinable IP → `unknown` without affecting tree rendering",
+      "precondition": "Valid user-nat VM whose IP cannot be determined.",
+      "steps": [
+        {
+          "action": "View the tree for the VM with undefinable IP",
+          "expected": "IP shows as `unknown`; tree rendering is unaffected."
+        }
+      ],
+      "expected": "Undefinable IP → `unknown`, no rendering impact.",
+      "type": "negative",
+      "requirement_ref": "REQ-12"
+    },
+    {
+      "temp_id": "REQ-12-BND-01",
+      "title": "REQ-12: Bridge list count boundary (0 vs 1 interface)",
+      "precondition": "Ability to vary the libvirt bridge list between empty and one entry.",
+      "steps": [
+        {
+          "action": "Provide an empty bridge list",
+          "expected": "`bridged` disabled with tooltip."
+        },
+        {
+          "action": "Provide exactly 1 bridge",
+          "expected": "`bridged` enabled and the single bridge is selectable."
+        }
+      ],
+      "expected": "0 bridges → disabled; ≥1 bridge → enabled/selectable.",
+      "type": "boundary",
+      "requirement_ref": "REQ-12"
+    },
+    {
+      "temp_id": "REQ-13-POS-01",
+      "title": "REQ-13: When libvirt events are supported, polling is not performed",
+      "precondition": "Libvirt reports event support (virConnectIsAlive + capability probe true).",
+      "steps": [
+        {
+          "action": "Activate and let the extension set up state updates",
+          "expected": "Extension subscribes to events instead of polling; no polling is observed in the log."
+        }
+      ],
+      "expected": "Events supported → subscription, no polling (verified via log).",
+      "type": "positive",
+      "requirement_ref": "REQ-13"
+    },
+    {
+      "temp_id": "REQ-13-POS-02",
+      "title": "REQ-13: «Refresh» button is always available",
+      "precondition": "Extension active in any poll/event mode.",
+      "steps": [
+        {
+          "action": "Locate the «Refresh» control in the tree",
+          "expected": "«Refresh» is present and triggers a manual refresh."
+        }
+      ],
+      "expected": "«Refresh» always available.",
+      "type": "positive",
+      "requirement_ref": "REQ-13"
+    },
+    {
+      "temp_id": "REQ-13-POS-03",
+      "title": "REQ-13: Refresh interval taken from the workspace setting (default 5 s)",
+      "precondition": "Interval setting at default; polling mode active.",
+      "steps": [
+        {
+          "action": "Observe polling cadence with default setting",
+          "expected": "State refreshes every 5 s."
+        }
+      ],
+      "expected": "Interval honoured from settings (default 5 s).",
+      "type": "positive",
+      "requirement_ref": "REQ-13"
+    },
+    {
+      "temp_id": "REQ-13-NEG-01",
+      "title": "REQ-13: Event subscription failure → fall back to polling with a log warning, no user error",
+      "precondition": "Libvirt event subscription is induced to fail.",
+      "steps": [
+        {
+          "action": "Activate while event subscription fails",
+          "expected": "Polling continues; a warning is written to the log (REQ-15); no user-facing error is shown."
+        }
+      ],
+      "expected": "Subscription failure → polling + warning in log, no user error.",
+      "type": "negative",
+      "requirement_ref": "REQ-13"
+    },
+    {
+      "temp_id": "REQ-13-BND-01",
+      "title": "REQ-13: Interval boundaries 0 (manual)/1/60/61, default 5",
+      "precondition": "Ability to edit the interval workspace setting.",
+      "steps": [
+        {
+          "action": "Set interval 0",
+          "expected": "Only manual refresh; no auto-polling."
+        },
+        {
+          "action": "Set interval 1 (min) and 60 (max)",
+          "expected": "Both accepted."
+        },
+        {
+          "action": "Set interval 61",
+          "expected": "Rejected as above the 60 s maximum."
+        }
+      ],
+      "expected": "0 = manual only; 1 and 60 accepted; 61 rejected; default 5.",
+      "type": "boundary",
+      "requirement_ref": "REQ-13",
+      "comment": "C-06 (deferred risk): value 0 is valid but lies outside the declared 1–60 range; case asserts both the literal special value 0 and the 1–60 range."
+    },
+    {
+      "temp_id": "REQ-14-POS-01",
+      "title": "REQ-14: Mapped libvirt error → friendly notification without raw stack; actions shown",
+      "precondition": "Libvirt returns one of the minimum-coverage errors (connection refused, auth failed, VM not found, operation not supported, disk full, resource busy).",
+      "steps": [
+        {
+          "action": "Trigger a mapped libvirt error",
+          "expected": "Notification shows the friendly mapped message without a raw stack trace, with «Show log» and «Dismiss» actions."
+        }
+      ],
+      "expected": "Mapped error → friendly notification, correct actions, no raw stack in text.",
+      "type": "positive",
+      "requirement_ref": "REQ-14",
+      "comment": "G-02 (deferred risk): the mapping table content is absent, so specific message text is not asserted — only the notification shape and absence of raw stack."
+    },
+    {
+      "temp_id": "REQ-14-POS-02",
+      "title": "REQ-14: «Show log» opens Output Channel and focuses the last entry",
+      "precondition": "An error notification with «Show log» is displayed.",
+      "steps": [
+        {
+          "action": "Click «Show log»",
+          "expected": "Output Channel opens and the last entry is focused."
+        }
+      ],
+      "expected": "«Show log» opens the Output Channel at the latest entry.",
+      "type": "positive",
+      "requirement_ref": "REQ-14"
+    },
+    {
+      "temp_id": "REQ-14-NEG-01",
+      "title": "REQ-14: Unmapped error → «Unexpected error: {code}» with «Show log» fallback",
+      "precondition": "Libvirt returns an error not present in the mapping table.",
+      "steps": [
+        {
+          "action": "Trigger an unmapped error",
+          "expected": "Notification «Unexpected error: {code}» with a «Show log» action is shown."
+        }
+      ],
+      "expected": "Unmapped error handled by the fallback branch.",
+      "type": "negative",
+      "requirement_ref": "REQ-14"
+    },
+    {
+      "temp_id": "REQ-15-POS-01",
+      "title": "REQ-15: Each command logged at info/debug in the required line format",
+      "precondition": "Output Channel «QEMU Manager»; log level default `info`.",
+      "steps": [
+        {
+          "action": "Execute a command",
+          "expected": "A log line is written as `YYYY-MM-DDTHH:MM:SSZ [LEVEL] [conn:vm] message` at level `info` or `debug`."
+        }
+      ],
+      "expected": "Commands produce info/debug lines in the specified format.",
+      "type": "positive",
+      "requirement_ref": "REQ-15"
+    },
+    {
+      "temp_id": "REQ-15-POS-02",
+      "title": "REQ-15: Error responses logged at `error` level",
+      "precondition": "Log level default `info`.",
+      "steps": [
+        {
+          "action": "Trigger an erroneous response",
+          "expected": "A log entry with level `error` is written."
+        }
+      ],
+      "expected": "Error responses logged at `error` level.",
+      "type": "positive",
+      "requirement_ref": "REQ-15"
+    },
+    {
+      "temp_id": "REQ-15-POS-03",
+      "title": "REQ-15: Changing the log level applies immediately",
+      "precondition": "Output Channel open.",
+      "steps": [
+        {
+          "action": "Change the log level setting (error/info/debug)",
+          "expected": "New level is applied immediately to subsequent entries."
+        }
+      ],
+      "expected": "Level change takes effect immediately.",
+      "type": "positive",
+      "requirement_ref": "REQ-15"
+    },
+    {
+      "temp_id": "REQ-15-NEG-01",
+      "title": "REQ-15: Non-VM / connection-level entry and the [conn:vm] segment",
+      "precondition": "Log level such that activation/settings entries are recorded.",
+      "steps": [
+        {
+          "action": "Trigger an extension-level entry with no associated VM (e.g. activation/settings)",
+          "expected": "Format is asserted literally as `... [LEVEL] [conn:vm] message`; requirement does not define what `conn`/`vm` render for non-VM entries."
+        }
+      ],
+      "expected": "Format asserted per literal text; non-VM segment content captured as open question, not invented.",
+      "type": "negative",
+      "requirement_ref": "REQ-15",
+      "comment": "A-05 (deferred risk): it is undefined what [conn:vm] contains for connection/extension-level entries and whether values are names or IDs."
+    },
+    {
+      "temp_id": "REQ-15-BND-01",
+      "title": "REQ-15: Ring buffer boundary at 10 000 lines",
+      "precondition": "Ability to generate more than 10 000 log lines.",
+      "steps": [
+        {
+          "action": "Generate exactly 10 000 lines",
+          "expected": "All 10 000 lines retained."
+        },
+        {
+          "action": "Generate the 10 001st line",
+          "expected": "Oldest line is dropped; buffer stays at 10 000 lines."
+        }
+      ],
+      "expected": "Buffer capped at 10 000 lines, oldest discarded beyond that.",
+      "type": "boundary",
+      "requirement_ref": "REQ-15"
+    },
+    {
+      "temp_id": "REQ-16-POS-01",
+      "title": "REQ-16: Valid form → submit enabled and validation passes",
+      "precondition": "Create-VM form open; all fields valid per REQ-04.",
+      "steps": [
+        {
+          "action": "Fill all fields with valid values",
+          "expected": "Validation passes, no inline errors, «Create» is enabled."
+        }
+      ],
+      "expected": "Valid form enables submit and passes validation.",
+      "type": "positive",
+      "requirement_ref": "REQ-16"
+    },
+    {
+      "temp_id": "REQ-16-NEG-01",
+      "title": "REQ-16: Empty / missing required field → inline error, submit disabled",
+      "precondition": "Create-VM form open.",
+      "steps": [
+        {
+          "action": "Leave a required field empty",
+          "expected": "Inline error next to the field; «Create» is disabled."
+        }
+      ],
+      "expected": "Empty/missing field blocks submit with inline error.",
+      "type": "negative",
+      "requirement_ref": "REQ-16"
+    },
+    {
+      "temp_id": "REQ-16-NEG-02",
+      "title": "REQ-16: Non-numeric value in a numeric field → inline error, submit disabled",
+      "precondition": "Create-VM form open.",
+      "steps": [
+        {
+          "action": "Enter a non-numeric value in a numeric field (e.g. vcpu = `two`)",
+          "expected": "Inline error; «Create» is disabled."
+        }
+      ],
+      "expected": "Non-numeric input rejected with inline error.",
+      "type": "negative",
+      "requirement_ref": "REQ-16"
+    },
+    {
+      "temp_id": "REQ-16-NEG-03",
+      "title": "REQ-16: Out-of-range / non-multiple value → inline error with the rule text",
+      "precondition": "Create-VM form open.",
+      "steps": [
+        {
+          "action": "Enter ramMb = 300",
+          "expected": "Inline error reflecting the violated rule, e.g. «RAM must be between 256 and 262144 MB, multiple of 128»; «Create» disabled."
+        }
+      ],
+      "expected": "Rule-reflecting inline error; submit disabled.",
+      "type": "negative",
+      "requirement_ref": "REQ-16"
+    },
+    {
+      "temp_id": "REQ-16-NEG-04",
+      "title": "REQ-16: Text/length/invalid chars/duplicate name → inline error, submit disabled",
+      "precondition": "Create-VM form open.",
+      "steps": [
+        {
+          "action": "Enter an over-length name, an invalid-character name, and a duplicate name in turn",
+          "expected": "Each produces an inline error and disables «Create»."
+        }
+      ],
+      "expected": "Text/length/char/duplicate violations block submit.",
+      "type": "negative",
+      "requirement_ref": "REQ-16"
+    },
+    {
+      "temp_id": "REQ-16-NEG-05",
+      "title": "REQ-16: Invalid values are not sent to libvirt",
+      "precondition": "Create-VM form open; libvirt call observation enabled.",
+      "steps": [
+        {
+          "action": "Attempt submit with an invalid field",
+          "expected": "Submit is blocked and no request is sent to libvirt."
+        }
+      ],
+      "expected": "Invalid values never reach libvirt.",
+      "type": "negative",
+      "requirement_ref": "REQ-16"
+    },
+    {
+      "temp_id": "REQ-16-NEG-06",
+      "title": "REQ-16: Server-side libvirt validation error shown per REQ-14",
+      "precondition": "Create-VM form open; libvirt returns a validation error on submit.",
+      "steps": [
+        {
+          "action": "Submit a form and let libvirt reject it",
+          "expected": "Error is shown per REQ-14."
+        }
+      ],
+      "expected": "Server-side libvirt validation errors surfaced via REQ-14.",
+      "type": "negative",
+      "requirement_ref": "REQ-16"
+    },
+    {
+      "temp_id": "REQ-16-BND-01",
+      "title": "REQ-16: Numeric field boundary validation (just-inside vs just-outside)",
+      "precondition": "Create-VM form open.",
+      "steps": [
+        {
+          "action": "vcpu 1 / 32 accepted; 0 / 33 rejected",
+          "expected": "Boundary behaviour per REQ-04."
+        },
+        {
+          "action": "ramMb 256 / 262144 accepted; 255 / 262145 rejected; 300 (non-multiple) rejected",
+          "expected": "Boundary/multiple behaviour per REQ-04."
+        },
+        {
+          "action": "disks 1 / 8 accepted; 0 / 9 rejected",
+          "expected": "Boundary behaviour per REQ-04."
+        },
+        {
+          "action": "disk size 1 / 2000 accepted; 0 / 2001 rejected",
+          "expected": "Boundary behaviour per REQ-04."
+        }
+      ],
+      "expected": "All numeric boundaries validated client-side before submit.",
+      "type": "boundary",
+      "requirement_ref": "REQ-16",
+      "comment": "C-04 (deferred risk): all-fields client-side validation conflicts with REQ-04's libvirt-side disk/iso path checks, which cannot run client-side."
+    },
+    {
+      "temp_id": "REQ-17-POS-01",
+      "title": "REQ-17: Default binding Ctrl+Shift+Q (Cmd+Shift+Q) runs Start for the selected VM",
+      "precondition": "A VM is selected in an eligible state (stopped/crashed).",
+      "steps": [
+        {
+          "action": "Press Ctrl+Shift+Q (macOS Cmd+Shift+Q)",
+          "expected": "The Start command executes for the selected VM."
+        }
+      ],
+      "expected": "Default Start binding works for a selected eligible VM.",
+      "type": "positive",
+      "requirement_ref": "REQ-17"
+    },
+    {
+      "temp_id": "REQ-17-POS-02",
+      "title": "REQ-17: User-defined binding via Keybindings JSON works",
+      "precondition": "A custom keybinding added via the standard Keybindings JSON.",
+      "steps": [
+        {
+          "action": "Press the user-defined binding for Shutdown",
+          "expected": "The Shutdown command executes for the selected eligible VM."
+        }
+      ],
+      "expected": "Custom bindings resolve to the command.",
+      "type": "positive",
+      "requirement_ref": "REQ-17"
+    },
+    {
+      "temp_id": "REQ-17-NEG-01",
+      "title": "REQ-17: Binding does not fire when the command is inapplicable to the state",
+      "precondition": "A VM is selected but its state makes the command inapplicable.",
+      "steps": [
+        {
+          "action": "Press the default binding for an inapplicable state",
+          "expected": "The binding does not fire (no state change)."
+        }
+      ],
+      "expected": "Binding suppressed for inapplicable state.",
+      "type": "negative",
+      "requirement_ref": "REQ-17"
+    },
+    {
+      "temp_id": "REQ-17-NEG-02",
+      "title": "REQ-17: Binding does not fire when no VM is selected",
+      "precondition": "No VM selected in the tree.",
+      "steps": [
+        {
+          "action": "Press the default binding",
+          "expected": "The command does not fire."
+        }
+      ],
+      "expected": "Binding requires a selected VM.",
+      "type": "negative",
+      "requirement_ref": "REQ-17",
+      "comment": "A-06 (deferred risk): resolution of a collision with a VS Code built-in is undefined; cases assert only the literal 'does not override others' bindings' behaviour."
+    },
+    {
+      "temp_id": "REQ-18-POS-01",
+      "title": "REQ-18: Extension installs and activates on Windows 10+, macOS 12+, Ubuntu 22.04+",
+      "precondition": "Clean instances of each supported OS.",
+      "steps": [
+        {
+          "action": "Install and activate on Windows 10+",
+          "expected": "Installs and activates."
+        },
+        {
+          "action": "Install and activate on macOS 12+",
+          "expected": "Installs and activates."
+        },
+        {
+          "action": "Install and activate on Ubuntu 22.04+",
+          "expected": "Installs and activates."
+        }
+      ],
+      "expected": "Cross-platform install/activation on all three OS families.",
+      "type": "positive",
+      "requirement_ref": "REQ-18"
+    },
+    {
+      "temp_id": "REQ-18-POS-02",
+      "title": "REQ-18: Runtime detected when libvirt 8.0+ or QEMU 6.0+ QMP socket is present",
+      "precondition": "libvirt 8.0+ (or QEMU 6.0+ with QMP socket) reachable.",
+      "steps": [
+        {
+          "action": "Activate with a supported runtime present",
+          "expected": "Runtime is detected; no setup notification; tree is functional."
+        }
+      ],
+      "expected": "Supported runtime detected and usable.",
+      "type": "positive",
+      "requirement_ref": "REQ-18"
+    },
+    {
+      "temp_id": "REQ-18-NEG-01",
+      "title": "REQ-18: No runtime → setup notification, degraded, empty tree, friendly command errors",
+      "precondition": "No libvirt/QEMU runtime available on the host.",
+      "steps": [
+        {
+          "action": "Activate without a runtime",
+          "expected": "Notification «QEMU Manager: libvirt/QEMU not detected» with «Show setup instructions»; extension enters `degraded`."
+        },
+        {
+          "action": "Inspect the tree and invoke a command",
+          "expected": "Tree is empty; commands return a friendly error per REQ-14."
+        }
+      ],
+      "expected": "Missing runtime → degraded + setup instruction + empty tree + friendly errors.",
+      "type": "negative",
+      "requirement_ref": "REQ-18",
+      "comment": "C-02 (deferred risk): REQ-18 allows a QMP-only runtime while REQ-04/12/13 require libvirt; no requirement defines the libvirt-absent behavior."
+    },
+    {
+      "temp_id": "REQ-18-NEG-02",
+      "title": "REQ-18: `degraded` state does not crash or hang VS Code",
+      "precondition": "Extension in `degraded` state (missing runtime).",
+      "steps": [
+        {
+          "action": "Interact with the extension while degraded",
+          "expected": "VS Code does not crash or hang; degraded is stable."
+        }
+      ],
+      "expected": "Degraded state is non-fatal.",
+      "type": "negative",
+      "requirement_ref": "REQ-18"
+    },
+    {
+      "temp_id": "REQ-18-BND-01",
+      "title": "REQ-18: Runtime version thresholds (libvirt 8.0 / QEMU 6.0)",
+      "precondition": "Ability to present runtime versions around the thresholds.",
+      "steps": [
+        {
+          "action": "Present libvirt 8.0",
+          "expected": "Accepted (minimum)."
+        },
+        {
+          "action": "Present libvirt 7.9",
+          "expected": "Rejected (below minimum)."
+        },
+        {
+          "action": "Present QEMU 6.0 with QMP socket",
+          "expected": "Accepted (minimum)."
+        },
+        {
+          "action": "Present QEMU 5.x with QMP socket",
+          "expected": "Rejected (below minimum)."
+        }
+      ],
+      "expected": "Version thresholds enforced at libvirt 8.0 and QEMU 6.0.",
+      "type": "boundary",
+      "requirement_ref": "REQ-18"
+    },
+    {
+      "temp_id": "REQ-19-POS-01",
+      "title": "REQ-19: Telemetry enabled → payload matches the defined schema",
+      "precondition": "Telemetry enabled via `qemuManager.telemetry.enabled`; a VM action executed.",
+      "steps": [
+        {
+          "action": "Enable telemetry and perform an action (e.g. vm.start)",
+          "expected": "Payload contains action type, success/failure, error code (if any), duration_ms, extension version, OS family."
+        }
+      ],
+      "expected": "Enabled telemetry emits a schema-conformant payload.",
+      "type": "positive",
+      "requirement_ref": "REQ-19"
+    },
+    {
+      "temp_id": "REQ-19-POS-02",
+      "title": "REQ-19: Telemetry off by default → no telemetry network calls",
+      "precondition": "Fresh install; telemetry untouched (default off).",
+      "steps": [
+        {
+          "action": "Use the extension without enabling telemetry",
+          "expected": "No telemetry network calls are made."
+        }
+      ],
+      "expected": "Disabled telemetry performs no network calls.",
+      "type": "positive",
+      "requirement_ref": "REQ-19"
+    },
+    {
+      "temp_id": "REQ-19-NEG-01",
+      "title": "REQ-19: Declining the first-run prompt keeps the setting false",
+      "precondition": "First-run telemetry prompt shown.",
+      "steps": [
+        {
+          "action": "Decline the prompt",
+          "expected": "Setting remains `false`; telemetry stays off."
+        }
+      ],
+      "expected": "Decline → setting false.",
+      "type": "negative",
+      "requirement_ref": "REQ-19"
+    },
+    {
+      "temp_id": "REQ-19-NEG-02",
+      "title": "REQ-19: Payload excludes all sensitive fields",
+      "precondition": "Telemetry enabled; actions involving VMs/connections executed.",
+      "steps": [
+        {
+          "action": "Inspect the payload for sensitive data",
+          "expected": "Payload contains no VM names, file paths, IP addresses, connection URIs/users, or hostname."
+        }
+      ],
+      "expected": "No PII / sensitive fields in the payload.",
+      "type": "negative",
+      "requirement_ref": "REQ-19"
+    },
+    {
+      "temp_id": "REQ-19-BND-01",
+      "title": "REQ-19: Re-prompt no earlier than 30 days after decline",
+      "precondition": "First-run prompt declined; controllable elapsed time.",
+      "steps": [
+        {
+          "action": "Advance 29 days after the decline",
+          "expected": "No re-prompt is shown (earlier than 30 days)."
+        },
+        {
+          "action": "Advance to 30 days after the decline",
+          "expected": "Re-prompt is permitted (no earlier than 30 days)."
+        }
+      ],
+      "expected": "Re-prompt gated by the 30-day boundary.",
+      "type": "boundary",
+      "requirement_ref": "REQ-19"
+    },
+    {
+      "temp_id": "REQ-20-POS-01",
+      "title": "REQ-20: Export produces valid JSON schema qemuManager.vmConfig v1 with all fields",
+      "precondition": "A VM defined in a connection.",
+      "steps": [
+        {
+          "action": "Export the VM configuration",
+          "expected": "JSON with schema `qemuManager.vmConfig` version 1 containing name, vcpu, ramMb, disks[path,sizeGb,format], network(type,bridge for bridged), iso."
+        }
+      ],
+      "expected": "Export yields valid JSON with all required fields.",
+      "type": "positive",
+      "requirement_ref": "REQ-20"
+    },
+    {
+      "temp_id": "REQ-20-POS-02",
+      "title": "REQ-20: Import a valid config without conflict → VM created",
+      "precondition": "Valid v1 config; no VM with that name in the target connection.",
+      "steps": [
+        {
+          "action": "Import the valid config",
+          "expected": "VM is created in the target connection."
+        }
+      ],
+      "expected": "Valid import creates the VM.",
+      "type": "positive",
+      "requirement_ref": "REQ-20"
+    },
+    {
+      "temp_id": "REQ-20-POS-03",
+      "title": "REQ-20: Import a valid config with a name conflict → overwrite confirmation (default Cancel)",
+      "precondition": "Valid v1 config; a VM with the same name already exists in the target connection.",
+      "steps": [
+        {
+          "action": "Import the conflicting config",
+          "expected": "Confirmation «VM '{name}' already exists. Overwrite?» is shown with default `Cancel`."
+        }
+      ],
+      "expected": "Conflict → overwrite confirmation with default Cancel.",
+      "type": "positive",
+      "requirement_ref": "REQ-20",
+      "comment": "A-03 (deferred risk): overwrite semantics (VM identity/disks/state) are undefined; case asserts only the literal confirmation text and default."
+    },
+    {
+      "temp_id": "REQ-20-NEG-01",
+      "title": "REQ-20: Import an unsupported schema version → error and abort",
+      "precondition": "Config with a schema version other than 1.",
+      "steps": [
+        {
+          "action": "Import the unsupported-version config",
+          "expected": "Error «Unsupported config version: {version}» and import is aborted."
+        }
+      ],
+      "expected": "Non-1 schema version rejected and import aborted.",
+      "type": "negative",
+      "requirement_ref": "REQ-20",
+      "comment": "G-05 (deferred risk): no migration/upgrade strategy beyond rejecting non-1 versions."
+    },
+    {
+      "temp_id": "REQ-20-NEG-02",
+      "title": "REQ-20: Import with invalid/missing fields → per-line report, abort, no partial changes",
+      "precondition": "Config missing a required field or violating REQ-04 rules.",
+      "steps": [
+        {
+          "action": "Import the invalid config",
+          "expected": "Report with per-line messages is shown; import is aborted with no partial changes."
+        }
+      ],
+      "expected": "Invalid config → report + abort without partial changes.",
+      "type": "negative",
+      "requirement_ref": "REQ-20"
+    },
+    {
+      "temp_id": "REQ-20-NEG-03",
+      "title": "REQ-20: Cancelling the overwrite confirmation → no changes",
+      "precondition": "Overwrite confirmation displayed (default Cancel).",
+      "steps": [
+        {
+          "action": "Press Cancel on the overwrite confirmation",
+          "expected": "No changes are made; existing VM is untouched."
+        }
+      ],
+      "expected": "Cancel overwrite → no changes.",
+      "type": "negative",
+      "requirement_ref": "REQ-20"
+    },
+    {
+      "temp_id": "REQ-20-BND-01",
+      "title": "REQ-20: Schema version boundary — 1 accepted, 0 and 2 rejected",
+      "precondition": "Configs with schema versions 1, 0 and 2.",
+      "steps": [
+        {
+          "action": "Import a version-1 config",
+          "expected": "Accepted."
+        },
+        {
+          "action": "Import a version-0 config",
+          "expected": "Rejected with «Unsupported config version: 0»."
+        },
+        {
+          "action": "Import a version-2 config",
+          "expected": "Rejected with «Unsupported config version: 2»."
+        }
+      ],
+      "expected": "Only schema version 1 accepted; 0 and 2 rejected.",
+      "type": "boundary",
+      "requirement_ref": "REQ-20"
+    }
+  ],
+  "coverage_summary": [
+    {
+      "requirement_ref": "REQ-01",
+      "applicable_types": [
+        "positive",
+        "negative",
+        "boundary"
+      ],
+      "na_types": []
+    },
+    {
+      "requirement_ref": "REQ-02",
+      "applicable_types": [
+        "positive",
+        "negative",
+        "boundary"
+      ],
+      "na_types": []
+    },
+    {
+      "requirement_ref": "REQ-03",
+      "applicable_types": [
+        "positive",
+        "negative",
+        "boundary"
+      ],
+      "na_types": []
+    },
+    {
+      "requirement_ref": "REQ-04",
+      "applicable_types": [
+        "positive",
+        "negative",
+        "boundary"
+      ],
+      "na_types": []
+    },
+    {
+      "requirement_ref": "REQ-05",
+      "applicable_types": [
+        "positive",
+        "negative",
+        "boundary"
+      ],
+      "na_types": []
+    },
+    {
+      "requirement_ref": "REQ-06",
+      "applicable_types": [
+        "positive",
+        "negative"
+      ],
+      "na_types": [
+        {
+          "type": "boundary",
+          "reason": "Clone defines no numeric/range/limit condition of its own; the name rules it inherits from REQ-04 are boundary-tested under REQ-04."
+        }
+      ]
+    },
+    {
+      "requirement_ref": "REQ-07",
+      "applicable_types": [
+        "positive",
+        "negative"
+      ],
+      "na_types": [
+        {
+          "type": "boundary",
+          "reason": "Delete has no numeric/range/limit condition; only state eligibility and confirmation options apply."
+        }
+      ]
+    },
+    {
+      "requirement_ref": "REQ-08",
+      "applicable_types": [
+        "positive",
+        "negative",
+        "boundary"
+      ],
+      "na_types": []
+    },
+    {
+      "requirement_ref": "REQ-09",
+      "applicable_types": [
+        "positive",
+        "negative",
+        "boundary"
+      ],
+      "na_types": []
+    },
+    {
+      "requirement_ref": "REQ-10",
+      "applicable_types": [
+        "positive",
+        "negative",
+        "boundary"
+      ],
+      "na_types": []
+    },
+    {
+      "requirement_ref": "REQ-11",
+      "applicable_types": [
+        "positive",
+        "negative",
+        "boundary"
+      ],
+      "na_types": []
+    },
+    {
+      "requirement_ref": "REQ-12",
+      "applicable_types": [
+        "positive",
+        "negative",
+        "boundary"
+      ],
+      "na_types": []
+    },
+    {
+      "requirement_ref": "REQ-13",
+      "applicable_types": [
+        "positive",
+        "negative",
+        "boundary"
+      ],
+      "na_types": []
+    },
+    {
+      "requirement_ref": "REQ-14",
+      "applicable_types": [
+        "positive",
+        "negative"
+      ],
+      "na_types": [
+        {
+          "type": "boundary",
+          "reason": "Error handling has no numeric/range/limit condition; the mapping table content is absent (G-02) so message-specific boundaries cannot be derived."
+        }
+      ]
+    },
+    {
+      "requirement_ref": "REQ-15",
+      "applicable_types": [
+        "positive",
+        "negative",
+        "boundary"
+      ],
+      "na_types": []
+    },
+    {
+      "requirement_ref": "REQ-16",
+      "applicable_types": [
+        "positive",
+        "negative",
+        "boundary"
+      ],
+      "na_types": []
+    },
+    {
+      "requirement_ref": "REQ-17",
+      "applicable_types": [
+        "positive",
+        "negative"
+      ],
+      "na_types": [
+        {
+          "type": "boundary",
+          "reason": "Keybindings have no numeric/range/limit condition; conflict handling is delegated to VS Code (A-06)."
+        }
+      ]
+    },
+    {
+      "requirement_ref": "REQ-18",
+      "applicable_types": [
+        "positive",
+        "negative",
+        "boundary"
+      ],
+      "na_types": []
+    },
+    {
+      "requirement_ref": "REQ-19",
+      "applicable_types": [
+        "positive",
+        "negative",
+        "boundary"
+      ],
+      "na_types": []
+    },
+    {
+      "requirement_ref": "REQ-20",
+      "applicable_types": [
+        "positive",
+        "negative",
+        "boundary"
+      ],
+      "na_types": []
+    }
+  ],
+  "status": "completed",
+  "gate_recommendation": "pass"
+}

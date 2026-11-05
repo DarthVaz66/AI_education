@@ -1,0 +1,100 @@
+{
+  "artifact_id": "publish-report-360449-v0.2",
+  "requirement_version": "0.2",
+  "timestamp": "2026-11-03T15:10:00Z",
+  "jira": {
+    "project": "KAN",
+    "issue_type_requested": "Task",
+    "issue_type_created": "Задача (Task, id 10003)",
+    "count": 19,
+    "status": "success",
+    "created": [
+      {
+        "temp_id": "T-01",
+        "key": "KAN-1"
+      },
+      {
+        "temp_id": "T-02",
+        "key": "KAN-2"
+      },
+      {
+        "temp_id": "T-03",
+        "key": "KAN-3"
+      },
+      {
+        "temp_id": "T-04",
+        "key": "KAN-4"
+      },
+      {
+        "temp_id": "T-05",
+        "key": "KAN-5"
+      },
+      {
+        "temp_id": "T-06",
+        "key": "KAN-6"
+      },
+      {
+        "temp_id": "T-07",
+        "key": "KAN-7"
+      },
+      {
+        "temp_id": "T-08",
+        "key": "KAN-8"
+      },
+      {
+        "temp_id": "T-09",
+        "key": "KAN-9"
+      },
+      {
+        "temp_id": "T-10",
+        "key": "KAN-10"
+      },
+      {
+        "temp_id": "T-11",
+        "key": "KAN-11"
+      },
+      {
+        "temp_id": "T-12",
+        "key": "KAN-12"
+      },
+      {
+        "temp_id": "T-13",
+        "key": "KAN-13"
+      },
+      {
+        "temp_id": "T-14",
+        "key": "KAN-14"
+      },
+      {
+        "temp_id": "T-15",
+        "key": "KAN-15"
+      },
+      {
+        "temp_id": "T-16",
+        "key": "KAN-16"
+      },
+      {
+        "temp_id": "T-17",
+        "key": "KAN-17"
+      },
+      {
+        "temp_id": "T-18",
+        "key": "KAN-18"
+      },
+      {
+        "temp_id": "T-19",
+        "key": "KAN-19"
+      }
+    ]
+  },
+  "qase": {
+    "project": "TEST",
+    "suite": "QEMU Manager v0.2",
+    "cases_planned": 128,
+    "cases_created": 0,
+    "suite_created": false,
+    "status": "blocked",
+    "error": "read ECONNRESET on ALL write operations (POST /v1/suite/TEST, POST case bulk, POST /v1/run/TEST, raw POST). GET/read operations succeed. Persists after repeated retries with backoff."
+  },
+  "status": "partial"
+}

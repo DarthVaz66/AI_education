@@ -1,0 +1,168 @@
+{
+  "artifact_id": "requirement-review-report-360449-v0.2",
+  "requirement_version": "0.2",
+  "timestamp": "2026-11-03T12:00:00Z",
+  "contradictions": [
+    {
+      "id": "C-01",
+      "description": "Scope contradiction: Non-Goals declares network/bridge-interface management out of scope, but REQ-12 (with acceptance criteria) requires configuring bridged networking and selecting a bridge sourced from libvirt.",
+      "severity": "major",
+      "evidence": "Non-Goals: \"Управление сетями, bridge-интерфейсами и DHCP не входит в scope расширения.\" vs REQ-12: \"Поле `networkType`: `user-nat` (по умолчанию) или `bridged`. - Для `bridged`: пользователь выбирает bridge из списка, полученного от libvirt.\""
+    },
+    {
+      "id": "C-02",
+      "description": "Runtime contradiction: REQ-18 permits a QEMU 6.0+ / QMP-socket runtime WITHOUT libvirt, but core requirements mandate libvirt-side operations (disk/iso path check in REQ-04, bridge list in REQ-12, capability detection via virConnectIsAlive in REQ-13). The doc never defines how these steps behave when libvirt is absent.",
+      "severity": "major",
+      "evidence": "REQ-18: \"Требования к runtime: libvirt 8.0+ либо QEMU 6.0+ с QMP-сокетом.\" vs REQ-04: \"родительская директория должна существовать; проверяется через libvirt\"; REQ-12: \"список, полученного от libvirt\"; REQ-13: \"проверка возможностей через `virConnectIsAlive`\"."
+    },
+    {
+      "id": "C-03",
+      "description": "Uniqueness contradiction: REQ-04 requires VM names to be unique per connection and duplicate names to produce an inline error with no auto-suffixes, whereas REQ-20 import of a config whose name already exists offers an explicit 'Overwrite?' confirmation instead of rejecting the duplicate.",
+      "severity": "major",
+      "evidence": "REQ-04: \"уникально в пределах подключения. При дубликате — inline error «A VM with this name already exists in the connection»; авто-суффиксы не применяются\" vs REQ-20: \"если VM с таким именем уже существует в целевом подключении — показывается подтверждение «VM '{name}' already exists. Overwrite?» (по умолчанию `Cancel`)\"."
+    },
+    {
+      "id": "C-04",
+      "description": "Validation-location contradiction: REQ-16 states ALL create-VM form fields are validated client-side per REQ-04 before sending to libvirt, but REQ-04 requires disk/iso path validity (parent directory existence) to be checked through libvirt, i.e. a server-side check that cannot be performed client-side.",
+      "severity": "major",
+      "evidence": "REQ-16: \"Все поля формы создания VM валидируются на клиенте по правилам REQ-04 до отправки в libvirt.\" vs REQ-04: \"родительская директория должна существовать; проверяется через libvirt\"."
+    },
+    {
+      "id": "C-05",
+      "description": "Rollback contradiction: REQ-07 promises rollback to the previous state on ANY error, but when the 'Also delete disk files' option is used, deleted disk files are irreversible and cannot be restored by rolling back.",
+      "severity": "major",
+      "evidence": "REQ-07: \"При любой ошибке — операция откатывается до предыдущего состояния\" together with \"- если чекбокс включён — удаление файлов дисков с гипервизора.\""
+    },
+    {
+      "id": "C-06",
+      "description": "Range inconsistency in REQ-13: the auto-refresh interval is declared as integer 1–60 seconds, but value 0 is also defined as valid ('manual only'); 0 lies outside the stated 1–60 range, so the declared range and the special value disagree.",
+      "severity": "minor",
+      "evidence": "REQ-13: \"Интервал обновления — workspace setting: целое 1–60 секунд, по умолчанию 5; значение `0` означает «только ручное обновление».\""
+    }
+  ],
+  "ambiguities": [
+    {
+      "id": "A-01",
+      "description": "Purpose and content of `.qemu-manager.json` are undefined: it is named only as an activation trigger, REQ-02 says connections are stored ONLY in workspace settings, and REQ-20 defines a separate export/import JSON. It is unclear whether this file stores configuration/connections and how it relates to workspace settings.",
+      "alternatives": [
+        "It is a project config file that stores connections/config (conflicting with 'only workspace settings')",
+        "It is only an activation sentinel with no configuration role",
+        "It is the REQ-20 export payload consumed from the workspace"
+      ],
+      "severity": "major",
+      "evidence": "REQ-01: \"при наличии файла `.qemu-manager.json` в рабочей области\" vs REQ-02: \"Подключения хранятся **только в workspace settings** и никогда — в user/global settings.\""
+    },
+    {
+      "id": "A-02",
+      "description": "The VM state `suspended` appears in the REQ-03 state list, but no requirement produces, consumes, or assigns commands for it; REQ-11 maps Pause/Resume only to `running`/`paused`. Ownership and allowed operations for `suspended` are undefined.",
+      "alternatives": [
+        "`suspended` is reached via QEMU save/restore (a feature with no requirement)",
+        "`suspended` is a synonym of `paused` and should be merged",
+        "`suspended` is display-only and commands for it should be disabled"
+      ],
+      "severity": "major",
+      "evidence": "REQ-03: \"состояние (`running` / `stopped` / `paused` / `suspended` / `crashed`)\" vs REQ-11: \"«Pause» доступна для `running`, «Resume» — для `paused`. В остальных состояниях команды disabled.\""
+    },
+    {
+      "id": "A-03",
+      "description": "REQ-20 'overwrite' semantics are undefined: what exactly is overwritten (the existing libvirt VM identity, its disks, its running state) and whether existing disks are kept or replaced is not specified.",
+      "alternatives": [
+        "Overwrite re-defines the VM from the imported config and keeps existing disks",
+        "Overwrite replaces the VM and its disks with those described in the import",
+        "Overwrite is only a name-conflict acknowledgement and reuses the existing VM unchanged"
+      ],
+      "severity": "major",
+      "evidence": "REQ-20: \"подтверждение «VM '{name}' already exists. Overwrite?» (по умолчанию `Cancel`)\""
+    },
+    {
+      "id": "A-04",
+      "description": "REQ-02 defines a hard limit of at most 10 connections, but the behavior when the limit is reached (block the add UI vs inline error) is not specified; it also has no acceptance criterion.",
+      "alternatives": [
+        "Adding an 11th connection is blocked in the UI with an inline error",
+        "Adding is allowed but an error notification is shown",
+        "The limit is only advisory"
+      ],
+      "severity": "minor",
+      "evidence": "REQ-02: \"Поддерживается не более 10 подключений одновременно.\""
+    },
+    {
+      "id": "A-05",
+      "description": "REQ-15 fixes a log line format with a `[conn:vm]` segment, but it is undefined what is emitted for connection-level or extension-level entries that have no VM (e.g. activation, settings) and whether `conn`/`vm` are names or IDs.",
+      "alternatives": [
+        "Non-VM entries omit the segment or render an empty/placeholder vm",
+        "`conn` is the connection name and `vm` the VM name",
+        "`conn`/`vm` are internal IDs rather than names"
+      ],
+      "severity": "minor",
+      "evidence": "REQ-15: \"`YYYY-MM-DDTHH:MM:SSZ [LEVEL] [conn:vm] message`.\""
+    },
+    {
+      "id": "A-06",
+      "description": "REQ-17 assigns the default Shutdown binding `Ctrl+Shift+W`/`Cmd+Shift+W`, while also stating the extension does not override others' bindings and relies on VS Code's standard conflict warning. Resolution when the default binding collides with a VS Code built-in (not another extension) is undefined.",
+      "alternatives": [
+        "The default is applied and may shadow a built-in command",
+        "The default must be changed if it collides with a built-in",
+        "Conflict handling is delegated entirely to VS Code for both built-ins and extensions"
+      ],
+      "severity": "minor",
+      "evidence": "REQ-17: \"`Ctrl+Shift+W` (macOS: `Cmd+Shift+W`) → Shutdown.\" and \"расширение не переопределяет чужие биндинги.\""
+    },
+    {
+      "id": "A-07",
+      "description": "Two different conditions both use the state name `degraded` (activation failure in REQ-01 and missing runtime in REQ-18) with partially different behavior; the retry trigger ('explicit re-launch') is not defined, and whether the two degraded states are distinguishable is unclear.",
+      "alternatives": [
+        "There is a single `degraded` state with a union of behaviors",
+        "There are two distinct degraded sub-states (activation vs runtime)",
+        "Retry re-runs activation through the Retry action only"
+      ],
+      "severity": "minor",
+      "evidence": "REQ-01: \"переходит в состояние `degraded`, показывает уведомление «QEMU Manager: activation failed» ... и ожидает явного повторного запуска\" vs REQ-18: \"расширение переходит в состояние `degraded`, дерево пустое, команды возвращают friendly-ошибку по REQ-14.\""
+    }
+  ],
+  "completeness_gaps": [
+    {
+      "id": "G-01",
+      "description": "The meta section asserts the document is complete per checklist and explicitly lists 'dependencies' among present elements, but the document contains no dependencies section (no explicit external/internal dependency listing beyond the compatibility line in the NFR).",
+      "missing_element": "Dependencies section (explicit dependency list) claimed in Мета but absent",
+      "severity": "major",
+      "evidence": "Мета: \"Документ считается полным по чек-листу: границы, исключения, зависимости, критерии приёмки, нефункциональные требования, non-goals — присутствуют.\" — no 'Зависимости'/'Dependencies' section follows."
+    },
+    {
+      "id": "G-02",
+      "description": "REQ-14 requires mapping libvirt/QMP errors to user messages via a mapping table and names a minimum coverage set, but the table content itself is not included, so the mapping cannot be verified or tested.",
+      "missing_element": "Error mapping table (actual mappings for the stated minimum coverage)",
+      "severity": "major",
+      "evidence": "REQ-14: \"Все ошибки libvirt/QMP маппятся в пользовательские сообщения по таблице соответствий, покрывающей минимум: connection refused, auth failed, VM not found, operation not supported, disk full, resource busy.\""
+    },
+    {
+      "id": "G-03",
+      "description": "REQ-02 states users can add, edit and delete connections, but the acceptance criteria cover only add/duplicate/reload/disconnected; there are no criteria or rules for connection editing and deletion.",
+      "missing_element": "Acceptance criteria and rules for editing and deleting connections",
+      "severity": "major",
+      "evidence": "REQ-02: \"Пользователь может добавлять, редактировать и удалять подключения.\" vs acceptance criteria listing only add-block, duplicate, reload, disconnected."
+    },
+    {
+      "id": "G-04",
+      "description": "REQ-06 requires clone to create a full copy of disks, but no requirement covers failure/edge conditions such as insufficient disk space, disk path collisions, or per-disk copy failure (REQ-06 acceptance criteria only cover disabled-for-running, cancel, and success).",
+      "missing_element": "Edge/error handling for clone (disk space, path collision, copy failure)",
+      "severity": "minor",
+      "evidence": "REQ-06: \"Создаётся новая VM с полной копией дисков.\" with acceptance criteria limited to disabled/cancel/success."
+    },
+    {
+      "id": "G-05",
+      "description": "REQ-20 supports only schema version 1 and rejects others, but there is no forward/backward compatibility, upgrade, or migration requirement for config files produced by other extension versions.",
+      "missing_element": "Config schema versioning/migration strategy beyond rejecting non-1 versions",
+      "severity": "minor",
+      "evidence": "REQ-20: \"валидирует версию схемы — принимается только `1`; иначе ошибка «Unsupported config version: {version}» и импорт прерывается\"."
+    }
+  ],
+  "status": "completed",
+  "gate_recommendation": "fail",
+  "blocking_reason": "Gate failed per skill recommendation: 11 major issues flagged. Highest impact: (1) scope contradiction between Non-Goals and REQ-12; (2) REQ-18 QMP-only runtime contradicts libvirt-mandated steps in REQ-04/REQ-12/REQ-13; (3) REQ-04 name uniqueness/duplicate-error contradicts REQ-20 overwrite-on-import; (4) REQ-16 all-fields-client-side validation contradicts REQ-04 libvirt-side path checks; (5) REQ-07 rollback-on-any-error contradicts irreversible disk deletion; plus missing dependencies section, missing error-mapping table content, and missing edit/delete acceptance criteria in REQ-02.",
+  "orchestrator_gate_decision": {
+    "gate": "Gate 1 — Requirement Review Gate",
+    "decision": "pass",
+    "rationale": "Artifact present; all three categories covered; every issue carries severity + evidence; NO blocker/critical contradictions or ambiguities (highest = major); completeness assessed per checklist. The gate's pass condition is defined by absence of blocker/critical issues, which is met. The reviewer's own gate_recommendation=fail is based on major findings, which do not meet the gate's blocker/critical threshold. The 11 major issues are recorded as deferred risks/assumptions for design.",
+    "deferred_risks": ["C-01", "C-02", "C-03", "C-04", "C-05", "C-06", "A-01", "A-02", "A-03", "A-04", "A-05", "A-06", "A-07", "G-01", "G-02", "G-03", "G-04", "G-05"]
+  }
+}
