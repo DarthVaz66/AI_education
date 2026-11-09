@@ -1,0 +1,1828 @@
+{
+  "artifact_id": "2026-11-09T17-30-00_0.5:03-test-design",
+  "run_id": "2026-11-09T17-30-00_0.5",
+  "requirement_version": "0.5",
+  "timestamp": "2026-11-09T17:35:00Z",
+  "confluence_page_id": "2228226",
+  "testomat_params": {
+    "project_id": "test-cc3c0",
+    "project_id_source": "argument",
+    "suite_id": null
+  },
+  "cases": [
+    {
+      "temp_id": "REQ-01-POS-01",
+      "title": "REQ-01: Activation on startup and QEMU: Connect available in Command Palette",
+      "precondition": "Extension installed; libvirt/QEMU runtime reachable.",
+      "steps": [
+        { "step": "Start VS Code so the onStartupFinished event fires", "expected": "Extension activates without blocking VS Code startup." },
+        { "step": "Open the Command Palette and search for the command", "expected": "Command «QEMU: Connect» is present and executable." }
+      ],
+      "priority": "normal",
+      "type": "positive",
+      "requirement_ref": "REQ-01",
+      "title_hash": "sha256:9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c1500000001"
+    },
+    {
+      "temp_id": "REQ-01-POS-02",
+      "title": "REQ-01: Activation when any extension command is invoked",
+      "precondition": "Extension installed but not yet activated; runtime reachable.",
+      "steps": [
+        { "step": "Invoke an extension command before the extension has activated", "expected": "Extension activates via the onCommand trigger and the command executes." }
+      ],
+      "priority": "normal",
+      "type": "positive",
+      "requirement_ref": "REQ-01",
+      "title_hash": "sha256:9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c1500000002"
+    },
+    {
+      "temp_id": "REQ-01-POS-03",
+      "title": "REQ-01: Activation when .qemu-manager.json exists in the workspace",
+      "precondition": "Extension installed and not activated; a file named .qemu-manager.json is placed in the workspace root.",
+      "steps": [
+        { "step": "Open the workspace containing .qemu-manager.json", "expected": "Extension activates due to the file-presence trigger." }
+      ],
+      "priority": "normal",
+      "type": "positive",
+      "requirement_ref": "REQ-01",
+      "title_hash": "sha256:9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c1500000003",
+      "comment": "Purpose/content of .qemu-manager.json is undefined; the case asserts only the literal activation trigger."
+    },
+    {
+      "temp_id": "REQ-01-POS-04",
+      "title": "REQ-01: Cold activation within 1.5 s on reference hardware",
+      "precondition": "Cold start; reference hardware (4 cores, 8 GB RAM); extension installed.",
+      "steps": [
+        { "step": "Measure the time from VS Code start to extension activation", "expected": "Cold activation completes within 1.5 s." }
+      ],
+      "priority": "important",
+      "type": "positive",
+      "requirement_ref": "REQ-01",
+      "title_hash": "sha256:9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c1500000004"
+    },
+    {
+      "temp_id": "REQ-01-BND-01",
+      "title": "REQ-01: Cold activation 1.5 s boundary (just-inside vs just-outside)",
+      "precondition": "Reference hardware; cold start; controllable activation timing.",
+      "steps": [
+        { "step": "Measure activation at 1.49 s (min side, just-inside)", "expected": "Within the ≤ 1.5 s limit — passes." },
+        { "step": "Measure activation at exactly 1.50 s (limit)", "expected": "Within the ≤ 1.5 s limit — passes." },
+        { "step": "Measure activation at 1.51 s (just-outside)", "expected": "Exceeds the 1.5 s limit — fails." }
+      ],
+      "priority": "important",
+      "type": "boundary",
+      "requirement_ref": "REQ-01",
+      "title_hash": "sha256:9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c1500000005"
+    },
+    {
+      "temp_id": "REQ-01-NEG-01",
+      "title": "REQ-01: Activation error goes to degraded with notification and Retry (no silent fail)",
+      "precondition": "Extension installed; an activation failure is induced.",
+      "steps": [
+        { "step": "Trigger activation with an induced error", "expected": "Extension transitions to the degraded state." },
+        { "step": "Observe the notification", "expected": "Notification «QEMU Manager: activation failed» is shown with a «Retry» action." },
+        { "step": "Do not press Retry", "expected": "Extension waits for an explicit re-launch." }
+      ],
+      "priority": "high",
+      "type": "negative",
+      "requirement_ref": "REQ-01",
+      "title_hash": "sha256:9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c1500000006"
+    },
+    {
+      "temp_id": "REQ-02-POS-01",
+      "title": "REQ-02: Add a valid connection stored only in workspace settings",
+      "precondition": "Extension active; fewer than 10 connections configured; runtime reachable.",
+      "steps": [
+        { "step": "Add a connection with name prod-1 and URI qemu:///system", "expected": "Connection is accepted and added." },
+        { "step": "Inspect the storage location of the connection", "expected": "Connection is stored only in workspace settings, never in user/global settings." }
+      ],
+      "priority": "important",
+      "type": "positive",
+      "requirement_ref": "REQ-02",
+      "title_hash": "sha256:9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c1500000007"
+    },
+    {
+      "temp_id": "REQ-02-POS-02",
+      "title": "REQ-02: Edit an existing connection",
+      "precondition": "At least one connection exists.",
+      "steps": [
+        { "step": "Edit the existing connection name/URI and save", "expected": "The connection is updated with the new values." }
+      ],
+      "priority": "normal",
+      "type": "positive",
+      "requirement_ref": "REQ-02",
+      "title_hash": "sha256:9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c1500000008"
+    },
+    {
+      "temp_id": "REQ-02-POS-03",
+      "title": "REQ-02: Delete an existing connection",
+      "precondition": "At least one connection exists.",
+      "steps": [
+        { "step": "Delete the existing connection", "expected": "The connection is removed from workspace settings." }
+      ],
+      "priority": "normal",
+      "type": "positive",
+      "requirement_ref": "REQ-02",
+      "title_hash": "sha256:9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c1500000009"
+    },
+    {
+      "temp_id": "REQ-02-POS-04",
+      "title": "REQ-02: Connections are restored after VS Code reload",
+      "precondition": "At least one valid connection configured in workspace settings.",
+      "steps": [
+        { "step": "Reload the VS Code window", "expected": "Configured connections are restored after reload." }
+      ],
+      "priority": "high",
+      "type": "positive",
+      "requirement_ref": "REQ-02",
+      "title_hash": "sha256:9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c150000000a"
+    },
+    {
+      "temp_id": "REQ-02-POS-05",
+      "title": "REQ-02: Unreachable connection shows disconnected status with Retry",
+      "precondition": "A configured connection whose host/URI is unreachable.",
+      "steps": [
+        { "step": "Connect or refresh the unreachable connection", "expected": "Connection is displayed with status disconnected and a «Retry» action." }
+      ],
+      "priority": "important",
+      "type": "positive",
+      "requirement_ref": "REQ-02",
+      "title_hash": "sha256:9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c150000000b"
+    },
+    {
+      "temp_id": "REQ-02-POS-06",
+      "title": "REQ-02: Deleting a connection with running VMs shows the warning dialog",
+      "precondition": "An active connection with at least one VM in running state.",
+      "steps": [
+        { "step": "Invoke delete for the active connection", "expected": "Confirmation dialog contains the warning «This connection has running VMs. Delete anyway?»." }
+      ],
+      "priority": "important",
+      "type": "positive",
+      "requirement_ref": "REQ-02",
+      "title_hash": "sha256:9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c150000000c",
+      "comment": "F-007 (open, major): the warning condition for VMs in paused/suspended/crashed states is undefined; the case asserts only the literal running-VM condition and does not invent behavior for other states."
+    },
+    {
+      "temp_id": "REQ-02-NEG-01",
+      "title": "REQ-02: Adding a connection without mandatory fields is blocked",
+      "precondition": "Extension active.",
+      "steps": [
+        { "step": "Attempt to add a connection leaving name and/or URI empty", "expected": "Add is blocked; mandatory-field validation prevents saving." }
+      ],
+      "priority": "important",
+      "type": "negative",
+      "requirement_ref": "REQ-02",
+      "title_hash": "sha256:9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c150000000d"
+    },
+    {
+      "temp_id": "REQ-02-NEG-02",
+      "title": "REQ-02: Duplicate connection name produces inline error",
+      "precondition": "A connection named prod-1 already exists.",
+      "steps": [
+        { "step": "Add a new connection with the same name prod-1", "expected": "Inline error «Connection name already exists» is shown; the duplicate is not saved." }
+      ],
+      "priority": "normal",
+      "type": "negative",
+      "requirement_ref": "REQ-02",
+      "title_hash": "sha256:9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c150000000e"
+    },
+    {
+      "temp_id": "REQ-02-NEG-03",
+      "title": "REQ-02: Connection name with characters outside the allowed set is rejected",
+      "precondition": "Extension active.",
+      "steps": [
+        { "step": "Enter a name containing a disallowed character, e.g. prod@1", "expected": "Input is rejected because it violates the allowed character set." }
+      ],
+      "priority": "normal",
+      "type": "negative",
+      "requirement_ref": "REQ-02",
+      "title_hash": "sha256:9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c150000000f"
+    },
+    {
+      "temp_id": "REQ-02-NEG-04",
+      "title": "REQ-02: Invalid URI and QMP socket path not ending in .sock are rejected",
+      "precondition": "Extension active.",
+      "steps": [
+        { "step": "Enter an unsupported URI, e.g. qemu:///bogus", "expected": "Rejected — not one of the supported URI forms." },
+        { "step": "Enter an absolute path not ending in .sock, e.g. /tmp/qmp", "expected": "Rejected — QMP socket paths must end in .sock." }
+      ],
+      "priority": "important",
+      "type": "negative",
+      "requirement_ref": "REQ-02",
+      "title_hash": "sha256:9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c1500000010"
+    },
+    {
+      "temp_id": "REQ-02-BND-01",
+      "title": "REQ-02: Connection name length boundaries 1 and 32 accepted, 0 and 33 rejected",
+      "precondition": "Extension active.",
+      "steps": [
+        { "step": "Use a 0-character (empty) name (min-1)", "expected": "Rejected." },
+        { "step": "Use a 1-character name (min)", "expected": "Accepted." },
+        { "step": "Use a 2-character name (min+1)", "expected": "Accepted." },
+        { "step": "Use a 31-character name (max-1)", "expected": "Accepted." },
+        { "step": "Use a 32-character name (max)", "expected": "Accepted." },
+        { "step": "Use a 33-character name (max+1)", "expected": "Rejected." }
+      ],
+      "priority": "normal",
+      "type": "boundary",
+      "requirement_ref": "REQ-02",
+      "title_hash": "sha256:9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c1500000011"
+    },
+    {
+      "temp_id": "REQ-02-BND-02",
+      "title": "REQ-02: Connection count limit of 10 (10 accepted, 11th undefined)",
+      "precondition": "9 connections already configured.",
+      "steps": [
+        { "step": "Add the 10th connection (max)", "expected": "Accepted — 10 connections are supported." },
+        { "step": "Attempt to add an 11th connection (max+1)", "expected": "Limit is reached; the requirement does not define the exact rejection UI, so only the reached limit is asserted." }
+      ],
+      "priority": "normal",
+      "type": "boundary",
+      "requirement_ref": "REQ-02",
+      "title_hash": "sha256:9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c1500000012",
+      "comment": "Limit-reached behavior has no acceptance criterion; the case asserts the literal limit of no more than 10."
+    },
+    {
+      "temp_id": "REQ-03-POS-01",
+      "title": "REQ-03: VMs grouped by connection with name, state, vCPU and RAM",
+      "precondition": "Connections configured; at least one connection with VMs.",
+      "steps": [
+        { "step": "Open the QEMU Manager sidebar", "expected": "VMs are listed grouped by their connections." },
+        { "step": "Inspect each VM entry", "expected": "Each VM shows name, state, vCPU and RAM in MB." }
+      ],
+      "priority": "important",
+      "type": "positive",
+      "requirement_ref": "REQ-03",
+      "title_hash": "sha256:9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c1500000013",
+      "comment": "F-002 (open, major): REQ-12 requires an IP field in the tree while REQ-03 omits IP; the case asserts only the REQ-03 field list."
+    },
+    {
+      "temp_id": "REQ-03-POS-02",
+      "title": "REQ-03: Default sort by name is case-insensitive ascending",
+      "precondition": "A connection with VMs named beta, Alpha, gamma.",
+      "steps": [
+        { "step": "View the tree with default sorting", "expected": "VMs are ordered ascending by name ignoring case (Alpha, beta, gamma)." }
+      ],
+      "priority": "normal",
+      "type": "positive",
+      "requirement_ref": "REQ-03",
+      "title_hash": "sha256:9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c1500000014"
+    },
+    {
+      "temp_id": "REQ-03-POS-03",
+      "title": "REQ-03: Connection without VMs shows placeholder No VMs",
+      "precondition": "A connection with no VMs.",
+      "steps": [
+        { "step": "Expand a connection that has no VMs", "expected": "Placeholder «No VMs» is shown." }
+      ],
+      "priority": "low",
+      "type": "positive",
+      "requirement_ref": "REQ-03",
+      "title_hash": "sha256:9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c1500000015"
+    },
+    {
+      "temp_id": "REQ-03-POS-04",
+      "title": "REQ-03: Sorting and grouping are preserved after a state update",
+      "precondition": "Tree visible with multiple VMs across connections.",
+      "steps": [
+        { "step": "Let state refresh change one VM state", "expected": "Grouping and case-insensitive ascending sort are still respected after the update." }
+      ],
+      "priority": "normal",
+      "type": "positive",
+      "requirement_ref": "REQ-03",
+      "title_hash": "sha256:9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c1500000016"
+    },
+    {
+      "temp_id": "REQ-03-NEG-01",
+      "title": "REQ-03: Temporarily unavailable VM data shows last known state with (stale)",
+      "precondition": "VM data becomes temporarily unavailable for a connection.",
+      "steps": [
+        { "step": "Trigger a refresh while VM data is temporarily unavailable", "expected": "Last known state is displayed with the suffix (stale)." }
+      ],
+      "priority": "important",
+      "type": "negative",
+      "requirement_ref": "REQ-03",
+      "title_hash": "sha256:9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c1500000017"
+    },
+    {
+      "temp_id": "REQ-03-BND-01",
+      "title": "REQ-03: State enum coverage including suspended",
+      "precondition": "VMs exist in each state: running, stopped, paused, suspended, crashed.",
+      "steps": [
+        { "step": "Observe a VM in each of the five states in turn", "expected": "All five states render as their literal values in the tree." },
+        { "step": "Observe a VM in the suspended state", "expected": "State suspended is rendered per REQ-03." }
+      ],
+      "priority": "normal",
+      "type": "boundary",
+      "requirement_ref": "REQ-03",
+      "title_hash": "sha256:9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c1500000018",
+      "comment": "Enum coverage (no numeric range). State machine completeness is flagged by F-005 (REQ-09 has no stopped transition)."
+    },
+    {
+      "temp_id": "REQ-04-POS-01",
+      "title": "REQ-04: Successful VM creation with all valid fields",
+      "precondition": "Valid connection; runtime reachable; name not yet used in the connection.",
+      "steps": [
+        { "step": "Fill valid fields: name vm-01, vcpu 2, ramMb 2048, one qcow2 disk (valid absolute path, 20 GB), network user-nat", "expected": "Form is valid; «Create» is enabled." },
+        { "step": "Click «Create»", "expected": "Form is sent to libvirt and the VM appears in the tree within 3 s." }
+      ],
+      "priority": "high",
+      "type": "positive",
+      "requirement_ref": "REQ-04",
+      "title_hash": "sha256:9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c1500000019"
+    },
+    {
+      "temp_id": "REQ-04-POS-02",
+      "title": "REQ-04: VM creation with the optional iso path provided",
+      "precondition": "Valid connection; a valid absolute iso path exists on the hypervisor.",
+      "steps": [
+        { "step": "Provide valid mandatory fields plus an existing absolute iso path", "expected": "iso is accepted (validated via libvirt) and creation succeeds." }
+      ],
+      "priority": "normal",
+      "type": "positive",
+      "requirement_ref": "REQ-04",
+      "title_hash": "sha256:9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c150000001a"
+    },
+    {
+      "temp_id": "REQ-04-NEG-01",
+      "title": "REQ-04: Duplicate VM name produces inline error with no auto-suffix",
+      "precondition": "A VM named vm-01 already exists in the target connection.",
+      "steps": [
+        { "step": "Attempt to create a VM named vm-01", "expected": "Inline error «A VM with this name already exists in the connection»; no auto-suffix is applied and the form is not sent." }
+      ],
+      "priority": "important",
+      "type": "negative",
+      "requirement_ref": "REQ-04",
+      "title_hash": "sha256:9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c150000001b"
+    },
+    {
+      "temp_id": "REQ-04-NEG-02",
+      "title": "REQ-04: VM name with characters outside the allowed set is rejected",
+      "precondition": "Valid connection.",
+      "steps": [
+        { "step": "Enter a name containing an underscore, e.g. vm_01", "expected": "Inline error — character set violation." }
+      ],
+      "priority": "normal",
+      "type": "negative",
+      "requirement_ref": "REQ-04",
+      "title_hash": "sha256:9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c150000001c"
+    },
+    {
+      "temp_id": "REQ-04-NEG-03",
+      "title": "REQ-04: VM name starting or ending with a dash is rejected",
+      "precondition": "Valid connection.",
+      "steps": [
+        { "step": "Enter -vm01", "expected": "Inline error — must not start with a dash." },
+        { "step": "Enter vm01-", "expected": "Inline error — must not end with a dash." }
+      ],
+      "priority": "normal",
+      "type": "negative",
+      "requirement_ref": "REQ-04",
+      "title_hash": "sha256:9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c150000001d"
+    },
+    {
+      "temp_id": "REQ-04-NEG-04",
+      "title": "REQ-04: vcpu outside 1-32 produces an inline rule error",
+      "precondition": "Valid connection.",
+      "steps": [
+        { "step": "Enter vcpu = 0", "expected": "Inline error referencing the 1-32 rule." },
+        { "step": "Enter vcpu = 33", "expected": "Inline error referencing the 1-32 rule." }
+      ],
+      "priority": "important",
+      "type": "negative",
+      "requirement_ref": "REQ-04",
+      "title_hash": "sha256:9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c150000001e"
+    },
+    {
+      "temp_id": "REQ-04-NEG-05",
+      "title": "REQ-04: ramMb outside 256-262144 produces an inline rule error",
+      "precondition": "Valid connection.",
+      "steps": [
+        { "step": "Enter ramMb = 255", "expected": "Inline error referencing the 256-262144 range." },
+        { "step": "Enter ramMb = 262145", "expected": "Inline error referencing the 256-262144 range." }
+      ],
+      "priority": "important",
+      "type": "negative",
+      "requirement_ref": "REQ-04",
+      "title_hash": "sha256:9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c150000001f"
+    },
+    {
+      "temp_id": "REQ-04-NEG-06",
+      "title": "REQ-04: ramMb not a multiple of 128 produces an inline error",
+      "precondition": "Valid connection.",
+      "steps": [
+        { "step": "Enter ramMb = 300 (in range but not a multiple of 128)", "expected": "Inline error referencing the multiple-of-128 rule." }
+      ],
+      "priority": "normal",
+      "type": "negative",
+      "requirement_ref": "REQ-04",
+      "title_hash": "sha256:9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c1500000020"
+    },
+    {
+      "temp_id": "REQ-04-NEG-07",
+      "title": "REQ-04: Disk count outside 1-8 produces an inline error",
+      "precondition": "Valid connection.",
+      "steps": [
+        { "step": "Configure 0 disks", "expected": "Inline error — at least 1 disk required." },
+        { "step": "Configure 9 disks", "expected": "Inline error — at most 8 disks." }
+      ],
+      "priority": "normal",
+      "type": "negative",
+      "requirement_ref": "REQ-04",
+      "title_hash": "sha256:9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c1500000021"
+    },
+    {
+      "temp_id": "REQ-04-NEG-08",
+      "title": "REQ-04: Disk path not absolute or parent directory missing is rejected",
+      "precondition": "Valid connection; runtime reachable.",
+      "steps": [
+        { "step": "Provide a relative disk path", "expected": "Rejected — the path must be absolute on the hypervisor." },
+        { "step": "Provide an absolute path whose parent directory does not exist", "expected": "Rejected via the libvirt parent-directory existence check." }
+      ],
+      "priority": "important",
+      "type": "negative",
+      "requirement_ref": "REQ-04",
+      "title_hash": "sha256:9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c1500000022",
+      "comment": "F-003 (open, major): the storage-pool concept used by the libvirt check is undefined, so an 'unavailable storage pool' error cannot be derived deterministically; only the absolute-path and parent-directory checks are asserted."
+    },
+    {
+      "temp_id": "REQ-04-NEG-09",
+      "title": "REQ-04: Disk size outside 1-2000 GB produces an inline error",
+      "precondition": "Valid connection.",
+      "steps": [
+        { "step": "Enter disk size 0 GB", "expected": "Inline error referencing the 1-2000 GB rule." },
+        { "step": "Enter disk size 2001 GB", "expected": "Inline error referencing the 1-2000 GB rule." }
+      ],
+      "priority": "normal",
+      "type": "negative",
+      "requirement_ref": "REQ-04",
+      "title_hash": "sha256:9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c1500000023"
+    },
+    {
+      "temp_id": "REQ-04-NEG-10",
+      "title": "REQ-04: Disk format other than qcow2 is rejected",
+      "precondition": "Valid connection.",
+      "steps": [
+        { "step": "Set the disk format to raw", "expected": "Inline error — only qcow2 is allowed." }
+      ],
+      "priority": "normal",
+      "type": "negative",
+      "requirement_ref": "REQ-04",
+      "title_hash": "sha256:9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c1500000024"
+    },
+    {
+      "temp_id": "REQ-04-NEG-11",
+      "title": "REQ-04: iso path missing on the hypervisor is rejected",
+      "precondition": "Valid connection; runtime reachable.",
+      "steps": [
+        { "step": "Provide an absolute iso path that does not exist on the hypervisor", "expected": "Validation via libvirt rejects the iso path." }
+      ],
+      "priority": "normal",
+      "type": "negative",
+      "requirement_ref": "REQ-04",
+      "title_hash": "sha256:9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c1500000025"
+    },
+    {
+      "temp_id": "REQ-04-NEG-12",
+      "title": "REQ-04: libvirt error on create shows notification, logs raw text, adds no tree entry",
+      "precondition": "Valid form; libvirt induced to return an error.",
+      "steps": [
+        { "step": "Submit a valid form and have libvirt return an error", "expected": "Notification per REQ-14; full raw text written to the Output Channel per REQ-15." },
+        { "step": "Inspect the tree", "expected": "VM is NOT added to the tree." }
+      ],
+      "priority": "high",
+      "type": "negative",
+      "requirement_ref": "REQ-04",
+      "title_hash": "sha256:9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c1500000026"
+    },
+    {
+      "temp_id": "REQ-04-BND-01",
+      "title": "REQ-04: name length boundaries 0/1/2/62/63/64",
+      "precondition": "Valid connection.",
+      "steps": [
+        { "step": "Enter an empty (0-character) name (min-1)", "expected": "Rejected." },
+        { "step": "Enter a 1-character name (min)", "expected": "Accepted." },
+        { "step": "Enter a 2-character name (min+1)", "expected": "Accepted." },
+        { "step": "Enter a 62-character name (max-1)", "expected": "Accepted." },
+        { "step": "Enter a 63-character name (max)", "expected": "Accepted." },
+        { "step": "Enter a 64-character name (max+1)", "expected": "Rejected." }
+      ],
+      "priority": "normal",
+      "type": "boundary",
+      "requirement_ref": "REQ-04",
+      "title_hash": "sha256:9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c1500000027"
+    },
+    {
+      "temp_id": "REQ-04-BND-02",
+      "title": "REQ-04: vcpu boundaries 0/1/2/31/32/33",
+      "precondition": "Valid connection.",
+      "steps": [
+        { "step": "Enter vcpu 0 (min-1)", "expected": "Rejected." },
+        { "step": "Enter vcpu 1 (min)", "expected": "Accepted." },
+        { "step": "Enter vcpu 2 (min+1)", "expected": "Accepted." },
+        { "step": "Enter vcpu 31 (max-1)", "expected": "Accepted." },
+        { "step": "Enter vcpu 32 (max)", "expected": "Accepted." },
+        { "step": "Enter vcpu 33 (max+1)", "expected": "Rejected." }
+      ],
+      "priority": "important",
+      "type": "boundary",
+      "requirement_ref": "REQ-04",
+      "title_hash": "sha256:9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c1500000028"
+    },
+    {
+      "temp_id": "REQ-04-BND-03",
+      "title": "REQ-04: ramMb range boundaries 255/256/384/262016/262144/262145",
+      "precondition": "Valid connection.",
+      "steps": [
+        { "step": "Enter ramMb 255 (min-1)", "expected": "Rejected." },
+        { "step": "Enter ramMb 256 (min)", "expected": "Accepted (multiple of 128)." },
+        { "step": "Enter ramMb 384 (min+1 step = min+128)", "expected": "Accepted (multiple of 128)." },
+        { "step": "Enter ramMb 262016 (max-128)", "expected": "Accepted (multiple of 128)." },
+        { "step": "Enter ramMb 262144 (max)", "expected": "Accepted (2048 x 128)." },
+        { "step": "Enter ramMb 262145 (max+1)", "expected": "Rejected." }
+      ],
+      "priority": "important",
+      "type": "boundary",
+      "requirement_ref": "REQ-04",
+      "title_hash": "sha256:9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c1500000029"
+    },
+    {
+      "temp_id": "REQ-04-BND-04",
+      "title": "REQ-04: ramMb multiple-of-128 boundaries",
+      "precondition": "Valid connection.",
+      "steps": [
+        { "step": "Enter 256, 384, 262016 and 262144", "expected": "All accepted (multiples of 128 within range)." },
+        { "step": "Enter 260 (above the 256 multiple, not a multiple)", "expected": "Rejected — not a multiple of 128." },
+        { "step": "Enter 262272", "expected": "Rejected — out of range, above 262144." }
+      ],
+      "priority": "normal",
+      "type": "boundary",
+      "requirement_ref": "REQ-04",
+      "title_hash": "sha256:9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c150000002a"
+    },
+    {
+      "temp_id": "REQ-04-BND-05",
+      "title": "REQ-04: disks count boundaries 0/1/2/7/8/9",
+      "precondition": "Valid connection.",
+      "steps": [
+        { "step": "Configure 0 disks (min-1)", "expected": "Rejected." },
+        { "step": "Configure 1 disk (min)", "expected": "Accepted." },
+        { "step": "Configure 2 disks (min+1)", "expected": "Accepted." },
+        { "step": "Configure 7 disks (max-1)", "expected": "Accepted." },
+        { "step": "Configure 8 disks (max)", "expected": "Accepted." },
+        { "step": "Configure 9 disks (max+1)", "expected": "Rejected." }
+      ],
+      "priority": "normal",
+      "type": "boundary",
+      "requirement_ref": "REQ-04",
+      "title_hash": "sha256:9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c150000002b"
+    },
+    {
+      "temp_id": "REQ-04-BND-06",
+      "title": "REQ-04: disk size boundaries 0/1/2/1999/2000/2001 GB",
+      "precondition": "Valid connection.",
+      "steps": [
+        { "step": "Set disk size 0 GB (min-1)", "expected": "Rejected." },
+        { "step": "Set disk size 1 GB (min)", "expected": "Accepted." },
+        { "step": "Set disk size 2 GB (min+1)", "expected": "Accepted." },
+        { "step": "Set disk size 1999 GB (max-1)", "expected": "Accepted." },
+        { "step": "Set disk size 2000 GB (max)", "expected": "Accepted." },
+        { "step": "Set disk size 2001 GB (max+1)", "expected": "Rejected." }
+      ],
+      "priority": "normal",
+      "type": "boundary",
+      "requirement_ref": "REQ-04",
+      "title_hash": "sha256:9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c150000002c"
+    },
+    {
+      "temp_id": "REQ-04-BND-07",
+      "title": "REQ-04: name dash rule boundary (interior accepted, edges rejected)",
+      "precondition": "Valid connection.",
+      "steps": [
+        { "step": "Enter a-b", "expected": "Accepted — dash allowed inside." },
+        { "step": "Enter -a", "expected": "Rejected — leading dash." },
+        { "step": "Enter a-", "expected": "Rejected — trailing dash." }
+      ],
+      "priority": "normal",
+      "type": "boundary",
+      "requirement_ref": "REQ-04",
+      "title_hash": "sha256:9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c150000002d"
+    },
+    {
+      "temp_id": "REQ-05-POS-01",
+      "title": "REQ-05: Rename a stopped VM to a valid unique name",
+      "precondition": "VM in stopped state; target name unused in the connection.",
+      "steps": [
+        { "step": "Invoke «Rename» on the stopped VM and enter a valid unique name", "expected": "Rename is accepted and sent to libvirt." },
+        { "step": "Observe the tree", "expected": "New name appears in the tree within 3 s." }
+      ],
+      "priority": "important",
+      "type": "positive",
+      "requirement_ref": "REQ-05",
+      "title_hash": "sha256:9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c150000002e"
+    },
+    {
+      "temp_id": "REQ-05-NEG-01",
+      "title": "REQ-05: Rename is disabled for a running VM with tooltip",
+      "precondition": "VM in running state.",
+      "steps": [
+        { "step": "Inspect «Rename» for the running VM", "expected": "Command is disabled with the tooltip «VM must be stopped»." }
+      ],
+      "priority": "important",
+      "type": "negative",
+      "requirement_ref": "REQ-05",
+      "title_hash": "sha256:9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c150000002f"
+    },
+    {
+      "temp_id": "REQ-05-NEG-02",
+      "title": "REQ-05: Rename is disabled for other non-stopped states",
+      "precondition": "VMs in paused, crashed and suspended states.",
+      "steps": [
+        { "step": "Check «Rename» for each non-stopped state", "expected": "Command is disabled in each case (only stopped is allowed)." }
+      ],
+      "priority": "normal",
+      "type": "negative",
+      "requirement_ref": "REQ-05",
+      "title_hash": "sha256:9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c1500000030"
+    },
+    {
+      "temp_id": "REQ-05-NEG-03",
+      "title": "REQ-05: Rename to a duplicate name produces an inline error",
+      "precondition": "Stopped VM; another VM already uses the target name in the connection.",
+      "steps": [
+        { "step": "Rename to the already-used name", "expected": "Inline error; no change is sent to libvirt." }
+      ],
+      "priority": "normal",
+      "type": "negative",
+      "requirement_ref": "REQ-05",
+      "title_hash": "sha256:9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c1500000031"
+    },
+    {
+      "temp_id": "REQ-05-NEG-04",
+      "title": "REQ-05: Rename to a name violating REQ-04 rules produces an inline error",
+      "precondition": "Stopped VM.",
+      "steps": [
+        { "step": "Rename to a name with invalid characters or leading/trailing dash, e.g. -x_1", "expected": "Inline error per the REQ-04 name rules." }
+      ],
+      "priority": "normal",
+      "type": "negative",
+      "requirement_ref": "REQ-05",
+      "title_hash": "sha256:9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c1500000032"
+    },
+    {
+      "temp_id": "REQ-05-BND-01",
+      "title": "REQ-05: Rename name length boundaries 1/63 accepted, 64 rejected",
+      "precondition": "Stopped VM.",
+      "steps": [
+        { "step": "Rename to a 1-character name (min)", "expected": "Accepted." },
+        { "step": "Rename to a 63-character name (max)", "expected": "Accepted." },
+        { "step": "Rename to a 64-character name (max+1)", "expected": "Rejected." }
+      ],
+      "priority": "normal",
+      "type": "boundary",
+      "requirement_ref": "REQ-05",
+      "title_hash": "sha256:9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c1500000033"
+    },
+    {
+      "temp_id": "REQ-06-POS-01",
+      "title": "REQ-06: Clone a stopped VM with full disk copy yields a new stopped VM",
+      "precondition": "Source VM in stopped state; valid unique new name available; sufficient host disk.",
+      "steps": [
+        { "step": "Invoke «Clone» with a valid unique name", "expected": "Clone proceeds and disks are copied in full." },
+        { "step": "Wait for completion", "expected": "New VM appears in the tree in stopped state." }
+      ],
+      "priority": "important",
+      "type": "positive",
+      "requirement_ref": "REQ-06",
+      "title_hash": "sha256:9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c1500000034"
+    },
+    {
+      "temp_id": "REQ-06-POS-02",
+      "title": "REQ-06: Clone shows a cancellable progress notification",
+      "precondition": "Source VM stopped; clone startable.",
+      "steps": [
+        { "step": "Start the clone", "expected": "A progress notification is shown in VS Code and offers cancellation." }
+      ],
+      "priority": "normal",
+      "type": "positive",
+      "requirement_ref": "REQ-06",
+      "title_hash": "sha256:9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c1500000035"
+    },
+    {
+      "temp_id": "REQ-06-NEG-01",
+      "title": "REQ-06: Clone is disabled for a running VM with tooltip",
+      "precondition": "VM in running state.",
+      "steps": [
+        { "step": "Inspect «Clone» for the running VM", "expected": "Command is disabled with a tooltip (only stopped is allowed)." }
+      ],
+      "priority": "important",
+      "type": "negative",
+      "requirement_ref": "REQ-06",
+      "title_hash": "sha256:9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c1500000036"
+    },
+    {
+      "temp_id": "REQ-06-NEG-02",
+      "title": "REQ-06: Cancel during clone deletes the partial VM and keeps the source",
+      "precondition": "Clone of a stopped VM in progress.",
+      "steps": [
+        { "step": "Cancel the clone while it is running", "expected": "Partially created VM is deleted and the source VM is unchanged." }
+      ],
+      "priority": "important",
+      "type": "negative",
+      "requirement_ref": "REQ-06",
+      "title_hash": "sha256:9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c1500000037"
+    },
+    {
+      "temp_id": "REQ-06-NEG-03",
+      "title": "REQ-06: Clone to a duplicate name produces an inline error",
+      "precondition": "Stopped VM; target name already used in the connection.",
+      "steps": [
+        { "step": "Clone specifying an existing name", "expected": "Inline error; the uniqueness rule from REQ-04 is applied." }
+      ],
+      "priority": "normal",
+      "type": "negative",
+      "requirement_ref": "REQ-06",
+      "title_hash": "sha256:9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c1500000038",
+      "comment": "F-004 (open, major): clone behavior in QMP-only runtime mode is undefined; only the libvirt path is asserted."
+    },
+    {
+      "temp_id": "REQ-07-POS-01",
+      "title": "REQ-07: Delete with checkbox off undefines the VM and keeps disks",
+      "precondition": "VM in stopped state.",
+      "steps": [
+        { "step": "Invoke «Delete», leave «Also delete disk files» unchecked and confirm", "expected": "VM is undefined in libvirt; disk files remain." }
+      ],
+      "priority": "critical",
+      "type": "positive",
+      "requirement_ref": "REQ-07",
+      "title_hash": "sha256:9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c1500000039"
+    },
+    {
+      "temp_id": "REQ-07-POS-02",
+      "title": "REQ-07: Delete with «Also delete disk files» checked removes the disks",
+      "precondition": "VM in stopped state.",
+      "steps": [
+        { "step": "Invoke «Delete», check «Also delete disk files» and confirm", "expected": "VM is undefined in libvirt and the disk files are deleted from the hypervisor." }
+      ],
+      "priority": "critical",
+      "type": "positive",
+      "requirement_ref": "REQ-07",
+      "title_hash": "sha256:9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c150000003a"
+    },
+    {
+      "temp_id": "REQ-07-NEG-01",
+      "title": "REQ-07: Cancelling the delete dialog makes no changes",
+      "precondition": "VM in stopped state.",
+      "steps": [
+        { "step": "Open the «Delete» dialog and press Cancel", "expected": "No changes are made to the VM or its disks." }
+      ],
+      "priority": "normal",
+      "type": "negative",
+      "requirement_ref": "REQ-07",
+      "title_hash": "sha256:9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c150000003b"
+    },
+    {
+      "temp_id": "REQ-07-NEG-02",
+      "title": "REQ-07: libvirt error during delete leaves the VM in the tree and shows the error",
+      "precondition": "VM in stopped state; libvirt induced to fail.",
+      "steps": [
+        { "step": "Confirm delete while libvirt returns an error", "expected": "VM remains in the tree and the error is shown per REQ-14." }
+      ],
+      "priority": "high",
+      "type": "negative",
+      "requirement_ref": "REQ-07",
+      "title_hash": "sha256:9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c150000003c"
+    },
+    {
+      "temp_id": "REQ-07-NEG-03",
+      "title": "REQ-07: Delete is disabled for a non-stopped VM",
+      "precondition": "VM in running state.",
+      "steps": [
+        { "step": "Inspect «Delete» for the running VM", "expected": "Command is disabled (only stopped is allowed)." }
+      ],
+      "priority": "important",
+      "type": "negative",
+      "requirement_ref": "REQ-07",
+      "title_hash": "sha256:9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c150000003d"
+    },
+    {
+      "temp_id": "REQ-08-POS-01",
+      "title": "REQ-08: Start a stopped VM reaches running within 5 s",
+      "precondition": "VM in stopped state.",
+      "steps": [
+        { "step": "Invoke «Start»", "expected": "Command executes and the state becomes running within 5 s." }
+      ],
+      "priority": "high",
+      "type": "positive",
+      "requirement_ref": "REQ-08",
+      "title_hash": "sha256:9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c150000003e"
+    },
+    {
+      "temp_id": "REQ-08-POS-02",
+      "title": "REQ-08: Start a crashed VM reaches running within 5 s",
+      "precondition": "VM in crashed state.",
+      "steps": [
+        { "step": "Invoke «Start»", "expected": "State becomes running within 5 s." }
+      ],
+      "priority": "high",
+      "type": "positive",
+      "requirement_ref": "REQ-08",
+      "title_hash": "sha256:9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c150000003f"
+    },
+    {
+      "temp_id": "REQ-08-NEG-01",
+      "title": "REQ-08: Start is disabled for non-eligible states",
+      "precondition": "VMs in running, paused and suspended states.",
+      "steps": [
+        { "step": "Inspect «Start» for each non-eligible state", "expected": "Command is disabled in each case." }
+      ],
+      "priority": "important",
+      "type": "negative",
+      "requirement_ref": "REQ-08",
+      "title_hash": "sha256:9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c1500000040"
+    },
+    {
+      "temp_id": "REQ-08-NEG-02",
+      "title": "REQ-08: libvirt error on start leaves state unchanged with «Show log»",
+      "precondition": "Stopped VM; libvirt induced to fail.",
+      "steps": [
+        { "step": "Invoke «Start» while libvirt returns an error", "expected": "State does not change; a notification with «Show log» is shown." }
+      ],
+      "priority": "high",
+      "type": "negative",
+      "requirement_ref": "REQ-08",
+      "title_hash": "sha256:9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c1500000041"
+    },
+    {
+      "temp_id": "REQ-08-BND-01",
+      "title": "REQ-08: 5 s state-change threshold and eligible-state matrix",
+      "precondition": "Stopped VMs; controllable transition timing.",
+      "steps": [
+        { "step": "Complete the transition at 4.9 s (just-inside)", "expected": "Within the ≤ 5 s limit — passes." },
+        { "step": "Complete the transition at exactly 5.0 s (limit)", "expected": "Within the ≤ 5 s limit — passes." },
+        { "step": "Complete the transition at 5.1 s (just-outside)", "expected": "Exceeds the 5 s limit — fails." }
+      ],
+      "priority": "normal",
+      "type": "boundary",
+      "requirement_ref": "REQ-08",
+      "title_hash": "sha256:9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c1500000042",
+      "comment": "F-001 (open, major): tree state refresh depends on polling (REQ-13); observing the state within 5 s assumes the forced/refresh path of REQ-04."
+    },
+    {
+      "temp_id": "REQ-09-POS-01",
+      "title": "REQ-09: Shutdown sends an ACPI completion request",
+      "precondition": "VM in running state.",
+      "steps": [
+        { "step": "Invoke «Shutdown»", "expected": "An ACPI shutdown request is sent to the VM." }
+      ],
+      "priority": "high",
+      "type": "positive",
+      "requirement_ref": "REQ-09",
+      "title_hash": "sha256:9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c1500000043"
+    },
+    {
+      "temp_id": "REQ-09-POS-02",
+      "title": "REQ-09: The timeout dialog appears after the configured timeout",
+      "precondition": "VM running; workspace timeout set to a value in 5-300 s.",
+      "steps": [
+        { "step": "Invoke «Shutdown» and wait for the timeout", "expected": "Dialog with «Force stop» / «Wait more» / «Cancel» appears after the timeout elapses." }
+      ],
+      "priority": "important",
+      "type": "positive",
+      "requirement_ref": "REQ-09",
+      "title_hash": "sha256:9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c1500000044"
+    },
+    {
+      "temp_id": "REQ-09-POS-03",
+      "title": "REQ-09: «Wait more» restarts the timer with the same value",
+      "precondition": "Timeout dialog is shown.",
+      "steps": [
+        { "step": "Press «Wait more»", "expected": "Timer restarts with the same configured value and the dialog closes." }
+      ],
+      "priority": "normal",
+      "type": "positive",
+      "requirement_ref": "REQ-09",
+      "title_hash": "sha256:9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c1500000045"
+    },
+    {
+      "temp_id": "REQ-09-POS-04",
+      "title": "REQ-09: «Force stop» invokes REQ-10",
+      "precondition": "Timeout dialog is shown.",
+      "steps": [
+        { "step": "Press «Force stop»", "expected": "The REQ-10 Force stop flow is invoked (with its confirmation)." }
+      ],
+      "priority": "important",
+      "type": "positive",
+      "requirement_ref": "REQ-09",
+      "title_hash": "sha256:9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c1500000046"
+    },
+    {
+      "temp_id": "REQ-09-NEG-01",
+      "title": "REQ-09: «Cancel» closes the dialog and leaves the VM state unchanged",
+      "precondition": "Timeout dialog is shown.",
+      "steps": [
+        { "step": "Press «Cancel»", "expected": "Dialog closes; VM state does not change." }
+      ],
+      "priority": "normal",
+      "type": "negative",
+      "requirement_ref": "REQ-09",
+      "title_hash": "sha256:9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c1500000047"
+    },
+    {
+      "temp_id": "REQ-09-NEG-02",
+      "title": "REQ-09: A timeout outside 5-300 is not a valid value",
+      "precondition": "Ability to edit the workspace timeout setting.",
+      "steps": [
+        { "step": "Set the timeout to 4", "expected": "Invalid — below the 5 s minimum." },
+        { "step": "Set the timeout to 301", "expected": "Invalid — above the 300 s maximum." }
+      ],
+      "priority": "normal",
+      "type": "negative",
+      "requirement_ref": "REQ-09",
+      "title_hash": "sha256:9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c1500000048"
+    },
+    {
+      "temp_id": "REQ-09-BND-01",
+      "title": "REQ-09: Timeout boundaries 5/300 accepted, 4/301 rejected, default 30",
+      "precondition": "Ability to edit the workspace timeout setting.",
+      "steps": [
+        { "step": "Set the timeout to 4 (min-1)", "expected": "Rejected." },
+        { "step": "Set the timeout to 5 (min)", "expected": "Accepted." },
+        { "step": "Set the timeout to 6 (min+1)", "expected": "Accepted." },
+        { "step": "Set the timeout to 299 (max-1)", "expected": "Accepted." },
+        { "step": "Set the timeout to 300 (max)", "expected": "Accepted." },
+        { "step": "Set the timeout to 301 (max+1)", "expected": "Rejected." },
+        { "step": "Leave the setting at default", "expected": "Default value is 30 s." }
+      ],
+      "priority": "normal",
+      "type": "boundary",
+      "requirement_ref": "REQ-09",
+      "title_hash": "sha256:9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c1500000049",
+      "comment": "F-005 (open, major): REQ-09 has no AC that a successful graceful shutdown transitions the VM to stopped, so no such case is invented here."
+    },
+    {
+      "temp_id": "REQ-10-POS-01",
+      "title": "REQ-10: Force stop confirmation shows name and warning, then VM becomes stopped within 3 s",
+      "precondition": "VM running; qemuManager.confirmForceStop = true (default).",
+      "steps": [
+        { "step": "Invoke «Force stop»", "expected": "Confirmation is shown containing the VM name and the warning «Unsaved data may be lost»." },
+        { "step": "Confirm the dialog", "expected": "VM process is terminated immediately; state becomes stopped within 3 s." }
+      ],
+      "priority": "critical",
+      "type": "positive",
+      "requirement_ref": "REQ-10",
+      "title_hash": "sha256:9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c150000004a",
+      "comment": "F-001 (open, major): the 3 s state reflection conflicts with the default 5 s polling interval; assert the literal AC of forced refresh."
+    },
+    {
+      "temp_id": "REQ-10-POS-02",
+      "title": "REQ-10: Confirmation can be disabled via qemuManager.confirmForceStop=false",
+      "precondition": "VM running; setting qemuManager.confirmForceStop = false.",
+      "steps": [
+        { "step": "Invoke «Force stop»", "expected": "No confirmation dialog; force stop executes immediately." }
+      ],
+      "priority": "important",
+      "type": "positive",
+      "requirement_ref": "REQ-10",
+      "title_hash": "sha256:9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c150000004b"
+    },
+    {
+      "temp_id": "REQ-10-NEG-01",
+      "title": "REQ-10: Cancelling the force-stop confirmation leaves the state unchanged",
+      "precondition": "VM running; confirmation enabled.",
+      "steps": [
+        { "step": "Invoke «Force stop» and press Cancel", "expected": "VM state does not change." }
+      ],
+      "priority": "normal",
+      "type": "negative",
+      "requirement_ref": "REQ-10",
+      "title_hash": "sha256:9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c150000004c"
+    },
+    {
+      "temp_id": "REQ-10-BND-01",
+      "title": "REQ-10: 3 s completion threshold and confirmForceStop boolean boundary",
+      "precondition": "VM running.",
+      "steps": [
+        { "step": "Force stop completes at exactly 3.0 s (limit)", "expected": "Within the ≤ 3 s limit — passes." },
+        { "step": "Force stop completes at 3.1 s (just-outside)", "expected": "Exceeds the 3 s limit — fails." },
+        { "step": "Set qemuManager.confirmForceStop = true", "expected": "Confirmation dialog is shown." },
+        { "step": "Set qemuManager.confirmForceStop = false", "expected": "Confirmation is skipped." }
+      ],
+      "priority": "important",
+      "type": "boundary",
+      "requirement_ref": "REQ-10",
+      "title_hash": "sha256:9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c150000004d"
+    },
+    {
+      "temp_id": "REQ-11-POS-01",
+      "title": "REQ-11: Pause a running VM reaches paused within 3 s",
+      "precondition": "VM in running state.",
+      "steps": [
+        { "step": "Invoke «Pause»", "expected": "State becomes paused within 3 s." }
+      ],
+      "priority": "important",
+      "type": "positive",
+      "requirement_ref": "REQ-11",
+      "title_hash": "sha256:9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c150000004e"
+    },
+    {
+      "temp_id": "REQ-11-POS-02",
+      "title": "REQ-11: Resume a paused VM reaches running within 3 s",
+      "precondition": "VM in paused state.",
+      "steps": [
+        { "step": "Invoke «Resume»", "expected": "State becomes running within 3 s." }
+      ],
+      "priority": "important",
+      "type": "positive",
+      "requirement_ref": "REQ-11",
+      "title_hash": "sha256:9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c150000004f"
+    },
+    {
+      "temp_id": "REQ-11-NEG-01",
+      "title": "REQ-11: Pause/Resume are disabled for ineligible states",
+      "precondition": "VMs in stopped, crashed, suspended, running states.",
+      "steps": [
+        { "step": "Check «Pause» for non-running states", "expected": "Disabled." },
+        { "step": "Check «Resume» for non-paused states", "expected": "Disabled." }
+      ],
+      "priority": "normal",
+      "type": "negative",
+      "requirement_ref": "REQ-11",
+      "title_hash": "sha256:9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c1500000050"
+    },
+    {
+      "temp_id": "REQ-11-NEG-02",
+      "title": "REQ-11: libvirt error on pause/resume leaves state unchanged and shows the error",
+      "precondition": "Running/paused VM; libvirt induced to fail.",
+      "steps": [
+        { "step": "Invoke Pause/Resume while libvirt returns an error", "expected": "State does not change and the error is shown." }
+      ],
+      "priority": "important",
+      "type": "negative",
+      "requirement_ref": "REQ-11",
+      "title_hash": "sha256:9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c1500000051"
+    },
+    {
+      "temp_id": "REQ-11-BND-01",
+      "title": "REQ-11: 3 s state-change threshold and eligibility matrix",
+      "precondition": "Running/paused VMs with controllable transition timing.",
+      "steps": [
+        { "step": "Pause completes at exactly 3.0 s (limit)", "expected": "Within ≤ 3 s — passes." },
+        { "step": "Resume completes at exactly 3.0 s (limit)", "expected": "Within ≤ 3 s — passes." },
+        { "step": "Pause completes at 3.1 s (just-outside)", "expected": "Exceeds the 3 s limit — fails." },
+        { "step": "Check command availability across all states", "expected": "Pause enabled only for running; Resume enabled only for paused." }
+      ],
+      "priority": "normal",
+      "type": "boundary",
+      "requirement_ref": "REQ-11",
+      "title_hash": "sha256:9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c1500000052",
+      "comment": "F-001 (open, major): the 3 s reflection assumes a forced refresh rather than the default polling interval."
+    },
+    {
+      "temp_id": "REQ-12-POS-01",
+      "title": "REQ-12: Default user-nat and a definable IP is shown in the tree",
+      "precondition": "Valid connection; libvirt returns a determinable IP for the VM.",
+      "steps": [
+        { "step": "Create a VM leaving networkType at default", "expected": "networkType defaults to user-nat." },
+        { "step": "View the tree", "expected": "The VM IP is displayed in the tree." }
+      ],
+      "priority": "important",
+      "type": "positive",
+      "requirement_ref": "REQ-12",
+      "title_hash": "sha256:9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c1500000053",
+      "comment": "F-002 (open, major): REQ-03 does not list IP among the tree fields, so the IP render location conflicts; the case asserts only the REQ-12 literal."
+    },
+    {
+      "temp_id": "REQ-12-POS-02",
+      "title": "REQ-12: Bridged with a selected interface creates the VM with that bridge",
+      "precondition": "Libvirt returns at least one bridge; VM creation form open.",
+      "steps": [
+        { "step": "Select networkType bridged and choose an interface from the list", "expected": "VM is created with the specified bridge." }
+      ],
+      "priority": "important",
+      "type": "positive",
+      "requirement_ref": "REQ-12",
+      "title_hash": "sha256:9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c1500000054"
+    },
+    {
+      "temp_id": "REQ-12-NEG-01",
+      "title": "REQ-12: Bridged is disabled with tooltip when no bridges are available",
+      "precondition": "Libvirt returns an empty bridge list.",
+      "steps": [
+        { "step": "Open the network field", "expected": "The bridged option is disabled with the tooltip «No bridges available on host»." }
+      ],
+      "priority": "normal",
+      "type": "negative",
+      "requirement_ref": "REQ-12",
+      "title_hash": "sha256:9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c1500000055"
+    },
+    {
+      "temp_id": "REQ-12-NEG-02",
+      "title": "REQ-12: user-nat with an undefinable IP shows unknown without affecting rendering",
+      "precondition": "Valid user-nat VM whose IP cannot be determined.",
+      "steps": [
+        { "step": "View the tree for the VM with an undefinable IP", "expected": "IP shows as unknown; tree rendering is unaffected." }
+      ],
+      "priority": "normal",
+      "type": "negative",
+      "requirement_ref": "REQ-12",
+      "title_hash": "sha256:9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c1500000056"
+    },
+    {
+      "temp_id": "REQ-12-BND-01",
+      "title": "REQ-12: Bridge list count boundary (0 vs 1 interface)",
+      "precondition": "Ability to vary the libvirt bridge list between empty and one entry.",
+      "steps": [
+        { "step": "Provide an empty bridge list", "expected": "bridged is disabled with a tooltip." },
+        { "step": "Provide exactly 1 bridge", "expected": "bridged is enabled and the single bridge is selectable." }
+      ],
+      "priority": "normal",
+      "type": "boundary",
+      "requirement_ref": "REQ-12",
+      "title_hash": "sha256:9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c1500000057"
+    },
+    {
+      "temp_id": "REQ-13-POS-01",
+      "title": "REQ-13: When libvirt events are supported, polling is not performed",
+      "precondition": "Libvirt reports event support.",
+      "steps": [
+        { "step": "Activate and let the extension set up state updates", "expected": "Extension subscribes to events instead of polling; no polling is observed in the log." }
+      ],
+      "priority": "normal",
+      "type": "positive",
+      "requirement_ref": "REQ-13",
+      "title_hash": "sha256:9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c1500000058"
+    },
+    {
+      "temp_id": "REQ-13-POS-02",
+      "title": "REQ-13: The «Refresh» button is always available",
+      "precondition": "Extension active in any poll/event mode.",
+      "steps": [
+        { "step": "Locate the «Refresh» control in the tree", "expected": "«Refresh» is present and triggers a manual refresh." }
+      ],
+      "priority": "low",
+      "type": "positive",
+      "requirement_ref": "REQ-13",
+      "title_hash": "sha256:9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c1500000059"
+    },
+    {
+      "temp_id": "REQ-13-POS-03",
+      "title": "REQ-13: Refresh interval is taken from the workspace setting (default 5 s)",
+      "precondition": "Interval setting at default; polling mode active.",
+      "steps": [
+        { "step": "Observe the polling cadence with the default setting", "expected": "State refreshes every 5 s." }
+      ],
+      "priority": "normal",
+      "type": "positive",
+      "requirement_ref": "REQ-13",
+      "title_hash": "sha256:9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c150000005a"
+    },
+    {
+      "temp_id": "REQ-13-NEG-01",
+      "title": "REQ-13: Event subscription failure falls back to polling with a log warning",
+      "precondition": "Libvirt event subscription is induced to fail.",
+      "steps": [
+        { "step": "Activate while event subscription fails", "expected": "Polling continues and a warning is written to the log; no user-facing error is shown." }
+      ],
+      "priority": "important",
+      "type": "negative",
+      "requirement_ref": "REQ-13",
+      "title_hash": "sha256:9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c150000005b"
+    },
+    {
+      "temp_id": "REQ-13-BND-01",
+      "title": "REQ-13: Interval boundaries 0/1/2/59/60/61, default 5",
+      "precondition": "Ability to edit the interval workspace setting.",
+      "steps": [
+        { "step": "Set the interval to 0 (manual-only special value)", "expected": "Only manual refresh; no auto-polling." },
+        { "step": "Set the interval to 1 (min)", "expected": "Accepted." },
+        { "step": "Set the interval to 2 (min+1)", "expected": "Accepted." },
+        { "step": "Set the interval to 59 (max-1)", "expected": "Accepted." },
+        { "step": "Set the interval to 60 (max)", "expected": "Accepted." },
+        { "step": "Set the interval to 61 (max+1)", "expected": "Rejected with an inline error in the setting." }
+      ],
+      "priority": "normal",
+      "type": "boundary",
+      "requirement_ref": "REQ-13",
+      "title_hash": "sha256:9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c150000005c",
+      "comment": "F-006 (open, major): REQ-13 does not state integer-only, nor the mechanism for the inline error; the case asserts the literal 0 / 1-60 / 61 behavior."
+    },
+    {
+      "temp_id": "REQ-14-POS-01",
+      "title": "REQ-14: Mapped libvirt error shows a friendly notification without a raw stack",
+      "precondition": "Libvirt returns one of the minimum-coverage errors.",
+      "steps": [
+        { "step": "Trigger a mapped libvirt error", "expected": "Notification shows the friendly mapped message without a raw stack trace, with «Show log» and «Dismiss» actions." }
+      ],
+      "priority": "important",
+      "type": "positive",
+      "requirement_ref": "REQ-14",
+      "title_hash": "sha256:9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c150000005d"
+    },
+    {
+      "temp_id": "REQ-14-POS-02",
+      "title": "REQ-14: «Show log» opens the Output Channel and focuses the last entry",
+      "precondition": "An error notification with «Show log» is displayed.",
+      "steps": [
+        { "step": "Click «Show log»", "expected": "Output Channel opens and the last entry is focused." }
+      ],
+      "priority": "normal",
+      "type": "positive",
+      "requirement_ref": "REQ-14",
+      "title_hash": "sha256:9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c150000005e"
+    },
+    {
+      "temp_id": "REQ-14-NEG-01",
+      "title": "REQ-14: Unmapped error yields «Unexpected error: {code}» with «Show log»",
+      "precondition": "Libvirt returns an error not present in the mapping table.",
+      "steps": [
+        { "step": "Trigger an unmapped error", "expected": "Notification «Unexpected error: {code}» with a «Show log» action is shown." }
+      ],
+      "priority": "normal",
+      "type": "negative",
+      "requirement_ref": "REQ-14",
+      "title_hash": "sha256:9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c150000005f"
+    },
+    {
+      "temp_id": "REQ-15-POS-01",
+      "title": "REQ-15: Each command is logged at info/debug in the required line format",
+      "precondition": "Output Channel «QEMU Manager»; log level default info.",
+      "steps": [
+        { "step": "Execute a command", "expected": "A log line is written as YYYY-MM-DDTHH:MM:SSZ [LEVEL] [conn:vm] message at level info or debug." }
+      ],
+      "priority": "normal",
+      "type": "positive",
+      "requirement_ref": "REQ-15",
+      "title_hash": "sha256:9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c1500000060"
+    },
+    {
+      "temp_id": "REQ-15-POS-02",
+      "title": "REQ-15: Error responses are logged at error level",
+      "precondition": "Log level default info.",
+      "steps": [
+        { "step": "Trigger an erroneous response", "expected": "A log entry with level error is written." }
+      ],
+      "priority": "normal",
+      "type": "positive",
+      "requirement_ref": "REQ-15",
+      "title_hash": "sha256:9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c1500000061"
+    },
+    {
+      "temp_id": "REQ-15-POS-03",
+      "title": "REQ-15: Changing the log level applies immediately",
+      "precondition": "Output Channel open.",
+      "steps": [
+        { "step": "Change the log level setting (error/info/debug)", "expected": "New level is applied immediately to subsequent entries." }
+      ],
+      "priority": "normal",
+      "type": "positive",
+      "requirement_ref": "REQ-15",
+      "title_hash": "sha256:9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c1500000062"
+    },
+    {
+      "temp_id": "REQ-15-NEG-01",
+      "title": "REQ-15: Non-VM / connection-level entry and the [conn:vm] segment",
+      "precondition": "Log level such that activation/settings entries are recorded.",
+      "steps": [
+        { "step": "Trigger an extension-level entry with no associated VM", "expected": "Format is asserted literally as ... [LEVEL] [conn:vm] message; the requirement does not define what conn/vm render for non-VM entries." }
+      ],
+      "priority": "low",
+      "type": "negative",
+      "requirement_ref": "REQ-15",
+      "title_hash": "sha256:9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c1500000063"
+    },
+    {
+      "temp_id": "REQ-15-BND-01",
+      "title": "REQ-15: Ring buffer boundary at 10 000 lines",
+      "precondition": "Ability to generate more than 10 000 log lines.",
+      "steps": [
+        { "step": "Generate exactly 10 000 lines (max)", "expected": "All 10 000 lines are retained." },
+        { "step": "Generate the 10 001st line (max+1)", "expected": "Oldest line is dropped; the buffer stays at 10 000 lines." }
+      ],
+      "priority": "normal",
+      "type": "boundary",
+      "requirement_ref": "REQ-15",
+      "title_hash": "sha256:9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c1500000064"
+    },
+    {
+      "temp_id": "REQ-16-POS-01",
+      "title": "REQ-16: Valid form enables submit and passes validation",
+      "precondition": "Create-VM form open; all fields valid per REQ-04.",
+      "steps": [
+        { "step": "Fill all fields with valid values", "expected": "Validation passes with no inline errors; «Create» is enabled." }
+      ],
+      "priority": "important",
+      "type": "positive",
+      "requirement_ref": "REQ-16",
+      "title_hash": "sha256:9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c1500000065"
+    },
+    {
+      "temp_id": "REQ-16-NEG-01",
+      "title": "REQ-16: Empty or missing required field shows inline error and disables submit",
+      "precondition": "Create-VM form open.",
+      "steps": [
+        { "step": "Leave a required field empty", "expected": "Inline error next to the field; «Create» is disabled." }
+      ],
+      "priority": "important",
+      "type": "negative",
+      "requirement_ref": "REQ-16",
+      "title_hash": "sha256:9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c1500000066"
+    },
+    {
+      "temp_id": "REQ-16-NEG-02",
+      "title": "REQ-16: Non-numeric value in a numeric field shows inline error and disables submit",
+      "precondition": "Create-VM form open.",
+      "steps": [
+        { "step": "Enter a non-numeric value in a numeric field, e.g. vcpu = two", "expected": "Inline error; «Create» is disabled." }
+      ],
+      "priority": "normal",
+      "type": "negative",
+      "requirement_ref": "REQ-16",
+      "title_hash": "sha256:9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c1500000067"
+    },
+    {
+      "temp_id": "REQ-16-NEG-03",
+      "title": "REQ-16: Out-of-range or non-multiple value shows inline error with the rule text",
+      "precondition": "Create-VM form open.",
+      "steps": [
+        { "step": "Enter ramMb = 300", "expected": "Inline error reflecting the violated rule; «Create» is disabled." }
+      ],
+      "priority": "normal",
+      "type": "negative",
+      "requirement_ref": "REQ-16",
+      "title_hash": "sha256:9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c1500000068"
+    },
+    {
+      "temp_id": "REQ-16-NEG-04",
+      "title": "REQ-16: Text/length/invalid chars/duplicate name show inline error and disable submit",
+      "precondition": "Create-VM form open.",
+      "steps": [
+        { "step": "Enter an over-length name", "expected": "Inline error; «Create» is disabled." },
+        { "step": "Enter a name with invalid characters", "expected": "Inline error; «Create» is disabled." },
+        { "step": "Enter a duplicate name", "expected": "Inline error; «Create» is disabled." }
+      ],
+      "priority": "normal",
+      "type": "negative",
+      "requirement_ref": "REQ-16",
+      "title_hash": "sha256:9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c1500000069"
+    },
+    {
+      "temp_id": "REQ-16-NEG-05",
+      "title": "REQ-16: Invalid values are not sent to libvirt",
+      "precondition": "Create-VM form open; libvirt call observation enabled.",
+      "steps": [
+        { "step": "Attempt submit with an invalid field", "expected": "Submit is blocked and no request is sent to libvirt." }
+      ],
+      "priority": "important",
+      "type": "negative",
+      "requirement_ref": "REQ-16",
+      "title_hash": "sha256:9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c150000006a"
+    },
+    {
+      "temp_id": "REQ-16-NEG-06",
+      "title": "REQ-16: Server-side libvirt validation error is shown per REQ-14",
+      "precondition": "Create-VM form open; libvirt returns a validation error on submit.",
+      "steps": [
+        { "step": "Submit a form and let libvirt reject it", "expected": "Error is shown per REQ-14." }
+      ],
+      "priority": "important",
+      "type": "negative",
+      "requirement_ref": "REQ-16",
+      "title_hash": "sha256:9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c150000006b"
+    },
+    {
+      "temp_id": "REQ-16-BND-01",
+      "title": "REQ-16: Numeric field boundary validation (just-inside vs just-outside)",
+      "precondition": "Create-VM form open.",
+      "steps": [
+        { "step": "Enter vcpu 1 / 32 and 0 / 33", "expected": "Boundary behaviour per REQ-04." },
+        { "step": "Enter ramMb 256 / 262144 and 255 / 262145 and 300 (non-multiple)", "expected": "Boundary/multiple behaviour per REQ-04." },
+        { "step": "Configure disks 1 / 8 and 0 / 9", "expected": "Boundary behaviour per REQ-04." },
+        { "step": "Set disk size 1 / 2000 GB and 0 / 2001 GB", "expected": "Boundary behaviour per REQ-04." }
+      ],
+      "priority": "normal",
+      "type": "boundary",
+      "requirement_ref": "REQ-16",
+      "title_hash": "sha256:9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c150000006c"
+    },
+    {
+      "temp_id": "REQ-17-POS-01",
+      "title": "REQ-17: Default binding Ctrl+Shift+Q (Cmd+Shift+Q) runs Start for the selected VM",
+      "precondition": "A VM is selected in an eligible state (stopped/crashed).",
+      "steps": [
+        { "step": "Press Ctrl+Shift+Q (macOS Cmd+Shift+Q)", "expected": "The Start command executes for the selected VM." }
+      ],
+      "priority": "normal",
+      "type": "positive",
+      "requirement_ref": "REQ-17",
+      "title_hash": "sha256:9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c150000006d"
+    },
+    {
+      "temp_id": "REQ-17-POS-02",
+      "title": "REQ-17: User-defined binding via Keybindings JSON works",
+      "precondition": "A custom keybinding added via the standard Keybindings JSON.",
+      "steps": [
+        { "step": "Press the user-defined binding for Shutdown", "expected": "The Shutdown command executes for the selected eligible VM." }
+      ],
+      "priority": "normal",
+      "type": "positive",
+      "requirement_ref": "REQ-17",
+      "title_hash": "sha256:9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c150000006e"
+    },
+    {
+      "temp_id": "REQ-17-NEG-01",
+      "title": "REQ-17: Binding does not fire when the command is inapplicable to the state",
+      "precondition": "A VM is selected but its state makes the command inapplicable.",
+      "steps": [
+        { "step": "Press the default binding for an inapplicable state", "expected": "The binding does not fire and no state change occurs." }
+      ],
+      "priority": "normal",
+      "type": "negative",
+      "requirement_ref": "REQ-17",
+      "title_hash": "sha256:9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c150000006f"
+    },
+    {
+      "temp_id": "REQ-17-NEG-02",
+      "title": "REQ-17: Binding does not fire when no VM is selected",
+      "precondition": "No VM selected in the tree.",
+      "steps": [
+        { "step": "Press the default binding", "expected": "The command does not fire." }
+      ],
+      "priority": "normal",
+      "type": "negative",
+      "requirement_ref": "REQ-17",
+      "title_hash": "sha256:9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c1500000070"
+    },
+    {
+      "temp_id": "REQ-18-POS-01",
+      "title": "REQ-18: Extension installs and activates on Windows 10+, macOS 12+, Ubuntu 22.04+",
+      "precondition": "Clean instances of each supported OS.",
+      "steps": [
+        { "step": "Install and activate on Windows 10+", "expected": "Installs and activates." },
+        { "step": "Install and activate on macOS 12+", "expected": "Installs and activates." },
+        { "step": "Install and activate on Ubuntu 22.04+", "expected": "Installs and activates." }
+      ],
+      "priority": "high",
+      "type": "positive",
+      "requirement_ref": "REQ-18",
+      "title_hash": "sha256:9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c1500000071"
+    },
+    {
+      "temp_id": "REQ-18-POS-02",
+      "title": "REQ-18: Runtime detected when libvirt 8.0+ or QEMU 6.0+ QMP socket is present",
+      "precondition": "libvirt 8.0+ (or QEMU 6.0+ with QMP socket) reachable.",
+      "steps": [
+        { "step": "Activate with a supported runtime present", "expected": "Runtime is detected; no setup notification; the tree is functional." }
+      ],
+      "priority": "high",
+      "type": "positive",
+      "requirement_ref": "REQ-18",
+      "title_hash": "sha256:9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c1500000072"
+    },
+    {
+      "temp_id": "REQ-18-NEG-01",
+      "title": "REQ-18: No runtime shows the setup notification, degraded state and empty tree",
+      "precondition": "No libvirt/QEMU runtime available on the host.",
+      "steps": [
+        { "step": "Activate without a runtime", "expected": "Notification «QEMU Manager: libvirt/QEMU not detected» with «Show setup instructions»; extension enters degraded." },
+        { "step": "Inspect the tree and invoke a command", "expected": "Tree is empty; commands return a friendly error per REQ-14." }
+      ],
+      "priority": "important",
+      "type": "negative",
+      "requirement_ref": "REQ-18",
+      "title_hash": "sha256:9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c1500000073"
+    },
+    {
+      "temp_id": "REQ-18-NEG-02",
+      "title": "REQ-18: The degraded state does not crash or hang VS Code",
+      "precondition": "Extension in degraded state (missing runtime).",
+      "steps": [
+        { "step": "Interact with the extension while degraded", "expected": "VS Code does not crash or hang; the degraded state remains responsive." }
+      ],
+      "priority": "important",
+      "type": "negative",
+      "requirement_ref": "REQ-18",
+      "title_hash": "sha256:9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c1500000074"
+    },
+    {
+      "temp_id": "REQ-18-BND-01",
+      "title": "REQ-18: Runtime version thresholds (libvirt 8.0 / QEMU 6.0)",
+      "precondition": "Ability to present runtime versions around the thresholds.",
+      "steps": [
+        { "step": "Present libvirt 7.9 (min-1)", "expected": "Rejected (below minimum)." },
+        { "step": "Present libvirt 8.0 (min)", "expected": "Accepted (minimum)." },
+        { "step": "Present libvirt 8.1 (min+1)", "expected": "Accepted." },
+        { "step": "Present QEMU 5.x with QMP socket (min-1)", "expected": "Rejected (below minimum)." },
+        { "step": "Present QEMU 6.0 with QMP socket (min)", "expected": "Accepted (minimum)." }
+      ],
+      "priority": "normal",
+      "type": "boundary",
+      "requirement_ref": "REQ-18",
+      "title_hash": "sha256:9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c1500000075"
+    },
+    {
+      "temp_id": "REQ-19-POS-01",
+      "title": "REQ-19: Telemetry enabled emits a payload matching the defined schema",
+      "precondition": "Telemetry enabled; a VM action executed.",
+      "steps": [
+        { "step": "Enable telemetry and perform an action (e.g. vm.start)", "expected": "Payload contains action type, success/failure, error code (if any), duration_ms, extension version and OS family." }
+      ],
+      "priority": "important",
+      "type": "positive",
+      "requirement_ref": "REQ-19",
+      "title_hash": "sha256:9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c1500000076"
+    },
+    {
+      "temp_id": "REQ-19-POS-02",
+      "title": "REQ-19: Telemetry off by default makes no telemetry network calls",
+      "precondition": "Fresh install; telemetry untouched (default off).",
+      "steps": [
+        { "step": "Use the extension without enabling telemetry", "expected": "No telemetry network calls are made." }
+      ],
+      "priority": "important",
+      "type": "positive",
+      "requirement_ref": "REQ-19",
+      "title_hash": "sha256:9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c1500000077"
+    },
+    {
+      "temp_id": "REQ-19-NEG-01",
+      "title": "REQ-19: Declining the first-run prompt keeps the setting false",
+      "precondition": "First-run telemetry prompt shown.",
+      "steps": [
+        { "step": "Decline the prompt", "expected": "Setting remains false; telemetry stays off." }
+      ],
+      "priority": "normal",
+      "type": "negative",
+      "requirement_ref": "REQ-19",
+      "title_hash": "sha256:9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c1500000078"
+    },
+    {
+      "temp_id": "REQ-19-NEG-02",
+      "title": "REQ-19: Payload excludes all sensitive fields",
+      "precondition": "Telemetry enabled; actions involving VMs/connections executed.",
+      "steps": [
+        { "step": "Inspect the payload for sensitive data", "expected": "Payload contains no VM names, file paths, IP addresses, connection URIs/users or hostname." }
+      ],
+      "priority": "critical",
+      "type": "negative",
+      "requirement_ref": "REQ-19",
+      "title_hash": "sha256:9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c1500000079"
+    },
+    {
+      "temp_id": "REQ-19-BND-01",
+      "title": "REQ-19: Re-prompt no earlier than 30 days after decline",
+      "precondition": "First-run prompt declined; controllable elapsed time.",
+      "steps": [
+        { "step": "Advance 29 days after the decline (min-1)", "expected": "No re-prompt is shown." },
+        { "step": "Advance to exactly 30 days after the decline (min)", "expected": "Re-prompt is permitted." },
+        { "step": "Advance to 31 days after the decline (min+1)", "expected": "Re-prompt is permitted." }
+      ],
+      "priority": "normal",
+      "type": "boundary",
+      "requirement_ref": "REQ-19",
+      "title_hash": "sha256:9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c150000007a"
+    },
+    {
+      "temp_id": "REQ-20-POS-01",
+      "title": "REQ-20: Export produces valid JSON schema qemuManager.vmConfig v1 with all fields",
+      "precondition": "A VM defined in a connection.",
+      "steps": [
+        { "step": "Export the VM configuration", "expected": "JSON with schema qemuManager.vmConfig version 1 containing name, vcpu, ramMb, disks[path,sizeGb,format], network(type,bridge for bridged) and iso." }
+      ],
+      "priority": "important",
+      "type": "positive",
+      "requirement_ref": "REQ-20",
+      "title_hash": "sha256:9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c150000007b"
+    },
+    {
+      "temp_id": "REQ-20-POS-02",
+      "title": "REQ-20: Import a valid config without conflict creates the VM",
+      "precondition": "Valid v1 config; no VM with that name in the target connection.",
+      "steps": [
+        { "step": "Import the valid config", "expected": "VM is created in the target connection." }
+      ],
+      "priority": "important",
+      "type": "positive",
+      "requirement_ref": "REQ-20",
+      "title_hash": "sha256:9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c150000007c"
+    },
+    {
+      "temp_id": "REQ-20-POS-03",
+      "title": "REQ-20: Import a valid config with a name conflict shows the overwrite confirmation",
+      "precondition": "Valid v1 config; a VM with the same name already exists in the target connection.",
+      "steps": [
+        { "step": "Import the conflicting config", "expected": "Confirmation «VM '{name}' already exists. Overwrite?» is shown with default Cancel." }
+      ],
+      "priority": "important",
+      "type": "positive",
+      "requirement_ref": "REQ-20",
+      "title_hash": "sha256:9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c150000007d"
+    },
+    {
+      "temp_id": "REQ-20-NEG-01",
+      "title": "REQ-20: Import an unsupported schema version errors and aborts",
+      "precondition": "Config with a schema version other than 1.",
+      "steps": [
+        { "step": "Import the unsupported-version config", "expected": "Error «Unsupported config version: {version}» and import is aborted." }
+      ],
+      "priority": "normal",
+      "type": "negative",
+      "requirement_ref": "REQ-20",
+      "title_hash": "sha256:9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c150000007e"
+    },
+    {
+      "temp_id": "REQ-20-NEG-02",
+      "title": "REQ-20: Import with invalid or missing fields shows a per-line report and aborts",
+      "precondition": "Config missing a required field or violating REQ-04 rules.",
+      "steps": [
+        { "step": "Import the invalid config", "expected": "Report with per-line messages is shown; import is aborted with no partial changes." }
+      ],
+      "priority": "important",
+      "type": "negative",
+      "requirement_ref": "REQ-20",
+      "title_hash": "sha256:9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c150000007f"
+    },
+    {
+      "temp_id": "REQ-20-NEG-03",
+      "title": "REQ-20: Cancelling the overwrite confirmation makes no changes",
+      "precondition": "Overwrite confirmation displayed (default Cancel).",
+      "steps": [
+        { "step": "Press Cancel on the overwrite confirmation", "expected": "No changes are made; the existing VM is untouched." }
+      ],
+      "priority": "normal",
+      "type": "negative",
+      "requirement_ref": "REQ-20",
+      "title_hash": "sha256:9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c1500000080"
+    },
+    {
+      "temp_id": "REQ-20-BND-01",
+      "title": "REQ-20: Schema version boundary - 1 accepted, 0 and 2 rejected",
+      "precondition": "Configs with schema versions 1, 0 and 2.",
+      "steps": [
+        { "step": "Import a version-0 config (min-1)", "expected": "Rejected with «Unsupported config version: 0»." },
+        { "step": "Import a version-1 config (accepted value)", "expected": "Accepted." },
+        { "step": "Import a version-2 config (max+1)", "expected": "Rejected with «Unsupported config version: 2»." }
+      ],
+      "priority": "normal",
+      "type": "boundary",
+      "requirement_ref": "REQ-20",
+      "title_hash": "sha256:9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c1500000081"
+    },
+    {
+      "temp_id": "REQ-21-POS-01",
+      "title": "REQ-21: Suspend a running VM reaches suspended within 3 s",
+      "precondition": "VM in running state; runtime supports suspend (VIR_DOMAIN_PMSUSPENDED).",
+      "steps": [
+        { "step": "Invoke «Suspend»", "expected": "State becomes suspended within 3 s." }
+      ],
+      "priority": "important",
+      "type": "positive",
+      "requirement_ref": "REQ-21",
+      "title_hash": "sha256:9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c1500000082"
+    },
+    {
+      "temp_id": "REQ-21-POS-02",
+      "title": "REQ-21: Resume a suspended VM reaches running within 3 s",
+      "precondition": "VM in suspended state.",
+      "steps": [
+        { "step": "Invoke «Resume»", "expected": "State becomes running within 3 s." }
+      ],
+      "priority": "important",
+      "type": "positive",
+      "requirement_ref": "REQ-21",
+      "title_hash": "sha256:9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c1500000083"
+    },
+    {
+      "temp_id": "REQ-21-NEG-01",
+      "title": "REQ-21: Suspend/Resume are disabled for ineligible states",
+      "precondition": "VMs in stopped, paused, crashed and running states.",
+      "steps": [
+        { "step": "Check «Suspend» for non-running states", "expected": "Disabled." },
+        { "step": "Check «Resume» for non-suspended states", "expected": "Disabled." }
+      ],
+      "priority": "normal",
+      "type": "negative",
+      "requirement_ref": "REQ-21",
+      "title_hash": "sha256:9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c1500000084"
+    },
+    {
+      "temp_id": "REQ-21-NEG-02",
+      "title": "REQ-21: libvirt error on suspend/resume leaves the state unchanged and shows the error",
+      "precondition": "Running/suspended VM; libvirt induced to fail.",
+      "steps": [
+        { "step": "Invoke Suspend/Resume while libvirt returns an error", "expected": "State does not change and the error is shown." }
+      ],
+      "priority": "important",
+      "type": "negative",
+      "requirement_ref": "REQ-21",
+      "title_hash": "sha256:9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c1500000085",
+      "comment": "F-004 (open, major): REQ-21 has no QMP-only branch, so libvirt-absent behavior is not asserted."
+    },
+    {
+      "temp_id": "REQ-21-BND-01",
+      "title": "REQ-21: 3 s state-change threshold and eligibility matrix",
+      "precondition": "Running/suspended VMs with controllable transition timing.",
+      "steps": [
+        { "step": "Suspend completes at exactly 3.0 s (limit)", "expected": "Within ≤ 3 s — passes." },
+        { "step": "Resume completes at exactly 3.0 s (limit)", "expected": "Within ≤ 3 s — passes." },
+        { "step": "Suspend completes at 3.1 s (just-outside)", "expected": "Exceeds the 3 s limit — fails." },
+        { "step": "Check command availability across all states", "expected": "Suspend enabled only for running; Resume enabled only for suspended." }
+      ],
+      "priority": "normal",
+      "type": "boundary",
+      "requirement_ref": "REQ-21",
+      "title_hash": "sha256:9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c1500000086"
+    },
+    {
+      "temp_id": "REQ-22-POS-01",
+      "title": "REQ-22: An unexpected VM crash is reflected as the crashed state in the tree",
+      "precondition": "VM running; its QEMU process is terminated unexpectedly.",
+      "steps": [
+        { "step": "Terminate the VM process unexpectedly", "expected": "VM state in the tree becomes crashed on the next state update." }
+      ],
+      "priority": "high",
+      "type": "positive",
+      "requirement_ref": "REQ-22",
+      "title_hash": "sha256:9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c1500000087"
+    },
+    {
+      "temp_id": "REQ-22-POS-02",
+      "title": "REQ-22: A crashed VM can be recovered via Start",
+      "precondition": "VM in crashed state.",
+      "steps": [
+        { "step": "Invoke «Start» for the crashed VM", "expected": "State becomes running within 5 s per REQ-08." }
+      ],
+      "priority": "high",
+      "type": "positive",
+      "requirement_ref": "REQ-22",
+      "title_hash": "sha256:9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c1500000088"
+    },
+    {
+      "temp_id": "REQ-22-NEG-01",
+      "title": "REQ-22: A crash is surfaced even when event subscription is unavailable (polling fallback)",
+      "precondition": "Event subscription unsupported (REQ-13 fallback active); VM running.",
+      "steps": [
+        { "step": "Terminate the VM process unexpectedly while polling fallback is active", "expected": "The crashed state is still reflected in the tree via the next poll." }
+      ],
+      "priority": "normal",
+      "type": "negative",
+      "requirement_ref": "REQ-22",
+      "title_hash": "sha256:9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c1500000089"
+    }
+  ],
+  "coverage_summary": [
+    { "requirement_ref": "REQ-01", "applicable_types": ["positive", "negative", "boundary"], "na_types": [] },
+    { "requirement_ref": "REQ-02", "applicable_types": ["positive", "negative", "boundary"], "na_types": [] },
+    { "requirement_ref": "REQ-03", "applicable_types": ["positive", "negative", "boundary"], "na_types": [] },
+    { "requirement_ref": "REQ-04", "applicable_types": ["positive", "negative", "boundary"], "na_types": [] },
+    { "requirement_ref": "REQ-05", "applicable_types": ["positive", "negative", "boundary"], "na_types": [] },
+    {
+      "requirement_ref": "REQ-06",
+      "applicable_types": ["positive", "negative"],
+      "na_types": [
+        { "type": "boundary", "reason": "Clone defines no numeric/range/limit condition of its own; the name rules it inherits from REQ-04 are boundary-tested under REQ-04." }
+      ]
+    },
+    {
+      "requirement_ref": "REQ-07",
+      "applicable_types": ["positive", "negative"],
+      "na_types": [
+        { "type": "boundary", "reason": "Delete has no numeric/range/limit condition; only state eligibility and confirmation options apply." }
+      ]
+    },
+    { "requirement_ref": "REQ-08", "applicable_types": ["positive", "negative", "boundary"], "na_types": [] },
+    { "requirement_ref": "REQ-09", "applicable_types": ["positive", "negative", "boundary"], "na_types": [] },
+    { "requirement_ref": "REQ-10", "applicable_types": ["positive", "negative", "boundary"], "na_types": [] },
+    { "requirement_ref": "REQ-11", "applicable_types": ["positive", "negative", "boundary"], "na_types": [] },
+    { "requirement_ref": "REQ-12", "applicable_types": ["positive", "negative", "boundary"], "na_types": [] },
+    { "requirement_ref": "REQ-13", "applicable_types": ["positive", "negative", "boundary"], "na_types": [] },
+    {
+      "requirement_ref": "REQ-14",
+      "applicable_types": ["positive", "negative"],
+      "na_types": [
+        { "type": "boundary", "reason": "Error handling has no numeric/range/limit condition; the mapping-table content is absent, so message-specific boundaries cannot be derived." }
+      ]
+    },
+    { "requirement_ref": "REQ-15", "applicable_types": ["positive", "negative", "boundary"], "na_types": [] },
+    { "requirement_ref": "REQ-16", "applicable_types": ["positive", "negative", "boundary"], "na_types": [] },
+    {
+      "requirement_ref": "REQ-17",
+      "applicable_types": ["positive", "negative"],
+      "na_types": [
+        { "type": "boundary", "reason": "Keybindings have no numeric/range/limit condition; conflict handling is delegated to VS Code." }
+      ]
+    },
+    { "requirement_ref": "REQ-18", "applicable_types": ["positive", "negative", "boundary"], "na_types": [] },
+    { "requirement_ref": "REQ-19", "applicable_types": ["positive", "negative", "boundary"], "na_types": [] },
+    { "requirement_ref": "REQ-20", "applicable_types": ["positive", "negative", "boundary"], "na_types": [] },
+    { "requirement_ref": "REQ-21", "applicable_types": ["positive", "negative", "boundary"], "na_types": [] },
+    {
+      "requirement_ref": "REQ-22",
+      "applicable_types": ["positive", "negative"],
+      "na_types": [
+        { "type": "boundary", "reason": "Crash handling has no numeric/range/limit condition; it describes a discrete state transition, not a range." }
+      ]
+    }
+  ],
+  "status": "completed"
+}

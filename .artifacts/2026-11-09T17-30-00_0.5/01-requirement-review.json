@@ -1,0 +1,84 @@
+{
+  "artifact_id": "2026-11-09T17-00-00:01-requirement-review",
+  "run_id": "2026-11-09T17-00-00",
+  "requirement_version": "0.5",
+  "requirement_status": "ready_for_review",
+  "confluence_page_id": "2228226",
+  "timestamp": "2026-11-09T17:05:00Z",
+  "findings": [
+    {
+      "id": "F-001",
+      "category": "contradiction",
+      "severity": "major",
+      "requirement_refs": ["REQ-04", "REQ-10", "REQ-11", "REQ-13"],
+      "evidence": "REQ-13: «Интервал обновления — workspace setting: 0 (только ручное обновление) или 1–60 секунд; по умолчанию 5». REQ-10 AC: «после force stop состояние становится stopped в течение 3 с». REQ-11 AC: «running + Pause → состояние paused в течение 3 с». Форсированное обновление дерева вне polling явно оговорено только в REQ-04: «принудительное обновление дерева выполняется независимо от интервала polling REQ-13».",
+      "impact": "При дефолтном интервале polling 5 с дерево отражает смену состояния позже 3 с, поэтому тайминговые AC REQ-10/REQ-11 невыполнимы без неоговорённого форсированного refresh; тесты на 3 с противоречат REQ-13 и недетерминированы.",
+      "recommendation": "Либо задать форсированный refresh состояния для REQ-08/REQ-10/REQ-11 (как в REQ-04), либо согласовать значения таймингов с интервалом polling REQ-13."
+    },
+    {
+      "id": "F-002",
+      "category": "contradiction",
+      "severity": "major",
+      "requirement_refs": ["REQ-03", "REQ-12"],
+      "evidence": "REQ-03: «Для каждой VM: имя, состояние (running / stopped / paused / suspended / crashed), vCPU, RAM в МБ» — IP в перечне отображаемых полей отсутствует. REQ-12 AC: «user-nat с определимым IP → IP отображается в дереве в течение 2 с».",
+      "impact": "Состав отображаемых полей дерева противоречив: тест на поля REQ-03 и тест на IP REQ-12 несовместимы; неясно, является ли IP обязательным полем дерева и где он рендерится.",
+      "recommendation": "Добавить IP в перечень полей REQ-03 (и в её AC) либо убрать требование отображения IP из REQ-12 и перенести его в отдельную UI-спеку."
+    },
+    {
+      "id": "F-003",
+      "category": "ambiguity",
+      "severity": "major",
+      "requirement_refs": ["REQ-04", "REQ-16"],
+      "evidence": "REQ-04: диски — «абсолютный путь на гипервизоре»; валидация: «серверная (libvirt) — существование родительской директории диска и ISO-файла; доступность storage pool; проверяется при отправке запроса в libvirt». Поле выбора storage pool в форме REQ-04/REQ-16 отсутствует.",
+      "impact": "Невозможно детерминированно построить AC «недоступный storage pool → ошибка»: не определено, какой pool проверяется и как абсолютный путь диска соотносится с pool. Альтернативные интерпретации (pool = pool родительской директории / pool по умолчанию / понятие pool не применимо к путям) дают разные результаты валидации; дизайн серверной валидации и негативные тесты неоднозначны.",
+      "recommendation": "Определить понятие и правило выбора storage pool (например, pool, содержащий родительскую директорию диска), либо исключить проверку storage pool из REQ-04/REQ-16."
+    },
+    {
+      "id": "F-004",
+      "category": "completeness",
+      "severity": "major",
+      "requirement_refs": ["REQ-05", "REQ-06", "REQ-07", "REQ-21", "REQ-18", "Non-Goals"],
+      "evidence": "Non-Goals: «QMP-only режим (без libvirt) поддерживается с ограничениями, описанными в REQ-04, REQ-12, REQ-13, REQ-18, REQ-22». REQ-05 (Rename), REQ-06 (Clone), REQ-07 (Delete), REQ-21 (Suspend/Resume) не содержат QMP-only ветки, хотя опираются на libvirt-операции (переименование домена, копирование дисков, undefine, VIR_DOMAIN_PMSUSPENDED).",
+      "impact": "Не определено поведение команд жизненного цикла VM в QMP-only режиме: доступны ли они, деградируют ли с tooltip/ошибкой, и как их тестировать. Матрица тестов по режимам неполна, решения по реализáции приходится угадывать.",
+      "recommendation": "Для каждой команды REQ-05/REQ-06/REQ-07/REQ-21 зафиксировать доступность и деградацию в QMP-only режиме (аналогично REQ-04/REQ-12/REQ-13)."
+    },
+    {
+      "id": "F-005",
+      "category": "completeness",
+      "severity": "major",
+      "requirement_refs": ["REQ-03", "REQ-09"],
+      "evidence": "REQ-03 AC: «каждое из пяти состояний имеет хотя бы одну REQ, определяющую переход в него: running — REQ-08; stopped — REQ-09/REQ-10; paused — REQ-11; suspended — REQ-21; crashed — REQ-22». При этом REQ-09 (Graceful shutdown) не содержит AC о переходе VM в stopped после успешного ACPI-завершения — описаны только таймер, диалог и Force stop.",
+      "impact": "State machine неполна: ссылка REQ-03 на REQ-09 не подтверждена текстом REQ-09; нет базы для AC и теста «успешный graceful shutdown → stopped», что ломает проверку полноты состояний из REQ-03.",
+      "recommendation": "Добавить в REQ-09 AC о переходе VM в stopped после успешного ACPI-завершения (или явно исключить REQ-09 из списка переходов в REQ-03)."
+    },
+    {
+      "id": "F-006",
+      "category": "ambiguity",
+      "severity": "major",
+      "requirement_refs": ["REQ-13"],
+      "evidence": "REQ-13: «Интервал обновления — workspace setting: 0 (только ручное обновление) или 1–60 секунд; по умолчанию 5»; AC: «интервал 61 → значение отклоняется с inline error в настройке». Не сказано «целое» (в отличие от REQ-09: «целое 5–300 секунд»), не определены дробные/отрицательные/нечисловые значения, и не задан механизм «inline error в настройке» (нативные VS Code settings не имеют встроенной валидации значений).",
+      "impact": "Неоднозначны правила и способ валидации настройки: где и как показывается ошибка, что происходит при 0<v<1, отрицательных и нечисловых значениях; граничные AC невозможно построить детерминированно.",
+      "recommendation": "Указать «целое», явно определить реакцию на все недопустимые значения (включая границы 0/1/60/61) и механизм отображения ошибки валидации."
+    },
+    {
+      "id": "F-007",
+      "category": "ambiguity",
+      "severity": "major",
+      "requirement_refs": ["REQ-02"],
+      "evidence": "REQ-02 Delete: «Если подключение активно и в нём есть VM в состоянии running — диалог содержит предупреждение «This connection has running VMs. Delete anyway?»». Для иных активных состояний VM (paused / suspended / crashed) поведение не описано.",
+      "impact": "Не определено, показывается ли предупреждение при наличии VM в paused/suspended/crashed. Дизайн диалога удаления и негативные тесты неоднозначны; возможны разные реализации.",
+      "recommendation": "Уточнить условие предупреждения (только running или любые VM подключения) и закрепить его AC."
+    },
+    {
+      "id": "F-008",
+      "category": "completeness",
+      "severity": "minor",
+      "requirement_refs": ["REQ-02", "REQ-12", "Glossary"],
+      "evidence": "Glossary определяет Connection, VM state, Operation outcome, Stale, Degraded, Workspace settings, но вводимые требованиями термины/статусы «unknown» (REQ-12: «в дереве unknown») и «disconnected» (REQ-02: «статусом disconnected») в глоссарии не определены.",
+      "impact": "Редакционный пробел в глоссарии: единообразие терминов нарушено. На поведение не влияет, но затрудняет трассировку требований и тестов.",
+      "recommendation": "Добавить определения «unknown» и «disconnected» в Glossary."
+    }
+  ],
+  "severity_summary": { "blocker": 0, "critical": 0, "major": 7, "minor": 1 },
+  "status": "completed"
+}

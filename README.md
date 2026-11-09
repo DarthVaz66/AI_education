@@ -11,22 +11,25 @@
    │
    ▼
 QA Orchestrator (primary)
-   ├──▶ Requirement Reviewer (subagent) ──▶ 01-requirement-review.json ──▶ Gate 1
-   ├──▶ Task Designer       (subagent) ──▶ 02-task-design.json       ──▶ Gate 2a ──┐
-   └──▶ Test Designer       (subagent) ──▶ 03-test-design.json       ──▶ Gate 2b ──┴──▶ Gate 2c
-                                                                                              │
-                                                                                              ▼
-                                                                                          Publish
-                                                                                   (Jira + Testomat.io)
-                                                                                              │
-                                                                                              ▼
-                                                                                     Final / Blocking
-                                                                                          Report
+   ├──▶ Requirement Reviewer (subagent) ──▶ .artifacts/.current/01-requirement-review.json ──▶ Gate 1
+   ├──▶ Task Designer       (subagent) ──▶ .artifacts/.current/02-task-design.json       ──▶ Gate 2a ──┐
+   └──▶ Test Designer       (subagent) ──▶ .artifacts/.current/03-test-design.json       ──▶ Gate 2b ──┴──▶ Gate 2c
+                                                                                                                │
+                                                                                                                ▼
+                                                                                                            Publish
+                                                                                                     (Jira + Testomat.io)
+                                                                                                                │
+                                                                                                                ▼
+                                                                                                    Final / Blocking
+                                                                                                         Report
+                                                                                                                │
+                                                                                                                ▼
+                                                                                       mv .artifacts/.current → .artifacts/{run_id}
 ```
 
 **Агенты** (`.opencode/agents/`):
 - `qa-orchestrator.md` — primary. Делегирует этапы, применяет Quality Gates,
-  публикует артефакты, формирует отчёты.
+  публикует артефакты, формирует отчёты, управляет `.artifacts/.current/`.
 - `requirement-reviewer.md` — анализ требований Confluence.
 - `task-designer.md` — построение payload задач Jira.
 - `test-designer.md` — построение тестовой модели Testomat.io.
@@ -37,13 +40,26 @@ QA Orchestrator (primary)
 - `test-design/` — equivalence partitioning, boundary values, state transition,
   decision tables, priority rubric, формат шагов `step + expected`, правила N/A.
 
-**Артефакты** (`.artifacts/{run_id}/`) — файловое хранилище с версионированием:
+**Артефакты** — жизненный цикл через `.artifacts/.current/`:
+
+Во время прогона все артефакты пишутся в `.artifacts/.current/`:
+- `meta.json` — метаданные прогона (включая `testomat_project_id`,
+  `testomat_project_id_source`, `preflight_decision`, `human_override`).
 - `01-requirement-review.json` — находки requirement-reviewer.
 - `02-task-design.json` — payload задач Jira.
 - `03-test-design.json` — тестовая модель Testomat.io.
 - `04-publish-state.json` — чекпойнт публикации (идемпотентность).
 - `05-publish-report.json` — итоговая сводка публикации.
 - `REPORT.md` — Final Report или Blocking Report.
+
+По завершении прогона (успех или блокировка) `.artifacts/.current/`
+переименовывается в `.artifacts/{run_id}/`. `run_id` — временная метка старта
+прогона (`{ISO-timestamp}_{req_version}`); по ней прогон находится в
+`.artifacts/index.json`.
+
+Субагенты (`requirement-reviewer`, `task-designer`, `test-designer`) имеют
+доступ **только** к `.artifacts/.current/`. Ни один субагент не может прочитать
+артефакты прошлых прогонов.
 
 ## Требования
 
@@ -73,6 +89,9 @@ QA Orchestrator (primary)
 
    # Quality gates
    QA_GATE1_MAJOR_LIMIT=5
+
+   # Preflight resume behavior (ask | resume | archive)
+   QA_RESUME_MODE=ask
    ```
 
    `.env` добавлен в `.gitignore`. Токены не коммитятся.
@@ -161,19 +180,29 @@ opencode run --agent qa-orchestrator \
 ```
 
 `04-publish-state.json` и `05-publish-report.json` не создаются, `REPORT.md`
-содержит сводку гейтов и рекомендации.
+содержит сводку гейтов и рекомендации. Финализация `.current` → `.artifacts/{run_id}`
+всё равно выполняется по завершении.
 
-### Resume упавшего прогона
+## Resume и архивация
 
-Повторный запуск с теми же аргументами безопасен:
+Состояние прогона живёт в `.artifacts/.current/`. Поведение при повторном
+запуске с непустым `.current` управляется переменной `QA_RESUME_MODE`:
 
-```bash
-/run-qa-flow https://your-domain.atlassian.net/wiki/spaces/QA/pages/123456/QEMU+Manager QA
-```
+| Значение | Поведение |
+|---|---|
+| `ask` (default) | Интерактивный prompt: `R` — resume, `A` — archive. В неинтерактивном режиме (CLI без TTY) ведёт себя как `archive`. |
+| `resume` | Продолжить предыдущий прогон (reuse `run_id`, `meta.json`, состояние `04-publish-state.json`; завершённые стадии пропускаются). |
+| `archive` | Переименовать `.artifacts/.current/` → `.artifacts/{old_run_id}/`, обновить `index.json` (`status=blocked`, `path=.artifacts/{old_run_id}/`), создать новый `.artifacts/.current/`. |
 
-Оркестратор найдёт незавершённый `run_id` для той же `requirement_version`,
-прочитает `04-publish-state.json`, пропустит `created` и `existing`, продолжит
-с `failed`. Дубли в Jira и Testomat.io исключены preflight-поиском.
+**Resume** безопасен: preflight-поиск в Jira и Testomat.io исключает дубли;
+`04-publish-state.json` содержит `created`/`existing`/`failed` по каждому
+элементу, и `failed` продолжается с того же места.
+
+**Archive** используется, когда предыдущий прогон логически завершён
+(пользователь не хочет resume), но `.current` остался из-за краша.
+
+Повторный запуск с теми же аргументами безопасен: дубли в Jira и Testomat.io
+исключены preflight-поиском.
 
 ## Как резолвится testomat_project_id
 
@@ -207,6 +236,7 @@ opencode run --agent qa-orchestrator \
 | `TESTOMATIO_PROJECT_ID` | Числовой ID проекта Testomat.io (fallback для аргумента) |
 | `TESTOMATIO_BASE_URL` | Базовый URL Testomat.io (по умолчанию `https://app.testomat.io`) |
 | `QA_GATE1_MAJOR_LIMIT` | Порог major-находок для Gate 1 (по умолчанию `5`) |
+| `QA_RESUME_MODE` | `ask` / `resume` / `archive` — поведение при обнаружении непустого `.artifacts/.current/` (по умолчанию `ask`; в неинтерактивном режиме → `archive`) |
 
 ## Конфигурация MCP
 
@@ -248,7 +278,7 @@ opencode run --agent qa-orchestrator \
 2. Перед созданием кейса — `testomat_tests` с `command: "list"` и TQL-фильтром
    `test == '{title}' and suite == '{suite_id}'`.
 3. Найденное — не дублируется, помечается `existing`.
-4. После каждого успешного создания — немедленная запись в `04-publish-state.json`.
+4. После каждого успешного создания — немедленная запись в `.artifacts/.current/04-publish-state.json`.
 5. При падении — `status = failed`, следующий запуск резюмит с этого элемента.
 
 Повторный запуск `/run-qa-flow` с теми же аргументами безопасен.
@@ -268,12 +298,23 @@ opencode run --agent qa-orchestrator \
 
 ## Просмотр артефактов
 
+**Текущий прогон (пока идёт):**
+```bash
+cat .artifacts/.current/REPORT.md
+cat .artifacts/.current/meta.json
+cat .artifacts/.current/04-publish-state.json
+```
+
+**Завершённые прогоны:**
 ```bash
 ls .artifacts/
 cat .artifacts/<run_id>/REPORT.md
 cat .artifacts/<run_id>/meta.json
-cat .artifacts/<run_id>/04-publish-state.json
-cat .artifacts/<run_id>/05-publish-report.json
+```
+
+**Реестр прогонов:**
+```bash
+cat .artifacts/index.json
 ```
 
 ## Troubleshooting
@@ -284,6 +325,22 @@ cat .artifacts/<run_id>/05-publish-report.json
   Приведите к одному значению либо уберите аргумент.
 - **`testomat_project_id_unresolved`** — ни аргумент, ни env, ни MCP не дали
   project_id. Задайте `TESTOMATIO_PROJECT_ID` в `.env` либо передайте аргументом.
+- **`.current` остался после краша** — при следующем запуске оркестратор
+  спросит, resume или archive (см. `QA_RESUME_MODE`). Вручную ничего
+  переименовывать не нужно.
+- **Хочу посмотреть прошлый прогон** — он лежит в `.artifacts/{run_id}/`,
+  найти `run_id` можно в `.artifacts/index.json`.
+- **Хочу принудительно начать с чистого листа** — `QA_RESUME_MODE=archive`,
+  затем запустить `/run-qa-flow`.
+- **`corrupt_current_state`** — `.current/meta.json` повреждён и в `index.json`
+  нет соответствующей записи. Удалите `.artifacts/.current/` вручную и
+  перезапустите (потеря только незавершённого прогона).
+- **`run_id_collision`** — при финализации/архивации уже существует
+  `.artifacts/{run_id}/`. Обычно означает, что предыдущий прогон с тем же
+  `run_id` не был очищен; переименуйте/удалите конфликтующий каталог вручную
+  и перезапустите.
+- **`bash_scope_violation`** — оркестратор попытался выполнить bash-команду
+  вне Allowed Bash Commands. Это баг конфигурации; смотрите `REPORT.md`.
 - **MCP не подключается** — проверить `.env` и `opencode.json`. Для Testomat.io
   убедиться, что `TESTOMATIO_PROJECT_TOKEN` начинается с `tstmt_`, а
   `TESTOMATIO_PROJECT_ID` — число.
@@ -291,7 +348,8 @@ cat .artifacts/<run_id>/05-publish-report.json
   проекту из `TESTOMATIO_PROJECT_ID`.
 - **Testomat.io отвечает 404 на suite_id** — сьют не существует в проекте;
   запустить без `suite_id` (кейсы уйдут в корень).
-- **Повторный запуск создаёт дубли** — проверить `04-publish-state.json`,
+- **Повторный запуск создаёт дубли** — проверить `.artifacts/.current/04-publish-state.json`
+  (или `.artifacts/{run_id}/04-publish-state.json` для завершённого прогона),
   не удалять его до завершения прогона.
 - **Артефакт не найден** — проверить `run_id` в `.artifacts/index.json`.
 - **Gate 1 упал при `major ≤ 5`** — проверить `QA_GATE1_MAJOR_LIMIT` в `.env`.

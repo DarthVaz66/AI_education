@@ -1,0 +1,30 @@
+{
+  "run_id": "2026-11-09T17-30-00_0.5",
+  "requirement_version": "0.5",
+  "jira": {
+    "project": "QA",
+    "label": "qemu-manager-req-0.5",
+    "items": [
+      { "temp_id": "T-01", "summary": "VM tree: отображение инвентаря VM и пяти состояний", "status": "created", "external_id": "QA-1" },
+      { "temp_id": "T-02", "summary": "Жизненный цикл VM: start, graceful shutdown и force stop", "status": "created", "external_id": "QA-2" },
+      { "temp_id": "T-03", "summary": "Приостановка состояний VM: pause/resume и suspend/resume", "status": "created", "external_id": "QA-3" },
+      { "temp_id": "T-04", "summary": "Обнаружение аварийного завершения VM (crashed)", "status": "created", "external_id": "QA-4" },
+      { "temp_id": "T-05", "summary": "Форма создания/редактирования VM с серверной валидацией libvirt", "status": "created", "external_id": "QA-5" },
+      { "temp_id": "T-06", "summary": "Переименование VM (rename)", "status": "created", "external_id": "QA-6" },
+      { "temp_id": "T-07", "summary": "Клонирование VM (clone)", "status": "created", "external_id": "QA-7" },
+      { "temp_id": "T-08", "summary": "Удаление VM (delete / undefine)", "status": "created", "external_id": "QA-8" },
+      { "temp_id": "T-09", "summary": "Удаление подключения с предупреждением о running VM", "status": "created", "external_id": "QA-9" },
+      { "temp_id": "T-10", "summary": "Workspace setting: интервал polling дерева", "status": "created", "external_id": "QA-10" },
+      { "temp_id": "T-11", "summary": "Отображение IP-адреса VM в дереве", "status": "created", "external_id": "QA-11" },
+      { "temp_id": "T-12", "summary": "QMP-only режим: доступность и деградация операций", "status": "created", "external_id": "QA-12" }
+    ]
+  },
+  "testomat": {
+    "project_id": "test-cc3c0",
+    "suite_id": "03f205ec",
+    "suite_title": "QEMU Manager — REQ v0.5 (Confluence 2228226)",
+    "items": [],
+    "created_total": 137,
+    "note": "137 cases (REQ-01..REQ-22) created in suite 03f205ec via bulk_upsert. Existing before publish: 0. Test IDs retrievable via testomat list (137 total)."
+  }
+}

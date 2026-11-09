@@ -1,0 +1,105 @@
+{
+  "artifact_id": "2026-11-09T14-00-00:01-requirement-review",
+  "run_id": "2026-11-09T14-00-00",
+  "requirement_version": "0.4",
+  "requirement_status": "ready_for_review",
+  "confluence_page_id": "2129922",
+  "confluence_page_url": "https://pvasecond.atlassian.net/wiki/spaces/~712020235d49aa26bb4f3e8f425cb4c132578a/pages/2129922/4",
+  "retrieval": "jira-confluence_get_confluence_page (pageId=2129922, page version 1, space ~712020235d49aa26bb4f3e8f425cb4c132578a) — body non-empty; full body read via authenticated rendered page view.",
+  "timestamp": "2026-11-09T14:35:00Z",
+  "findings": [
+    {
+      "id": "F-001",
+      "category": "contradiction",
+      "severity": "critical",
+      "requirement_refs": ["Non-Functional Requirements", "REQ-02", "REQ-14"],
+      "evidence": "NFR/Безопасность: «секреты (токены, пароли, SSH-ключи, URI с credentials) не пишутся в логи и настройки». REQ-02: «Подключение: имя ... и URI (qemu:///system, qemu:///session, qemu+ssh://...) либо абсолютный путь к QMP-сокету... Подключения хранятся только в workspace settings и никогда — в user/global settings.» REQ-14: «...URI с embedded credentials (user:pass@host)».",
+      "impact": "A qemu+ssh URI may embed credentials (user:pass@host) and REQ-02 stores the connection URI in workspace settings, which directly contradicts the security NFR that forbids writing credential-bearing URIs to settings. Design cannot decide whether credential URIs are allowed, rejected, or stripped, and no stable 'no secrets in settings' AC can be asserted; a credential leak into workspace settings is a security defect.",
+      "recommendation": "State explicitly whether credentials are forbidden inside the connection URI, or exactly how they are kept out of workspace settings (e.g., forbid user:pass and rely on SSH agent/keys), and add an acceptance criterion asserting settings contain no plaintext credentials."
+    },
+    {
+      "id": "F-002",
+      "category": "contradiction",
+      "severity": "major",
+      "requirement_refs": ["REQ-02", "REQ-03"],
+      "evidence": "REQ-02/Edit: «Если редактируется активное подключение — расширение разрывает соединение со старым URI и устанавливает новое с переданным URI; при неудаче подключение переходит в disconnected, дерево очищается.» REQ-03 AC: «если данные VM временно недоступны — отображается последнее известное состояние с суффиксом (stale)».",
+      "impact": "The same condition (an active connection becomes unreachable) yields two incompatible UI behaviours — REQ-02 clears the tree, REQ-03 keeps last-known entries with a (stale) suffix. Tests cannot assert one deterministic tree behaviour, and the REQ-03 state/coverage model is contradicted for this path.",
+      "recommendation": "Define precedence: either a failed reconnect shows disconnected with (stale) last-known VMs (consistent with REQ-03), or explicitly exempt the edit-reconnect path from the (stale) rule."
+    },
+    {
+      "id": "F-003",
+      "category": "contradiction",
+      "severity": "major",
+      "requirement_refs": ["REQ-17"],
+      "evidence": "REQ-17: «Windows / Linux: Ctrl+Shift+Q → Start, Ctrl+Shift+W → Shutdown» and «Конфликты с built-in командами VS Code — VS Code показывает штатное предупреждение; расширение не переопределяет built-in биндинги»; AC: «дефолтный биндинг выполняет команду для выбранной VM в применимом состоянии на каждой из трёх ОС». (Ctrl+Shift+W is the VS Code built-in for 'Close Window' on Windows/Linux.)",
+      "impact": "On Windows/Linux the default Shutdown binding collides with a VS Code built-in. Because the requirement forbids overriding built-in bindings, the AC 'default binding executes the command on every OS' cannot hold for Shutdown on Windows/Linux; the requirement is internally inconsistent.",
+      "recommendation": "Choose a Windows/Linux default that does not collide with a VS Code built-in (as already done for macOS where Cmd+Shift+Q is avoided), or state that the built-in wins and the default does not apply."
+    },
+    {
+      "id": "F-004",
+      "category": "ambiguity",
+      "severity": "minor",
+      "requirement_refs": ["REQ-07", "REQ-03"],
+      "evidence": "REQ-07: «операция переходит в состояние partially_completed». REQ-03 state list: «running / stopped / paused / suspended / crashed» (partially_completed is not listed).",
+      "impact": "It is undefined whether partially_completed is a VM state, an operation state, or only a notification; REQ-03 does not define how the tree renders it, so the post-failure UI cannot be modelled consistently in tests.",
+      "recommendation": "Clarify that partially_completed is an operation/notification outcome (not a VM state) and specify the resulting tree/UI representation."
+    },
+    {
+      "id": "F-005",
+      "category": "ambiguity",
+      "severity": "minor",
+      "requirement_refs": ["REQ-02"],
+      "evidence": "REQ-02: «Если редактируется активное подключение — расширение разрывает соединение со старым URI и устанавливает новое с переданным URI; при неудаче ... дерево очищается.»",
+      "impact": "It is undefined whether a name-only edit (URI unchanged) triggers the disconnect/reconnect and tree-clearing path; tests cannot determine the expected reconnect behaviour for name edits.",
+      "recommendation": "State that reconnect (and tree clearing) happens only when the URI changes, or that it always happens on edit."
+    },
+    {
+      "id": "F-006",
+      "category": "ambiguity",
+      "severity": "minor",
+      "requirement_refs": ["REQ-12"],
+      "evidence": "REQ-12: «Для user-nat: если IP определим — отображается в дереве; если нет — отображается unknown без влияния на рендеринг дерева.»",
+      "impact": "«если IP определим» is an unbounded condition with no specified mechanism, timeout, or failure AC; the user-nat IP display path cannot be tested deterministically for the undecidable case.",
+      "recommendation": "Define how the IP is obtained and a bounded timeout after which the value renders as unknown."
+    },
+    {
+      "id": "F-007",
+      "category": "ambiguity",
+      "severity": "minor",
+      "requirement_refs": ["REQ-14"],
+      "evidence": "REQ-14: redaction covers «значения переменных окружения, чьи имена соответствуют паттерну SECRET|TOKEN|PASSWORD|KEY».",
+      "impact": "The environment whose variables are scanned (VS Code extension host, host OS, or remote libvirt host) is unspecified, so the redaction ACs («лог не содержит секретов») cannot be scoped or tested deterministically.",
+      "recommendation": "Specify which environment's variables are matched by the SECRET|TOKEN|PASSWORD|KEY pattern."
+    },
+    {
+      "id": "F-008",
+      "category": "completeness",
+      "severity": "major",
+      "requirement_refs": ["REQ-14", "REQ-18"],
+      "evidence": "REQ-14 introduces a mapping table titled «libvirt / QMP error», but every row is a libvirt VIR_ERR_* / system code (VIR_ERR_NO_CONNECT, VIR_ERR_AUTH_FAILED, VIR_ERR_NO_DOMAIN, VIR_ERR_OPERATION_UNSUPPORTED, VIR_ERR_DISK_FULL, VIR_ERR_RESOURCE_BUSY) or 'любая unmapped ошибка'. REQ-18/REQ-04/REQ-12/REQ-13 establish a supported QMP-only mode (QEMU 6.0+ with QMP socket, no libvirt).",
+      "impact": "QMP-only errors returned by QEMU/QMP (not libvirt) have no mapping rows, so their friendly message and the «Show log» action cannot be designed or tested for the QMP-only mode; the table is incomplete relative to the declared 'libvirt / QMP' scope.",
+      "recommendation": "Add QMP error classes/reasons (or QMP-only equivalents) to the mapping table, or explicitly state that all QMP errors fall through to the unmapped fallback branch."
+    },
+    {
+      "id": "F-009",
+      "category": "completeness",
+      "severity": "minor",
+      "requirement_refs": ["REQ-16", "REQ-04"],
+      "evidence": "REQ-16 server validation: «доступность storage pool». REQ-04 two-level validation enumerates only «существование родительской директории диска и ISO-файла; проверяется при отправке запроса в libvirt».",
+      "impact": "The storage-pool availability check exists only in REQ-16, has no counterpart in REQ-04 and no acceptance criterion, so its failure message/action is untestable.",
+      "recommendation": "Add the storage-pool availability check to REQ-04 (or remove it from REQ-16) and give it an acceptance criterion."
+    },
+    {
+      "id": "F-010",
+      "category": "completeness",
+      "severity": "minor",
+      "requirement_refs": ["Non-Goals", "REQ-18", "REQ-22"],
+      "evidence": "Non-Goals: «QMP-only режим (без libvirt) поддерживается с ограничениями, описанными в REQ-04, REQ-12 и REQ-13.» REQ-18 and REQ-22 also define QMP-only behaviour/limitations.",
+      "impact": "The Non-Goals limitation list enumerates only REQ-04/REQ-12/REQ-13 and omits REQ-18/REQ-22, creating a scope-consistency gap when validating boundaries of the QMP-only mode.",
+      "recommendation": "Add REQ-18 and REQ-22 to the QMP-only limitation references in Non-Goals."
+    }
+  ],
+  "severity_summary": { "blocker": 0, "critical": 1, "major": 3, "minor": 6 },
+  "status": "completed",
+  "blocking_reason": null
+}

@@ -1,0 +1,16 @@
+{
+  "run_id": "2026-11-09T14-00-00",
+  "requirement_version": "0.4",
+  "confluence_page_id": "2129922",
+  "jira_project": "QA",
+  "testomat_project_id": "test-cc3c0",
+  "testomat_project_id_source": "argument",
+  "testomat_suite_id": null,
+  "started_at": "2026-11-09T14:00:00Z",
+  "resumed_at": "2026-11-09T14:30:00Z",
+  "status": "blocked",
+  "stopped_at": "Gate 1 — Requirement Review Gate",
+  "blocking_reason": "gate_fail",
+  "gate1": { "blocker": 0, "critical": 1, "major": 3, "minor": 6 },
+  "human_override": null
+}

@@ -1,0 +1,182 @@
+{
+  "artifact_id": "2026-11-09T17-30-00_0.5:02-task-design",
+  "run_id": "2026-11-09T17-30-00_0.5",
+  "requirement_version": "0.5",
+  "timestamp": "2026-11-09T17:30:05Z",
+  "jira_params": { "project": "QA", "issue_type": "Story" },
+  "tasks": [
+    {
+      "temp_id": "T-01",
+      "summary": "VM tree: отображение инвентаря VM и пяти состояний",
+      "description": "Реализовать дерево VM: для каждой виртуальной машины отображать имя, состояние, vCPU и RAM (МБ). Состояние принимает одно из пяти значений: running, stopped, paused, suspended, crashed. Каждое состояние должно иметь команду/событие-перехода (start, graceful shutdown/force stop, pause, suspend, crash) — см. задачи T-02, T-03, T-04. Источник: REQ-03 (findings F-002, F-005).",
+      "acceptance_criteria": [
+        { "format": "invariant", "text": "Для каждой VM в дереве отображаются поля: имя, состояние, vCPU, RAM (МБ)." },
+        { "format": "invariant", "text": "Значение состояния каждой VM всегда принадлежит множеству {running, stopped, paused, suspended, crashed}." },
+        { "format": "invariant", "text": "Для каждого из пяти состояний существует команда или событие, переводящее VM в это состояние (running — start; stopped — graceful shutdown / force stop; paused — pause; suspended — suspend; crashed — аварийное завершение домена)." }
+      ],
+      "requirement_refs": ["REQ-03"],
+      "dependencies": ["T-02", "T-03", "T-04"],
+      "dor_check": "pass",
+      "dor_failures": []
+    },
+    {
+      "temp_id": "T-02",
+      "summary": "Жизненный цикл VM: start, graceful shutdown и force stop",
+      "description": "Реализовать запуск и остановку VM. Graceful shutdown использует ACPI-завершение гостя с настраиваемым таймером (целое 5–300 секунд) и диалогом по истечении таймера; при подтверждении выполняется Force stop. Тайминговое AC для force stop проверяется при форсированном обновлении дерева (как в REQ-04), независимо от интервала polling REQ-13 (findings F-001, F-005). Также покрыть переход stopped после успешного ACPI-завершения (findings F-005).",
+      "acceptance_criteria": [
+        { "format": "given_when_then", "text": "Given VM в состоянии stopped, When пользователь выполняет Start, Then состояние VM становится running." },
+        { "format": "given_when_then", "text": "Given VM в состоянии running, When пользователь выполняет Graceful shutdown и гость завершается по ACPI в пределах выбранного таймера, Then состояние VM становится stopped." },
+        { "format": "given_when_then", "text": "Given VM в состоянии running и таймер graceful shutdown истёк без завершения гостя, When пользователь подтверждает Force stop в диалоге, Then состояние VM становится stopped в течение 3 c после форсированного обновления дерева." },
+        { "format": "invariant", "text": "Значение таймера graceful shutdown — целое число в диапазоне от 5 до 300 секунд." }
+      ],
+      "requirement_refs": ["REQ-08", "REQ-09", "REQ-10"],
+      "dependencies": ["T-01"],
+      "dor_check": "pass",
+      "dor_failures": []
+    },
+    {
+      "temp_id": "T-03",
+      "summary": "Приостановка состояний VM: pause/resume и suspend/resume",
+      "description": "Реализовать Pause (running → paused), Resume из paused (paused → running), Suspend (running → suspended, VIR_DOMAIN_PMSUSPENDED) и Resume из suspended (suspended → running). Тайминговое AC для pause проверяется при форсированном обновлении дерева, независимо от интервала polling REQ-13 (findings F-001).",
+      "acceptance_criteria": [
+        { "format": "given_when_then", "text": "Given VM в состоянии running, When пользователь выполняет Pause, Then состояние VM становится paused в течение 3 c после форсированного обновления дерева." },
+        { "format": "given_when_then", "text": "Given VM в состоянии paused, When пользователь выполняет Resume, Then состояние VM становится running." },
+        { "format": "given_when_then", "text": "Given VM в состоянии running, When пользователь выполняет Suspend, Then состояние VM становится suspended." },
+        { "format": "given_when_then", "text": "Given VM в состоянии suspended, When пользователь выполняет Resume, Then состояние VM становится running." }
+      ],
+      "requirement_refs": ["REQ-11", "REQ-21"],
+      "dependencies": ["T-01"],
+      "dor_check": "pass",
+      "dor_failures": []
+    },
+    {
+      "temp_id": "T-04",
+      "summary": "Обнаружение аварийного завершения VM (crashed)",
+      "description": "Реализовать детекцию аварийного завершения домена (например, неожиданный выход процесса QEMU) и перевод VM в состояние crashed с отражением в дереве. Источник: REQ-22, состояние crashed связано с REQ-03 (findings F-004, F-005).",
+      "acceptance_criteria": [
+        { "format": "given_when_then", "text": "Given VM в состоянии running, When домен аварийно завершается (QEMU process exit) без команды пользователя, Then состояние VM в дереве становится crashed." },
+        { "format": "given_when_then", "text": "Given VM в состоянии crashed, When пользователь выполняет Start, Then VM повторно запускается и состояние становится running." }
+      ],
+      "requirement_refs": ["REQ-22"],
+      "dependencies": ["T-01"],
+      "dor_check": "pass",
+      "dor_failures": []
+    },
+    {
+      "temp_id": "T-05",
+      "summary": "Форма создания/редактирования VM с серверной валидацией libvirt",
+      "description": "Реализовать форму создания/редактирования VM (REQ-04/REQ-16): диски задаются абсолютным путём на гипервизоре. Валидация серверная (libvirt) — проверка существования родительской директории диска и ISO-файла при отправке запроса в libvirt. Принудительное обновление дерева выполняется независимо от интервала polling (REQ-13). Правило выбора storage pool не задано в требованиях (findings F-003) — на этапе дизайна принимается ограничение: проверка доступности storage pool не входит в AC до уточнения правила выбора pool.",
+      "acceptance_criteria": [
+        { "format": "given_when_then", "text": "Given форма создания/редактирования VM, When пользователь указывает абсолютный путь к диску на гипервизоре и отправляет форму, Then выполняется серверная (libvirt) валидация существования родительской директории диска и ISO-файла." },
+        { "format": "given_when_then", "text": "Given форма VM с путём к диску, родительская директория которого не существует, When пользователь отправляет форму, Then запрос отклоняется и отображается ошибка валидации с указанием несуществующего пути." },
+        { "format": "given_when_then", "text": "Given форма VM с путём к несуществующему ISO-файлу, When пользователь отправляет форму, Then запрос отклоняется и отображается ошибка валидации с указанием отсутствующего ISO." },
+        { "format": "given_when_then", "text": "Given открытая форма VM, When пользователь выполняет принудительное обновление дерева, Then обновление выполняется независимо от интервала polling." }
+      ],
+      "requirement_refs": ["REQ-04", "REQ-16"],
+      "dependencies": ["T-01"],
+      "dor_check": "pass",
+      "dor_failures": []
+    },
+    {
+      "temp_id": "T-06",
+      "summary": "Переименование VM (rename)",
+      "description": "Реализовать переименование домена VM: новое имя применяется к домену и отражается в дереве. Источник: REQ-05 (findings F-004).",
+      "acceptance_criteria": [
+        { "format": "given_when_then", "text": "Given VM в дереве, When пользователь выполняет Rename с новым допустимым именем, Then домен переименовывается и новое имя отображается в дереве." },
+        { "format": "given_when_then", "text": "Given VM в дереве, When пользователь вводит имя, совпадающее с именем существующей VM, Then операция отклоняется с ошибкой." }
+      ],
+      "requirement_refs": ["REQ-05"],
+      "dependencies": ["T-01"],
+      "dor_check": "pass",
+      "dor_failures": []
+    },
+    {
+      "temp_id": "T-07",
+      "summary": "Клонирование VM (clone)",
+      "description": "Реализовать клонирование VM с копированием дисков: создаётся новый домен, который появляется в дереве. Источник: REQ-06 (findings F-004).",
+      "acceptance_criteria": [
+        { "format": "given_when_then", "text": "Given существующая VM, When пользователь выполняет Clone, Then создаётся новый домен с копией дисков и он появляется в дереве." },
+        { "format": "given_when_then", "text": "Given клонирование успешно завершено, When пользователь запускает новый (клонированный) домен, Then изменение исходной VM не влияет на клон." }
+      ],
+      "requirement_refs": ["REQ-06"],
+      "dependencies": ["T-01"],
+      "dor_check": "pass",
+      "dor_failures": []
+    },
+    {
+      "temp_id": "T-08",
+      "summary": "Удаление VM (delete / undefine)",
+      "description": "Реализовать удаление домена VM (undefine): после подтверждения VM исчезает из дерева. Источник: REQ-07 (findings F-004).",
+      "acceptance_criteria": [
+        { "format": "given_when_then", "text": "Given VM в дереве, When пользователь выполняет Delete и подтверждает действие, Then домен удаляется (undefine) и VM пропадает из дерева." },
+        { "format": "given_when_then", "text": "Given VM в дереве, When пользователь выполняет Delete и отменяет действие, Then домен остаётся и отображается в дереве без изменений." }
+      ],
+      "requirement_refs": ["REQ-07"],
+      "dependencies": ["T-01"],
+      "dor_check": "pass",
+      "dor_failures": []
+    },
+    {
+      "temp_id": "T-09",
+      "summary": "Удаление подключения с предупреждением о running VM",
+      "description": "Реализовать удаление подключения. Если подключение активно и содержит VM в состоянии running — диалог показывает предупреждение «This connection has running VMs. Delete anyway?». Подключение со статусом disconnected удаляется без обращения к гипервизору. Условие предупреждения для прочих активных состояний (paused/suspended/crashed) в требованиях не определено (findings F-007) — принимается условие «только running». Источник: REQ-02 (findings F-007, F-008).",
+      "acceptance_criteria": [
+        { "format": "given_when_then", "text": "Given активное подключение, содержащее VM в состоянии running, When пользователь удаляет подключение, Then показывается диалог с предупреждением «This connection has running VMs. Delete anyway?»." },
+        { "format": "given_when_then", "text": "Given активное подключение без VM в состоянии running, When пользователь удаляет подключение, Then удаление выполняется без предупреждения о running VM." },
+        { "format": "given_when_then", "text": "Given подключение со статусом disconnected, When пользователь удаляет подключение, Then подключение удаляется из списка без обращения к гипервизору." }
+      ],
+      "requirement_refs": ["REQ-02"],
+      "dependencies": [],
+      "dor_check": "pass",
+      "dor_failures": []
+    },
+    {
+      "temp_id": "T-10",
+      "summary": "Workspace setting: интервал polling дерева",
+      "description": "Реализовать workspace setting интервала обновления дерева: значение 0 (только ручное обновление) или целое 1–60 секунд, по умолчанию 5. Нецелые/отрицательные/нечисловые значения отклоняются с inline error в настройке; значение 61 отклоняется. Механизм отображения inline error для нативных VS Code settings в требованиях не задан (findings F-006) — принимается реализация через валидацию значения при записи настройки с сообщением об ошибке уровня workspace. Источник: REQ-13 (findings F-001, F-006).",
+      "acceptance_criteria": [
+        { "format": "invariant", "text": "Настройка интервала обновления принимает значение 0 (только ручное обновление) или целое число от 1 до 60 секунд; значение по умолчанию — 5." },
+        { "format": "given_when_then", "text": "Given настройка интервала обновления, When пользователь вводит значение 61, Then значение отклоняется с inline error в настройке." },
+        { "format": "given_when_then", "text": "Given настройка интервала обновления, When пользователь вводит 0, Then автоматическое обновление дерева отключается и обновление происходит только вручную." },
+        { "format": "given_when_then", "text": "Given настройка интервала обновления, When пользователь вводит нецелое или отрицательное значение, Then значение отклоняется с inline error в настройке." }
+      ],
+      "requirement_refs": ["REQ-13"],
+      "dependencies": ["T-01"],
+      "dor_check": "pass",
+      "dor_failures": []
+    },
+    {
+      "temp_id": "T-11",
+      "summary": "Отображение IP-адреса VM в дереве",
+      "description": "Отображать IP-адрес VM в дереве для сети user-nat при определимом IP (в течение 2 секунд после обновления, включая форсированное обновление). Если IP не определим — IP/состояние помечается как unknown. Источник: REQ-12 (findings F-002, F-008).",
+      "acceptance_criteria": [
+        { "format": "given_when_then", "text": "Given VM с сетью user-nat и определимым IP, When дерево обновляется (в том числе форсированно), Then IP-адрес отображается в дереве в течение 2 c." },
+        { "format": "given_when_then", "text": "Given VM, у которой IP не может быть определён, When дерево обновляется, Then значение IP отображается как unknown." }
+      ],
+      "requirement_refs": ["REQ-12"],
+      "dependencies": ["T-01"],
+      "dor_check": "pass",
+      "dor_failures": []
+    },
+    {
+      "temp_id": "T-12",
+      "summary": "QMP-only режим: доступность и деградация операций",
+      "description": "Обеспечить поддержку QMP-only режима (без libvirt) с ограничениями, определёнными в REQ-04/REQ-12/REQ-13/REQ-18/REQ-22 (Non-Goals). Libvirt-зависимые операции вне этого перечня в QMP-only режиме недоступны или деградируют с понятной ошибкой. Источник: REQ-18 и Non-Goals (findings F-004).",
+      "acceptance_criteria": [
+        { "format": "invariant", "text": "В QMP-only режиме доступен только набор операций, определённый REQ-04/REQ-12/REQ-13/REQ-18/REQ-22; поведение операций соответствует ограничениям, зафиксированным в этих требованиях." },
+        { "format": "given_when_then", "text": "Given подключение в QMP-only режиме, When пользователь пытается выполнить libvirt-зависимую операцию вне разрешённого перечня, Then операция не выполняется и пользователю показывается ошибка о недоступности в QMP-only режиме." }
+      ],
+      "requirement_refs": ["REQ-18"],
+      "dependencies": ["T-01"],
+      "dor_check": "pass",
+      "dor_failures": []
+    }
+  ],
+  "duplicates": [],
+  "trace_coverage": {
+    "requirements_covered": ["REQ-02", "REQ-03", "REQ-04", "REQ-05", "REQ-06", "REQ-07", "REQ-08", "REQ-09", "REQ-10", "REQ-11", "REQ-12", "REQ-13", "REQ-16", "REQ-18", "REQ-21", "REQ-22"],
+    "requirements_uncovered": []
+  },
+  "status": "completed",
+  "blocking_reason": ""
+}

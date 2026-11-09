@@ -1,0 +1,12 @@
+{
+  "run_id": "2026-11-09T15-00-00",
+  "requirement_version": null,
+  "confluence_page_id": "2228226",
+  "jira_project": "QA",
+  "testomat_project_id": "test-cc3c0",
+  "testomat_project_id_source": "argument",
+  "testomat_suite_id": null,
+  "started_at": "2026-11-09T15:00:00Z",
+  "status": "in_progress",
+  "human_override": null
+}

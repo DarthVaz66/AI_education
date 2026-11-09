@@ -1,0 +1,63 @@
+{
+  "run_id": "2026-11-09T18-00-00_0.5",
+  "requirement_version": "0.5",
+  "timestamp": "2026-11-09T18:30:00Z",
+  "result": "success",
+  "jira": {
+    "project": "QA",
+    "label": "qemu-manager-req-0.5",
+    "created": 29,
+    "existing": 0,
+    "failed": 0,
+    "stale": 0,
+    "items": [
+      { "temp_id": "T-01", "external_id": "QA-13" },
+      { "temp_id": "T-02", "external_id": "QA-14" },
+      { "temp_id": "T-03", "external_id": "QA-15" },
+      { "temp_id": "T-04", "external_id": "QA-16" },
+      { "temp_id": "T-05", "external_id": "QA-17" },
+      { "temp_id": "T-06", "external_id": "QA-18" },
+      { "temp_id": "T-07", "external_id": "QA-19" },
+      { "temp_id": "T-08", "external_id": "QA-20" },
+      { "temp_id": "T-09", "external_id": "QA-21" },
+      { "temp_id": "T-10", "external_id": "QA-22" },
+      { "temp_id": "T-11", "external_id": "QA-23" },
+      { "temp_id": "T-12", "external_id": "QA-24" },
+      { "temp_id": "T-13", "external_id": "QA-25" },
+      { "temp_id": "T-14", "external_id": "QA-26" },
+      { "temp_id": "T-15", "external_id": "QA-27" },
+      { "temp_id": "T-16", "external_id": "QA-28" },
+      { "temp_id": "T-17", "external_id": "QA-29" },
+      { "temp_id": "T-18", "external_id": "QA-30" },
+      { "temp_id": "T-19", "external_id": "QA-31" },
+      { "temp_id": "T-20", "external_id": "QA-32" },
+      { "temp_id": "T-21", "external_id": "QA-33" },
+      { "temp_id": "T-22", "external_id": "QA-34" },
+      { "temp_id": "T-23", "external_id": "QA-35" },
+      { "temp_id": "T-24", "external_id": "QA-36" },
+      { "temp_id": "T-25", "external_id": "QA-37" },
+      { "temp_id": "T-26", "external_id": "QA-38" },
+      { "temp_id": "T-27", "external_id": "QA-39" },
+      { "temp_id": "T-28", "external_id": "QA-40" },
+      { "temp_id": "T-29", "external_id": "QA-41" }
+    ]
+  },
+  "testomat": {
+    "project_id": "test-cc3c0",
+    "suite_id": "1c6e94ac",
+    "suite_title": "QEMU Manager — REQ v0.5 (Confluence 2228226)",
+    "created": 193,
+    "existing": 0,
+    "failed": 0,
+    "stale": 0,
+    "total_in_project": 193,
+    "by_type": { "positive": 74, "negative": 43, "boundary": 76 }
+  },
+  "notes": [
+    "Jira preflight by label 'qemu-manager-req-0.5': 0 existing; 29 created (QA-13..QA-41).",
+    "Testomat.io: root suite is not accepted ('Suite is required' on prior run) — created file-type suite 1c6e94ac.",
+    "Testomat bulk_upsert endpoint returned transient 'fetch failed'/'timed out' on large chunks; publishing was retried in smaller batches (<=31). A 66-test first attempt persisted only its final 16-test chunk; the remaining 50 were re-sent. No duplicates resulted.",
+    "Final reconciliation via testomat list: 193/193 cases present in suite 1c6e94ac (project total 193), all titles unique.",
+    "No stale items detected (no prior-run entities under this requirement_version)."
+  ]
+}

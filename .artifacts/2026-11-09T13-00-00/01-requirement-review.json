@@ -1,0 +1,21 @@
+{
+  "artifact_id": "2026-11-09T13-00-00:01-requirement-review",
+  "run_id": "2026-11-09T13-00-00",
+  "requirement_version": "draft-2026-11-09",
+  "confluence_page_id": "2129922",
+  "timestamp": "2026-11-09T13:00:00Z",
+  "findings": [
+    {
+      "id": "F-001",
+      "category": "completeness",
+      "severity": "critical",
+      "requirement_refs": ["DOCUMENT"],
+      "evidence": "Confluence page 2129922 «Требования тест 4» (version 1, space ~712020235d49aa26bb4f3e8f425cb4c132578a) retrieved with an empty body: `content: \"\"`. The page is accessible (read access confirmed) and authenticated, but contains no requirements, no REQ-IDs, no boundaries, no exceptions, no dependencies, no acceptance criteria, no NFRs and no Non-Goals.",
+      "impact": "The document has no requirements at all, so nothing can be reviewed for contradictions or ambiguities and no design/test design can be derived. There is no single requirement from which a deterministic Given/When/Then acceptance criterion could be built.",
+      "recommendation": "Populate the Confluence page with the actual requirements — scope/boundaries, numbered REQ-IDs, acceptance criteria, Non-Goals, NFRs, dependencies and exceptions — then re-run the requirement review."
+    }
+  ],
+  "severity_summary": { "blocker": 0, "critical": 1, "major": 0, "minor": 0 },
+  "status": "completed",
+  "blocking_reason": null
+}
