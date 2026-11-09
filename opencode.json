@@ -11,21 +11,17 @@
       },
       "enabled": true
     },
-    "qase": {
+    "testomat": {
       "type": "local",
-      "command": ["npx", "-y", "@qase/mcp-server"],
+      "command": [
+        "npx", "-y", "@testomatio/mcp@latest",
+        "--token", "{env:TESTOMATIO_PROJECT_TOKEN}",
+        "--project", "{env:TESTOMATIO_PROJECT_ID}"
+      ],
       "environment": {
-        "QASE_API_TOKEN": "{env:QASE_API_TOKEN}"
+        "TESTOMATIO_BASE_URL": "https://app.testomat.io"
       },
       "enabled": true
-    },
-    "artifact-store": {
-      "type": "local",
-      "command": ["npx", "-y", "@opendock/artifact-server-mcp"],
-      "environment": {
-        "ARTIFACT_SERVER_URL": "{env:ARTIFACT_SERVER_URL}"
-      },
-      "enabled": false
     }
   },
   "permission": {
