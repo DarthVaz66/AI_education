@@ -1,0 +1,24 @@
+{
+  "run_id": "2026-11-16_21-57-01",
+  "requirement_version": "0.5",
+  "jira": {
+    "project": "QEMU",
+    "label": "qemu-manager-req-0.5",
+    "created": 10,
+    "existing": 3,
+    "failed": 0,
+    "stale": 0,
+    "created_keys": ["QEMU-40", "QEMU-41", "QEMU-42", "QEMU-43", "QEMU-44", "QEMU-45", "QEMU-46", "QEMU-47", "QEMU-48", "QEMU-49"],
+    "existing_keys": ["QEMU-23", "QEMU-26", "QEMU-27"]
+  },
+  "testomat": {
+    "project_id": "test-cc3c0",
+    "suite_id": "93e1e30b",
+    "created": 106,
+    "existing": 0,
+    "failed": 0,
+    "stale": 0
+  },
+  "totals": { "created": 116, "existing": 3, "failed": 0, "stale": 0 },
+  "notes": "Preflight по метке qemu-manager-req-0.5 нашёл 20 ранее созданных задач (из прогона по странице 4161537); 3 из них совпали с design'ом (REQ-09/13/14) и помечены existing. Testomat: 113 ранее существовавших кейсов не совпали по title с текущей моделью; создано 106."
+}

@@ -488,10 +488,25 @@ preflight-поиском; они остаются orphaned и требуют р�
 
 ### 8. Report и финализация
 
-#### 8.1. `REPORT.md`
+#### 8.1. `REPORT.md` и итоговый ответ пользователю
 Сформировать `.artifacts/.current/REPORT.md` — `Final Report` при успехе,
 `Blocking Report` при остановке. В секции «Artifacts» указывать **финальные**
 пути `.artifacts/{run_id}/...` (после rename они станут валидны).
+
+**Полнота findings (обязательно).** И в `REPORT.md`, и в **итоговом текстовом
+ответе пользователю** приводить **полный** список `findings[]` из
+`01-requirement-review.json`: каждый finding — `id`, `category`, `severity`,
+`requirement_refs[]` и краткие `evidence`/`impact`. Запрещено перечислять
+только `blocker`/`critical` и опускать `major`/`minor` — полный перечень
+является частью наблюдаемого результата прогона.
+
+**Полная таблица гейтов.** Итоговый ответ (наравне с `REPORT.md`) обязан
+содержать таблицу критериев применённого **Gate 1** с фактическими
+значениями (`status`, `blocker`, `critical`, `major` vs
+`QA_GATE1_MAJOR_LIMIT`, `blocks design`, `prompt_injection blocker|critical`,
+непустой `requirements[]`) и строки итогов Gate 2a / 2b / 2c (или
+`not_started`), `publish`, `finalization`. Не ограничиваться фразой
+«Gate 1 = FAIL».
 
 #### 8.2. Обновить `.artifacts/.current/meta.json`
 `status = completed | blocked_transient | blocked_terminal | needs_input`.
@@ -520,8 +535,8 @@ preflight-поиском; они остаются orphaned и требуют р�
 Все пути — под `.artifacts/.current/`.
 
 **`01-requirement-review.json`**
-- обязательные поля: `artifact_id`, `requirement_version`, `timestamp`,
-  `requirements[]`, `findings[]`, `severity_summary`, `status`;
+- обязательные поля: `artifact_id`, `requirement_version`, `requirement_status`,
+  `timestamp`, `requirements[]`, `findings[]`, `severity_summary`, `status`;
 - `requirements[]` — массив, непустой при `status = completed`;
   - каждый элемент: `ref`, `title`, `text`, `acceptance_criteria[]`, `in_scope`;
   - `ref` уникален;
@@ -589,7 +604,7 @@ preflight-поиском; они остаются orphaned и требуют р�
 - `status == completed`;
 - `severity_summary.blocker == 0`;
 - `severity_summary.critical == 0`;
-- `severity_summary.major <= QA_GATE1_MAJOR_LIMIT` (env, по умолчанию `5`);
+- `severity_summary.major <= QA_GATE1_MAJOR_LIMIT` (env, в проекте задано `8`);
 - нет findings с `category = ambiguity` и `impact`, содержащим `blocks design`;
 - нет findings с `category = prompt_injection` и severity `blocker` или `critical`;
 - `requirements[]` непуст.
@@ -916,6 +931,10 @@ archived_previous: {path or "—"}
 - Gate 2b: PASS ({N cases: positive=X, negative=Y, boundary=Z, N/A=K})
 - Gate 2c: PASS (cross-check ok)
 
+## Findings
+- {ПОЛНЫЙ список findings — каждый: id, category, severity, requirement_refs,
+  краткий evidence/impact; при отсутствии — "none"}
+
 ## Gate retries
 - Gate 2a (Jira): attempts={N}/{QA_RETRY_LIMIT} → {pass|fail}
 - Gate 2b (Test):  attempts={M}/{QA_RETRY_LIMIT} → {pass|fail}
@@ -976,7 +995,9 @@ archived_previous: {path or "—"}
 {перечень невыполненного и почему; для blocking findings — Jira/Testomat create запрещён}
 
 ## Findings / Errors
-{findings или текст ошибки Tool}
+{ПОЛНЫЙ список findings из 01-requirement-review.json — каждый: id, category,
+severity, requirement_refs, краткий evidence/impact. Перечислять ВСЕ severities,
+а не только blocker/critical. Для ошибок Tool — текст ошибки}
 
 ## Action required from human
 {что именно нужно решить или подтвердить}

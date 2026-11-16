@@ -1,0 +1,350 @@
+{
+  "artifact_id": "2026-11-16_21-43-47:02-task-design",
+  "run_id": "2026-11-16_21-43-47",
+  "requirement_version": "0.5",
+  "timestamp": "2026-11-17T12:10:00Z",
+  "revision": 0,
+  "revision_notes": "",
+  "jira_params": { "project": "QEMU", "issue_type": "Task" },
+  "tasks": [
+    {
+      "temp_id": "T-01",
+      "task_kind": "implementation",
+      "summary": "Extension activates via startup/command/.qemu-manager.json and exposes 'QEMU: Connect'",
+      "description": "Расширение активируется по onStartupFinished, при вызове любой команды расширения либо при наличии файла `.qemu-manager.json` в корне рабочей области. Файл — только activation trigger: его содержимое не валидируется и не парсится. Контекст: cold activation измеряется на эталонной конфигурации (NFR/Производительность). Связь: ошибка активации переводит расширение в состояние degraded (Glossary), friendly-сообщения и логирование — по REQ-14.",
+      "acceptance_criteria": [
+        { "format": "given_when_then", "text": "Given расширение установлено, When VS Code доходит до onStartupFinished, Then команда `QEMU: Connect` доступна в Command Palette." },
+        { "format": "given_when_then", "text": "Given `.qemu-manager.json` присутствует в корне рабочей области, When расширение активируется, Then файл используется только как activation trigger (содержимое не читается и не валидируется)." },
+        { "format": "given_when_then", "text": "Given эталонная конфигурация (4 ядра CPU, 8 ГБ RAM, VS Code 1.85+, стандартный Extension Host), When выполняется cold activation, Then время активации ≤ 1.5 с." },
+        { "format": "given_when_then", "text": "Given активация завершилась ошибкой, When расширение переходит в состояние degraded, Then `degradedReason = \"activation_failed\"` и показано уведомление с действием «Retry»." },
+        { "format": "invariant", "text": "Отсутствие файла `.qemu-manager.json` не мешает активации по onStartupFinished или при вызове команды расширения." }
+      ],
+      "requirement_refs": ["REQ-01", "NFR/Производительность"],
+      "clarifies_findings": [],
+      "dependencies": [],
+      "dor_check": "pass",
+      "dor_failures": []
+    },
+    {
+      "temp_id": "T-02",
+      "task_kind": "implementation",
+      "summary": "VM tree groups VMs by connection with state, vCPU, RAM and No VMs / (stale) handling",
+      "description": "VM отображаются в боковой панели, сгруппированные по подключениям. Для каждой VM показываются имя, состояние (running / stopped / paused / suspended / crashed), vCPU и RAM в МБ. Сортировка по умолчанию — по имени, case-insensitive, по возрастанию. Связь: интервал обновления и подписка на события — по REQ-13.",
+      "acceptance_criteria": [
+        { "format": "invariant", "text": "Для каждой VM в дереве отображаются: имя, состояние (running / stopped / paused / suspended / crashed), vCPU, RAM в МБ." },
+        { "format": "given_when_then", "text": "Given подключение без VM, When дерево отрисовано, Then для этого подключения показан placeholder «No VMs»." },
+        { "format": "given_when_then", "text": "Given данные о состоянии VM временно недоступны, When дерево обновляется, Then отображается последнее известное состояние с суффиксом `(stale)`." },
+        { "format": "given_when_then", "text": "Given состояние VM изменилось, When дерево обновлено, Then группировка по подключениям и сортировка по имени (case-insensitive, по возрастанию) соблюдены." }
+      ],
+      "requirement_refs": ["REQ-03"],
+      "clarifies_findings": [],
+      "dependencies": [],
+      "dor_check": "pass",
+      "dor_failures": []
+    },
+    {
+      "temp_id": "T-03",
+      "task_kind": "implementation",
+      "summary": "Start command moves stopped/crashed VM to running",
+      "description": "Команда «Start» доступна только для VM в состоянии stopped или crashed. Переход из crashed реализуется как destroy + start. Связь: ошибки libvirt/QMP обрабатываются и логируются по REQ-14; тайминговый AC измеряется на эталонной конфигурации (NFR/Производительность).",
+      "acceptance_criteria": [
+        { "format": "given_when_then", "text": "Given VM в состоянии stopped, When выполнена команда «Start», Then VM переходит в running в течение 5 с (эталонная конфигурация)." },
+        { "format": "given_when_then", "text": "Given VM в состоянии crashed, When выполнена команда «Start», Then сначала выполняется destroy, затем start, и VM переходит в running в течение 5 с." },
+        { "format": "invariant", "text": "Для состояний running / paused / suspended команда «Start» disabled." },
+        { "format": "given_when_then", "text": "Given ошибка libvirt при выполнении «Start», When операция завершается, Then состояние VM не меняется и показано уведомление с действием «Show log» по REQ-14." }
+      ],
+      "requirement_refs": ["REQ-08", "NFR/Производительность"],
+      "clarifies_findings": [],
+      "dependencies": [],
+      "dor_check": "pass",
+      "dor_failures": []
+    },
+    {
+      "temp_id": "T-04",
+      "task_kind": "implementation",
+      "summary": "Graceful shutdown sends ACPI request with configurable timeout dialog",
+      "description": "Команда «Shutdown» доступна только для VM в состоянии running и отправляет ACPI-запрос завершения. Таймаут берётся из workspace settings: целое 5–300 секунд, по умолчанию 30. По истечении таймаута при всё ещё running показывается диалог «Force stop» / «Wait more» / «Cancel». Связь: «Force stop» вызывает REQ-10 (T-05); «Cancel» не отзывает ACPI-запрос, дальнейшие изменения состояния отражаются по REQ-13; ошибки — по REQ-14.",
+      "acceptance_criteria": [
+        { "format": "given_when_then", "text": "Given VM в состоянии running, When выполнена команда «Shutdown», Then отправлен ACPI-запрос завершения и диалог не появляется сразу." },
+        { "format": "given_when_then", "text": "Given N секунд истекло (N = значение настройки, по умолчанию 30), When VM всё ещё running, Then показан диалог с действиями «Force stop» / «Wait more» / «Cancel»." },
+        { "format": "given_when_then", "text": "Given VM перешла в stopped до истечения таймаута, When таймер истекает, Then диалог не появляется." },
+        { "format": "given_when_then", "text": "Given значение настройки таймаута вне диапазона 5–300, When настройка применяется, Then в настройке показан inline error." },
+        { "format": "given_when_then", "text": "Given диалог показан, When выбрано «Force stop», Then выполняется команда REQ-10." },
+        { "format": "given_when_then", "text": "Given диалог показан, When выбрано «Wait more», Then таймер перезапускается с тем же значением." },
+        { "format": "given_when_then", "text": "Given диалог показан, When выбрано «Cancel», Then диалог закрывается, отправленный ACPI-запрос не отзывается, дальнейшие изменения состояния отражаются по REQ-13." },
+        { "format": "invariant", "text": "Для состояний stopped / paused / suspended / crashed команда «Shutdown» disabled." },
+        { "format": "given_when_then", "text": "Given ошибка libvirt при выполнении «Shutdown», When операция завершается, Then состояние VM не меняется и показано уведомление по REQ-14." }
+      ],
+      "requirement_refs": ["REQ-09"],
+      "clarifies_findings": [],
+      "dependencies": ["T-05"],
+      "dor_check": "pass",
+      "dor_failures": []
+    },
+    {
+      "temp_id": "T-05",
+      "task_kind": "implementation",
+      "summary": "Force stop moves running/paused VM to stopped with optional confirmation",
+      "description": "Команда «Force stop» доступна для VM в состоянии running или paused и немедленно завершает процесс VM. Перед выполнением показывается подтверждение с именем VM и предупреждением «Unsaved data may be lost» при `qemuManager.confirmForceStop = true` (по умолчанию); при false — без диалога. Связь: ошибки libvirt — по REQ-14; тайминговый AC измеряется на эталонной конфигурации (NFR/Производительность).",
+      "acceptance_criteria": [
+        { "format": "given_when_then", "text": "Given VM в состоянии running, When выполнена команда «Force stop», Then VM переходит в stopped в течение 3 с (эталонная конфигурация)." },
+        { "format": "given_when_then", "text": "Given VM в состоянии paused, When выполнена команда «Force stop», Then VM переходит в stopped в течение 3 с." },
+        { "format": "invariant", "text": "Для состояний stopped / suspended / crashed команда «Force stop» disabled." },
+        { "format": "given_when_then", "text": "Given `qemuManager.confirmForceStop = true`, When вызвана «Force stop», Then показан диалог подтверждения с именем VM и предупреждением «Unsaved data may be lost»." },
+        { "format": "given_when_then", "text": "Given `qemuManager.confirmForceStop = false`, When вызвана «Force stop», Then команда выполняется без диалога." },
+        { "format": "given_when_then", "text": "Given диалог подтверждения показан, When пользователь отменяет диалог, Then состояние VM не меняется." },
+        { "format": "given_when_then", "text": "Given ошибка libvirt при выполнении «Force stop», When операция завершается, Then состояние VM не меняется и показано уведомление по REQ-14." }
+      ],
+      "requirement_refs": ["REQ-10", "NFR/Производительность"],
+      "clarifies_findings": [],
+      "dependencies": [],
+      "dor_check": "pass",
+      "dor_failures": []
+    },
+    {
+      "temp_id": "T-06",
+      "task_kind": "implementation",
+      "summary": "Pause and Resume transition between running and paused",
+      "description": "«Pause» доступна для running и переводит VM в paused. «Resume» — единая контекстная команда: для paused выполняет возобновление (paused → running), для suspended — поведение по REQ-21. Связь: ветка suspended + Resume зависит от T-11 (REQ-21); ошибки libvirt — по REQ-14; тайминговый AC измеряется на эталонной конфигурации (NFR/Производительность).",
+      "acceptance_criteria": [
+        { "format": "given_when_then", "text": "Given VM в состоянии running, When выполнена команда «Pause», Then VM переходит в paused в течение 3 с (эталонная конфигурация)." },
+        { "format": "given_when_then", "text": "Given VM в состоянии paused, When выполнена команда «Resume», Then VM переходит в running в течение 3 с." },
+        { "format": "given_when_then", "text": "Given VM в состоянии suspended, When выполнена команда «Resume», Then поведение соответствует REQ-21." },
+        { "format": "invariant", "text": "Для случаев paused + Pause, stopped + Pause, stopped + Resume команда disabled." },
+        { "format": "given_when_then", "text": "Given ошибка libvirt при выполнении Pause/Resume, When операция завершается, Then состояние VM не меняется и показано уведомление по REQ-14." }
+      ],
+      "requirement_refs": ["REQ-11", "NFR/Производительность"],
+      "clarifies_findings": [],
+      "dependencies": ["T-11"],
+      "dor_check": "pass",
+      "dor_failures": []
+    },
+    {
+      "temp_id": "T-07",
+      "task_kind": "implementation",
+      "summary": "Automatic state refresh via polling or libvirt events with configurable interval",
+      "description": "Интервал обновления — workspace setting: 0 (только ручное обновление, без polling и без подписки на события) или 1–60 секунд; по умолчанию 5. При interval > 0 и `domainEventSupport` подписка на события вместо polling; при невозможности подписки — откат к polling с warning в лог. Кнопка «Refresh» доступна всегда.",
+      "acceptance_criteria": [
+        { "format": "given_when_then", "text": "Given интервал = 0, When расширение работает, Then выполняется только ручное обновление, polling и подписка на события не выполняются." },
+        { "format": "given_when_then", "text": "Given интервал = 1, When polling активен, Then состояние обновляется каждые 1 с." },
+        { "format": "given_when_then", "text": "Given интервал = 60, When polling активен, Then состояние обновляется каждые 60 с." },
+        { "format": "given_when_then", "text": "Given интервал = 61, When настройка применяется, Then в настройке показан inline error." },
+        { "format": "given_when_then", "text": "Given `domainEventSupport = true` и interval > 0, When состояние обновляется, Then выполняется подписка на события, polling не выполняется." },
+        { "format": "given_when_then", "text": "Given подписка на события не удалась, When interval > 0, Then выполняется откат к polling и в лог записывается warning без пользовательской ошибки." },
+        { "format": "invariant", "text": "Кнопка «Refresh» доступна всегда, независимо от значения интервала." }
+      ],
+      "requirement_refs": ["REQ-13"],
+      "clarifies_findings": [],
+      "dependencies": [],
+      "dor_check": "pass",
+      "dor_failures": []
+    },
+    {
+      "temp_id": "T-08",
+      "task_kind": "implementation",
+      "summary": "Friendly libvirt/QMP error mapping, redacted logging and Show log",
+      "description": "Ошибки libvirt/QMP маппятся в friendly-сообщения по таблице (VIR_ERR_NO_CONNECT/VIR_ERR_INVALID_CONN → «Connection refused»; VIR_ERR_AUTH_FAILED/CANCELLED → «Authentication failed»; VIR_ERR_NO_DOMAIN → «VM not found»; VIR_ERR_OPERATION_UNSUPPORTED/NO_SUPPORT → «Operation not supported»; VIR_ERR_DISK_FULL/ENOSPC → «Disk full»; QMP GenericError No space left → «Disk full»; QMP CommandNotFound/KVMMissingCap → «Operation not supported»; QMP DeviceNotFound → «VM not found»; unmapped → «Unexpected error: {code}»). Логирование в Output Channel «QEMU Manager», ring buffer 10 000 строк, уровни error/info/debug (default info). Redaction: passwords, tokens, SSH private keys, URI с embedded credentials `user:pass@host`, env-переменные Extension Host (подстрочно, case-insensitive).",
+      "acceptance_criteria": [
+        { "format": "given_when_then", "text": "Given libvirt/QMP-ошибка из таблицы маппинга, When операция завершается ошибкой, Then показано friendly-сообщение (например, `VIR_ERR_NO_CONNECT` → «Connection refused») без raw stack trace." },
+        { "format": "given_when_then", "text": "Given уведомление с действием «Show log», When действие активировано, Then открывается Output Channel «QEMU Manager» и фокусируется последняя запись." },
+        { "format": "given_when_then", "text": "Given ошибка не входит в таблицу маппинга, When операция завершается, Then показан fallback «Unexpected error: {code}»." },
+        { "format": "invariant", "text": "Формат строки лога: `YYYY-MM-DDTHH:MM:SSZ [LEVEL] [conn:vm] message`, где conn/vm — display names; запись без VM и подключения → `[system:-]`, запись с подключением без VM → `[conn:-]`." },
+        { "format": "invariant", "text": "Каждая команда пишет info или debug, ошибочные ответы пишутся как error; ring buffer хранит последние 10 000 строк; изменение уровня применяется немедленно." },
+        { "format": "given_when_then", "text": "Given в лог попадает строка, содержащая password, token, SSH private key, URI с embedded credentials `user:pass@host` или env-переменную Extension Host (совпадение подстрочное, case-insensitive), When строка записывается, Then значение отредактировано и лог не содержит секретов." }
+      ],
+      "requirement_refs": ["REQ-14"],
+      "clarifies_findings": [],
+      "dependencies": [],
+      "dor_check": "pass",
+      "dor_failures": []
+    },
+    {
+      "temp_id": "T-09",
+      "task_kind": "implementation",
+      "summary": "Default Start/Shutdown hotkeys on Windows, Linux and macOS",
+      "description": "По умолчанию Windows/Linux: `Ctrl+Alt+Shift+Q` → Start, `Ctrl+Alt+Shift+W` → Shutdown. macOS: `Cmd+Alt+Shift+Q` → Start, `Cmd+Alt+Shift+W` → Shutdown. Комбинации настраиваются через Keybindings UI VS Code. Команда срабатывает только если выбрана VM и команда применима к её состоянию. Платформы различаются модификатором (Ctrl/Cmd). Связь: команды Start (T-03) и Shutdown (T-04).",
+      "acceptance_criteria": [
+        { "format": "given_when_then", "text": "Given выбрана VM в применимом состоянии и ОС Windows или Linux, When нажата `Ctrl+Alt+Shift+Q` (Start) или `Ctrl+Alt+Shift+W` (Shutdown), Then соответствующая команда выполняется." },
+        { "format": "given_when_then", "text": "Given ОС macOS, When нажата `Cmd+Alt+Shift+Q` (Start) или `Cmd+Alt+Shift+W` (Shutdown), Then соответствующая команда выполняется." },
+        { "format": "invariant", "text": "Дефолтные биндинги не конфликтуют с built-in VS Code." },
+        { "format": "given_when_then", "text": "Given у выбранной VM неприменимое состояние, When нажата комбинация, Then биндинг не срабатывает." },
+        { "format": "given_when_then", "text": "Given пользовательский биндинг задан через Keybindings JSON, When нажата комбинация, Then команда выполняется." },
+        { "format": "given_when_then", "text": "Given конфликт с другим расширением, When возникает конфликт, Then показано стандартное предупреждение VS Code и расширение не переопределяет биндинг." }
+      ],
+      "requirement_refs": ["REQ-17"],
+      "clarifies_findings": [],
+      "dependencies": ["T-03", "T-04"],
+      "dor_check": "pass",
+      "dor_failures": []
+    },
+    {
+      "temp_id": "T-10",
+      "task_kind": "implementation",
+      "summary": "Opt-in telemetry with schema-conform payload and no PII",
+      "description": "Телеметрия по умолчанию отключена и включается только явно через first-run notification или `qemuManager.telemetry.enabled`. Payload schema: `{ \"action\": string, \"success\": boolean, \"error_code\": string | null, \"duration_ms\": integer (≥ 0), \"extension_version\": string (semver), \"os_family\": \"windows\" | \"macos\" | \"linux\" }`. Payload не содержит имён VM, путей к файлам, IP-адресов, URI/пользователей подключений, hostname.",
+      "acceptance_criteria": [
+        { "format": "given_when_then", "text": "Given телеметрия отключена (по умолчанию), When расширение работает, Then сетевые вызовы телеметрии не выполняются." },
+        { "format": "given_when_then", "text": "Given телеметрия включена через first-run notification или `qemuManager.telemetry.enabled`, When отправляется событие, Then payload соответствует схеме (все поля присутствуют, типы соблюдены) и не содержит имён VM, путей к файлам, IP-адресов, URI/пользователей подключений, hostname." },
+        { "format": "given_when_then", "text": "Given показано first-run notification, When пользователь отказывается от телеметрии, Then настройка остаётся false и повторное уведомление появится не раньше 30 дней." }
+      ],
+      "requirement_refs": ["REQ-19"],
+      "clarifies_findings": [],
+      "dependencies": [],
+      "dor_check": "pass",
+      "dor_failures": []
+    },
+    {
+      "temp_id": "T-11",
+      "task_kind": "implementation",
+      "summary": "Suspend/Resume moves VM to S3 sleep and back with command gating",
+      "description": "«Suspend» доступна для running и переводит VM в S3-сон (`VIR_DOMAIN_PMSUSPENDED`). Resume возвращает VM в running. Пока VM в suspended, команды Start, Shutdown, Force stop, Pause недоступны с tooltip «Resume VM first». Связь: ошибки libvirt — по REQ-14; тайминговый AC измеряется на эталонной конфигурации (NFR/Производительность).",
+      "acceptance_criteria": [
+        { "format": "given_when_then", "text": "Given VM в состоянии running, When выполнена команда «Suspend», Then VM переходит в suspended (`VIR_DOMAIN_PMSUSPENDED`) в течение 5 с (эталонная конфигурация)." },
+        { "format": "given_when_then", "text": "Given VM в состоянии suspended, When выполнена команда «Resume», Then VM переходит в running в течение 5 с." },
+        { "format": "invariant", "text": "Пока VM в состоянии suspended, команды Start, Shutdown, Force stop, Pause disabled с tooltip «Resume VM first»." },
+        { "format": "given_when_then", "text": "Given ошибка libvirt при выполнении Suspend/Resume, When операция завершается, Then состояние VM не меняется и показано уведомление по REQ-14." }
+      ],
+      "requirement_refs": ["REQ-21", "NFR/Производительность"],
+      "clarifies_findings": [],
+      "dependencies": [],
+      "dor_check": "pass",
+      "dor_failures": []
+    },
+    {
+      "temp_id": "T-12",
+      "task_kind": "implementation",
+      "summary": "Crashed VM detection with warning icon and Start-based recovery",
+      "description": "crashed соответствует `VIR_DOMAIN_CRASHED`: QEMU-процесс завершился аварийно, но домен остаётся определён. libvirt-режим: events или polling по `virDomainGetState`; QMP-only: event SHUTDOWN с reason `guest-panic` или polling `query-status` с `internal-error` / `shutdown` + reason. Отображение: предупреждающая иконка и tooltip «VM crashed unexpectedly. Use Start to recover.». Связь: латентность детекции привязана к интервалу обновления REQ-13 (T-07); восстановление через «Start» — REQ-08 (T-03).",
+      "acceptance_criteria": [
+        { "format": "given_when_then", "text": "Given QEMU-процесс внешне убит, When проходит интервал обновления (REQ-13), Then VM отображается в состоянии crashed." },
+        { "format": "given_when_then", "text": "Given VM в состоянии crashed, When выполнена команда «Start», Then VM переходит в running в течение 5 с." },
+        { "format": "invariant", "text": "crashed отображается с предупреждающей иконкой и tooltip «VM crashed unexpectedly. Use Start to recover.»." }
+      ],
+      "requirement_refs": ["REQ-22"],
+      "clarifies_findings": [],
+      "dependencies": ["T-07", "T-03"],
+      "dor_check": "pass",
+      "dor_failures": []
+    },
+    {
+      "temp_id": "T-13",
+      "task_kind": "clarification",
+      "summary": "[Clarification] F-001: отсутствует раздел Non-Goals",
+      "description": "Evidence: страница не содержит раздела Non-Goals: после Glossary идут только разделы REQ-01 … REQ-22; единственные секции — NFR/Производительность, Glossary и REQ-*. Impact: границы scope не зафиксированы, невозможно отличить in-scope поведение от сознательно исключённого (конфигурация/создание VM, bridge, миграции); возможны кейсы на нереализуемое поведение. Recommendation: добавить раздел Non-Goals с явным перечнем того, что в scope не входит (создание/удаление VM, сетевые настройки, миграции и т.п.).",
+      "acceptance_criteria": [
+        { "format": "given_when_then", "text": "Given finding F-001 (отсутствует раздел Non-Goals), When требование уточнено и requirement-review перевыпущен, Then finding F-001 отсутствует или его severity снижена." }
+      ],
+      "requirement_refs": [],
+      "clarifies_findings": ["F-001"],
+      "dependencies": [],
+      "dor_check": "pass",
+      "dor_failures": []
+    },
+    {
+      "temp_id": "T-14",
+      "task_kind": "clarification",
+      "summary": "[Clarification] F-002: отсутствуют номера REQ-02, REQ-04..07, REQ-12, REQ-15..16, REQ-18, REQ-20",
+      "description": "Evidence: присутствуют только REQ-01, REQ-03, REQ-08, REQ-09, REQ-10, REQ-11, REQ-13, REQ-14, REQ-17, REQ-19, REQ-21, REQ-22; отсутствуют REQ-02, REQ-04–07, REQ-12, REQ-15–16, REQ-18, REQ-20 при сплошной нумерации v0.5. Impact: невозможно проверить полноту и трассируемость — либо часть требований потеряна при публикации, либо нумерация не соответствует составу. Recommendation: подтвердить/восстановить отсутствующие номера REQ либо явно зафиксировать, что разрывы нумерации намеренны (одной агрегированной записью).",
+      "acceptance_criteria": [
+        { "format": "given_when_then", "text": "Given finding F-002 (пропущенные номера REQ), When требование уточнено и requirement-review перевыпущен, Then finding F-002 отсутствует или его severity снижена." }
+      ],
+      "requirement_refs": [],
+      "clarifies_findings": ["F-002"],
+      "dependencies": [],
+      "dor_check": "pass",
+      "dor_failures": []
+    },
+    {
+      "temp_id": "T-15",
+      "task_kind": "clarification",
+      "summary": "[Clarification] F-003: значения Glossary partially_completed и runtime_missing не покрыты требованиями",
+      "description": "Evidence: Glossary вводит значения, не покрытые ни одним REQ — `Operation outcome` = completed / failed / partially_completed («Не является состоянием VM») и допустимый `degradedReason` = activation_failed / runtime_missing. Impact: для `partially_completed` и `runtime_missing` нет требования, описывающего, когда они возникают и как проверяются. Recommendation: добавить REQ, порождающие эти значения (условия установки runtime_missing; сценарии partially_completed), либо убрать неиспользуемые значения из глоссария.",
+      "acceptance_criteria": [
+        { "format": "given_when_then", "text": "Given finding F-003 (значения Glossary без порождающих REQ), When требование уточнено и requirement-review перевыпущен, Then finding F-003 отсутствует или его severity снижена." }
+      ],
+      "requirement_refs": [],
+      "clarifies_findings": ["F-003"],
+      "dependencies": [],
+      "dor_check": "pass",
+      "dor_failures": []
+    },
+    {
+      "temp_id": "T-16",
+      "task_kind": "clarification",
+      "summary": "[Clarification] F-004: не определён квантор 'ориентировочные' для тайминговых AC вне эталонной конфигурации",
+      "description": "Evidence: NFR/Производительность — «Тайминговые AC … измеряются на эталонной конфигурации … На других конфигурациях значения ориентировочные.» Impact: «ориентировочные» — квантор без границ; на не-эталонной конфигурации нельзя вывести детерминированный pass/fail. Recommendation: зафиксировать, что все тайминговые AC валидируются только на эталонной конфигурации, и явно объявить остальные конфигурации вне критериев приёмки (либо задать допустимый коэффициент).",
+      "acceptance_criteria": [
+        { "format": "given_when_then", "text": "Given finding F-004 (неоднозначность тайминговых AC вне эталона), When требование уточнено и requirement-review перевыпущен, Then finding F-004 отсутствует или его severity снижена." }
+      ],
+      "requirement_refs": ["NFR/Производительность"],
+      "clarifies_findings": ["F-004"],
+      "dependencies": [],
+      "dor_check": "pass",
+      "dor_failures": []
+    },
+    {
+      "temp_id": "T-17",
+      "task_kind": "clarification",
+      "summary": "[Clarification] F-005: не определено условие 'временной недоступности' и переход (stale)",
+      "description": "Evidence: REQ-03 — «при временной недоступности данных отображается последнее известное состояние с суффиксом `(stale)`»; «временная недоступность» не определена (нет порога/длительности), не задано правило перехода stale→ошибка. Impact: недетерминированный AC: неясно, сколько и при каких условиях показывать (stale), чем это отличается от ошибки, и как согласуется с интервалом обновления REQ-13 (в т.ч. при interval = 0). Recommendation: определить условие/длительность «временной недоступности», момент снятия метки (stale) и поведение при interval = 0.",
+      "acceptance_criteria": [
+        { "format": "given_when_then", "text": "Given finding F-005 (неопределённое условие stale), When требование уточнено и requirement-review перевыпущен, Then finding F-005 отсутствует или его severity снижена." }
+      ],
+      "requirement_refs": ["REQ-03", "REQ-13"],
+      "clarifies_findings": ["F-005"],
+      "dependencies": [],
+      "dor_check": "pass",
+      "dor_failures": []
+    },
+    {
+      "temp_id": "T-18",
+      "task_kind": "clarification",
+      "summary": "[Clarification] F-007: не определены 'ошибка активации' и эффект действия Retry",
+      "description": "Evidence: REQ-01 AC — «ошибка активации → состояние degraded … уведомление с действием „Retry“»; не определено, что считается «ошибкой активации» и что делает действие «Retry». Impact: поведение «Retry» (повторная активация? перезапуск расширения? сброс degraded?) не специфицировано → кнопка не тестируема, trigger перехода в degraded неоднозначен. Recommendation: описать множество условий «ошибки активации» и точно определить эффект действия «Retry» и его результат.",
+      "acceptance_criteria": [
+        { "format": "given_when_then", "text": "Given finding F-007 (неопределённые activation error и Retry), When требование уточнено и requirement-review перевыпущен, Then finding F-007 отсутствует или его severity снижена." }
+      ],
+      "requirement_refs": ["REQ-01"],
+      "clarifies_findings": ["F-007"],
+      "dependencies": [],
+      "dor_check": "pass",
+      "dor_failures": []
+    },
+    {
+      "temp_id": "T-19",
+      "task_kind": "clarification",
+      "summary": "[Clarification] F-008: не задан перечень подстрок-триггеров для redaction env-переменных",
+      "description": "Evidence: REQ-14 — redaction «env-переменные процесса Extension Host»; «Сопоставление имён env-переменных — подстрочное, case-insensitive; … (например, `MONKEY` содержит `KEY`)»; перечень подстрок-триггеров не задан. Impact: AC «лог не содержит секретов после redaction» неверифицируем без закрытого списка триггер-подстрок. Recommendation: перечислить подстроки-триггеры (KEY, TOKEN, PASS, SECRET, …) либо сослаться на конкретный список/политику.",
+      "acceptance_criteria": [
+        { "format": "given_when_then", "text": "Given finding F-008 (отсутствует список триггер-подстрок redaction), When требование уточнено и requirement-review перевыпущен, Then finding F-008 отсутствует или его severity снижена." }
+      ],
+      "requirement_refs": ["REQ-14"],
+      "clarifies_findings": ["F-008"],
+      "dependencies": [],
+      "dor_check": "pass",
+      "dor_failures": []
+    },
+    {
+      "temp_id": "T-20",
+      "task_kind": "clarification",
+      "summary": "[Clarification] F-009: friendly-ошибки для degraded/runtime_missing не определены в REQ-14",
+      "description": "Evidence: Glossary (Degraded) — «В degraded дерево пустое, все команды возвращают friendly-ошибку по REQ-14»; REQ-14 задаёт отображение только для ошибок libvirt/QMP, маппинга для degraded / runtime_missing там нет. Impact: ссылка на REQ-14 не обеспечена определением; поведение «friendly-ошибки для всех команд» вне сети libvirt/QMP не специфицировано → неверифицируемо. Recommendation: либо добавить в REQ-14 маппинг для degraded/runtime_missing, либо явно определить friendly-сообщения для degraded отдельно от libvirt/QMP-таблицы.",
+      "acceptance_criteria": [
+        { "format": "given_when_then", "text": "Given finding F-009 (нет маппинга friendly-ошибок для degraded/runtime_missing), When требование уточнено и requirement-review перевыпущен, Then finding F-009 отсутствует или его severity снижена." }
+      ],
+      "requirement_refs": ["REQ-14", "REQ-01"],
+      "clarifies_findings": ["F-009"],
+      "dependencies": [],
+      "dor_check": "pass",
+      "dor_failures": []
+    }
+  ],
+  "duplicates": [],
+  "trace_coverage": {
+    "requirements_covered": ["NFR/Производительность", "REQ-01", "REQ-03", "REQ-08", "REQ-09", "REQ-10", "REQ-11", "REQ-13", "REQ-14", "REQ-17", "REQ-19", "REQ-21", "REQ-22"],
+    "requirements_uncovered": [],
+    "clarification_findings_covered": ["F-001", "F-002", "F-003", "F-004", "F-005", "F-007", "F-008", "F-009"]
+  },
+  "status": "completed",
+  "blocking_reason": ""
+}

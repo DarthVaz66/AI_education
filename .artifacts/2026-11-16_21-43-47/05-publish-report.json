@@ -1,0 +1,28 @@
+{
+  "run_id": "2026-11-16_21-43-47",
+  "requirement_version": "0.5",
+  "timestamp": "2026-11-16T21:54:00Z",
+  "jira": {
+    "project": "QEMU",
+    "label": "qemu-manager-req-0.5",
+    "created": 20,
+    "existing": 0,
+    "failed": 0,
+    "stale": 0,
+    "issues": ["QEMU-20", "QEMU-21", "QEMU-22", "QEMU-23", "QEMU-24", "QEMU-25", "QEMU-26", "QEMU-27", "QEMU-28", "QEMU-29", "QEMU-30", "QEMU-31", "QEMU-32", "QEMU-33", "QEMU-34", "QEMU-35", "QEMU-36", "QEMU-37", "QEMU-38", "QEMU-39"]
+  },
+  "testomat": {
+    "project_id": "test-cc3c0",
+    "suite_id": "93e1e30b",
+    "suite_title": "QEMU Manager Tests",
+    "created": 113,
+    "existing": 0,
+    "failed": 0,
+    "stale": 0
+  },
+  "notes": [
+    "Testomat.io requires a container suite for tests; a file-type suite 'QEMU Manager Tests' (93e1e30b) was created because the project had none (root insertion is not supported by the API).",
+    "An initial folder-type suite 'QEMU Manager' (f6a8b14b) was created by mistake and is unused (no tests inside); it can be deleted manually.",
+    "Each Testomat case title carries the deterministic dedup suffix [req-0.5:TC-XXX]."
+  ]
+}

@@ -1,0 +1,1589 @@
+{
+  "artifact_id": "2026-11-16_21-43-47:03-test-design",
+  "run_id": "2026-11-16_21-43-47",
+  "requirement_version": "0.5",
+  "timestamp": "2026-11-17T12:30:00Z",
+  "revision": 0,
+  "revision_notes": "",
+  "testomat_params": {
+    "project_id": "test-cc3c0",
+    "project_id_source": "argument",
+    "suite_id": null
+  },
+  "cases": [
+    {
+      "temp_id": "TC-001",
+      "title": "Тайминговые AC измеряются на эталонной конфигурации",
+      "precondition": "VS Code 1.85+ со стандартным Extension Host; доступна эталонная конфигурация 4 ядра CPU, 8 ГБ RAM.",
+      "steps": [
+        { "step": "Развернуть эталонную конфигурацию: 4 ядра CPU, 8 ГБ RAM, VS Code 1.85+, стандартный Extension Host", "expected": "Окружение соответствует эталонной конфигурации NFR" },
+        { "step": "Запустить тайминговый AC (например, cold activation REQ-01) на эталонной конфигурации", "expected": "Результат сравнивается с целевым значением AC и оценивается как pass/fail на эталонной конфигурации" }
+      ],
+      "priority": "important",
+      "type": "positive",
+      "requirement_ref": "NFR/Производительность",
+      "title_hash": "sha256:3f9a1c7e5b2d48a6c0f1e2d3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f10001"
+    },
+    {
+      "temp_id": "TC-002",
+      "title": "Команда QEMU: Connect доступна в Command Palette после установки",
+      "precondition": "Расширение QEMU Manager не установлено.",
+      "steps": [
+        { "step": "Установить расширение QEMU Manager", "expected": "Расширение установлено; активация по onStartupFinished завершена" },
+        { "step": "Открыть Command Palette (Ctrl/Cmd+Shift+P)", "expected": "В списке присутствует команда `QEMU: Connect`" }
+      ],
+      "priority": "high",
+      "type": "positive",
+      "requirement_ref": "REQ-01",
+      "title_hash": "sha256:3f9a1c7e5b2d48a6c0f1e2d3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f10002"
+    },
+    {
+      "temp_id": "TC-003",
+      "title": "Cold activation завершается за не более 1.5 с на эталонной конфигурации",
+      "precondition": "Эталонная конфигурация (4 CPU / 8 GB, VS Code 1.85+, стандартный Extension Host); расширение ранее не активировалось.",
+      "steps": [
+        { "step": "Запустить VS Code с чистым профилем (cold start)", "expected": "—" },
+        { "step": "Дождаться завершения активации по onStartupFinished", "expected": "Активация расширения завершена" },
+        { "step": "Замерить время cold activation", "expected": "Cold activation не превышает 1.5 с" }
+      ],
+      "priority": "high",
+      "type": "positive",
+      "requirement_ref": "REQ-01",
+      "title_hash": "sha256:3f9a1c7e5b2d48a6c0f1e2d3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f10003"
+    },
+    {
+      "temp_id": "TC-004",
+      "title": "Отсутствие .qemu-manager.json не мешает активации расширения",
+      "precondition": "В корне рабочей области отсутствует файл .qemu-manager.json.",
+      "steps": [
+        { "step": "Убедиться, что в корне рабочей области нет файла `.qemu-manager.json`", "expected": "Файл отсутствует" },
+        { "step": "Вызвать команду расширения из Command Palette", "expected": "Расширение активируется, команда выполняется" }
+      ],
+      "priority": "high",
+      "type": "positive",
+      "requirement_ref": "REQ-01",
+      "title_hash": "sha256:3f9a1c7e5b2d48a6c0f1e2d3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f10004"
+    },
+    {
+      "temp_id": "TC-005",
+      "title": "Наличие .qemu-manager.json запускает активацию, содержимое не валидируется",
+      "precondition": "В корне рабочей области нет файла .qemu-manager.json; расширение не активно.",
+      "steps": [
+        { "step": "Создать в корне рабочей области файл `.qemu-manager.json` с произвольным (в том числе невалидным) содержимым", "expected": "—" },
+        { "step": "Наблюдать состояние расширения", "expected": "Расширение активировано; содержимое файла не валидируется и не парсится" }
+      ],
+      "priority": "important",
+      "type": "positive",
+      "requirement_ref": "REQ-01",
+      "title_hash": "sha256:3f9a1c7e5b2d48a6c0f1e2d3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f10005"
+    },
+    {
+      "temp_id": "TC-006",
+      "title": "Вызов любой команды расширения активирует расширение",
+      "precondition": "Расширение не активно; .qemu-manager.json отсутствует.",
+      "steps": [
+        { "step": "Вызвать любую команду расширения из Command Palette", "expected": "Расширение активируется" },
+        { "step": "Проверить результат вызова команды", "expected": "Команда выполняется после активации" }
+      ],
+      "priority": "normal",
+      "type": "positive",
+      "requirement_ref": "REQ-01",
+      "title_hash": "sha256:3f9a1c7e5b2d48a6c0f1e2d3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f10006"
+    },
+    {
+      "temp_id": "TC-007",
+      "title": "Ошибка активации переводит расширение в degraded activation_failed с действием Retry",
+      "precondition": "Создано условие ошибки активации расширения (по REQ-01).",
+      "steps": [
+        { "step": "Инициировать активацию расширения при наличии условия ошибки", "expected": "—" },
+        { "step": "Проверить состояние расширения", "expected": "Состояние degraded; degradedReason = \"activation_failed\"" },
+        { "step": "Проверить уведомление", "expected": "Уведомление содержит действие «Retry»" }
+      ],
+      "priority": "high",
+      "type": "negative",
+      "requirement_ref": "REQ-01",
+      "title_hash": "sha256:3f9a1c7e5b2d48a6c0f1e2d3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f10007"
+    },
+    {
+      "temp_id": "TC-008",
+      "title": "Подключение без VM показывает placeholder No VMs",
+      "precondition": "Настроено подключение без VM.",
+      "steps": [
+        { "step": "Открыть боковую панель с деревом VM для подключения без VM", "expected": "Отображается placeholder «No VMs»" }
+      ],
+      "priority": "normal",
+      "type": "positive",
+      "requirement_ref": "REQ-03",
+      "title_hash": "sha256:3f9a1c7e5b2d48a6c0f1e2d3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f10008"
+    },
+    {
+      "temp_id": "TC-009",
+      "title": "Сортировка VM по имени по умолчанию case-insensitive по возрастанию",
+      "precondition": "Подключение содержит VM с именами разного регистра (например, beta, Alpha, gamma).",
+      "steps": [
+        { "step": "Открыть дерево VM", "expected": "—" },
+        { "step": "Проверить порядок элементов", "expected": "VM упорядочены по имени case-insensitive по возрастанию (Alpha, beta, gamma)" }
+      ],
+      "priority": "normal",
+      "type": "positive",
+      "requirement_ref": "REQ-03",
+      "title_hash": "sha256:3f9a1c7e5b2d48a6c0f1e2d3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f10009"
+    },
+    {
+      "temp_id": "TC-010",
+      "title": "Группировка по подключениям соблюдается после обновления состояния",
+      "precondition": "Настроено несколько подключений, каждое с VM.",
+      "steps": [
+        { "step": "Открыть дерево VM", "expected": "VM сгруппированы по подключениям" },
+        { "step": "Обновить состояние VM", "expected": "После обновления VM остаются сгруппированными по подключениям" }
+      ],
+      "priority": "normal",
+      "type": "positive",
+      "requirement_ref": "REQ-03",
+      "title_hash": "sha256:3f9a1c7e5b2d48a6c0f1e2d3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1000a"
+    },
+    {
+      "temp_id": "TC-011",
+      "title": "При временной недоступности отображается последнее состояние с суффиксом (stale)",
+      "precondition": "VM отображается в дереве; данные о состоянии были получены.",
+      "steps": [
+        { "step": "Сделать данные подключения временно недоступными", "expected": "—" },
+        { "step": "Проверить отображение VM", "expected": "Показано последнее известное состояние с суффиксом «(stale)»" }
+      ],
+      "priority": "important",
+      "type": "positive",
+      "requirement_ref": "REQ-03",
+      "title_hash": "sha256:3f9a1c7e5b2d48a6c0f1e2d3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1000b"
+    },
+    {
+      "temp_id": "TC-012",
+      "title": "Для VM отображается имя",
+      "precondition": "Подключение содержит VM.",
+      "steps": [
+        { "step": "Развернуть VM в дереве", "expected": "Отображается имя VM" }
+      ],
+      "priority": "normal",
+      "type": "positive",
+      "requirement_ref": "REQ-03",
+      "title_hash": "sha256:3f9a1c7e5b2d48a6c0f1e2d3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1000c"
+    },
+    {
+      "temp_id": "TC-013",
+      "title": "Для VM отображается состояние из допустимого набора",
+      "precondition": "Подключение содержит VM в известном состоянии.",
+      "steps": [
+        { "step": "Проверить отображаемое состояние VM", "expected": "Состояние соответствует одному из running / stopped / paused / suspended / crashed" }
+      ],
+      "priority": "normal",
+      "type": "positive",
+      "requirement_ref": "REQ-03",
+      "title_hash": "sha256:3f9a1c7e5b2d48a6c0f1e2d3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1000d"
+    },
+    {
+      "temp_id": "TC-014",
+      "title": "Для VM отображается количество vCPU",
+      "precondition": "Подключение содержит VM с заданным числом vCPU.",
+      "steps": [
+        { "step": "Проверить блок ресурсов VM в дереве", "expected": "Отображается количество vCPU" }
+      ],
+      "priority": "low",
+      "type": "positive",
+      "requirement_ref": "REQ-03",
+      "title_hash": "sha256:3f9a1c7e5b2d48a6c0f1e2d3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1000e"
+    },
+    {
+      "temp_id": "TC-015",
+      "title": "Для VM отображается объём RAM в МБ",
+      "precondition": "Подключение содержит VM с заданным объёмом RAM.",
+      "steps": [
+        { "step": "Проверить блок ресурсов VM в дереве", "expected": "Отображается объём RAM в МБ" }
+      ],
+      "priority": "low",
+      "type": "positive",
+      "requirement_ref": "REQ-03",
+      "title_hash": "sha256:3f9a1c7e5b2d48a6c0f1e2d3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1000f"
+    },
+    {
+      "temp_id": "TC-016",
+      "title": "stopped + Start переводит VM в running в течение 5 с",
+      "precondition": "VM в состоянии stopped.",
+      "steps": [
+        { "step": "Выбрать VM в состоянии stopped", "expected": "—" },
+        { "step": "Проверить доступность команды Start", "expected": "Команда Start доступна" },
+        { "step": "Выполнить команду Start", "expected": "Запуск VM инициирован" },
+        { "step": "Проверить состояние VM", "expected": "VM перешла в running в течение 5 с" }
+      ],
+      "priority": "high",
+      "type": "positive",
+      "requirement_ref": "REQ-08",
+      "title_hash": "sha256:3f9a1c7e5b2d48a6c0f1e2d3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f10010"
+    },
+    {
+      "temp_id": "TC-017",
+      "title": "crashed + Start выполняет destroy затем start и переводит VM в running в течение 5 с",
+      "precondition": "VM в состоянии crashed.",
+      "steps": [
+        { "step": "Выбрать VM в состоянии crashed", "expected": "—" },
+        { "step": "Выполнить команду Start", "expected": "VM переведена в destroy, затем выполнена операция start" },
+        { "step": "Проверить состояние VM", "expected": "VM перешла в running в течение 5 с" }
+      ],
+      "priority": "high",
+      "type": "positive",
+      "requirement_ref": "REQ-08",
+      "title_hash": "sha256:3f9a1c7e5b2d48a6c0f1e2d3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f10011"
+    },
+    {
+      "temp_id": "TC-018",
+      "title": "running + Start команда disabled",
+      "precondition": "VM в состоянии running.",
+      "steps": [
+        { "step": "Выбрать VM в состоянии running", "expected": "—" },
+        { "step": "Проверить доступность команды Start", "expected": "Команда Start disabled" }
+      ],
+      "priority": "high",
+      "type": "negative",
+      "requirement_ref": "REQ-08",
+      "title_hash": "sha256:3f9a1c7e5b2d48a6c0f1e2d3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f10012"
+    },
+    {
+      "temp_id": "TC-019",
+      "title": "paused + Start команда disabled",
+      "precondition": "VM в состоянии paused.",
+      "steps": [
+        { "step": "Выбрать VM в состоянии paused", "expected": "—" },
+        { "step": "Проверить доступность команды Start", "expected": "Команда Start disabled" }
+      ],
+      "priority": "high",
+      "type": "negative",
+      "requirement_ref": "REQ-08",
+      "title_hash": "sha256:3f9a1c7e5b2d48a6c0f1e2d3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f10013"
+    },
+    {
+      "temp_id": "TC-020",
+      "title": "suspended + Start команда disabled",
+      "precondition": "VM в состоянии suspended.",
+      "steps": [
+        { "step": "Выбрать VM в состоянии suspended", "expected": "—" },
+        { "step": "Проверить доступность команды Start", "expected": "Команда Start disabled" }
+      ],
+      "priority": "high",
+      "type": "negative",
+      "requirement_ref": "REQ-08",
+      "title_hash": "sha256:3f9a1c7e5b2d48a6c0f1e2d3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f10014"
+    },
+    {
+      "temp_id": "TC-021",
+      "title": "Ошибка libvirt при Start состояние не меняется, уведомление с действием Show log",
+      "precondition": "VM в состоянии stopped; смоделирована ошибка libvirt.",
+      "steps": [
+        { "step": "Выполнить команду Start", "expected": "—" },
+        { "step": "Проверить состояние VM", "expected": "Состояние VM не изменилось (stopped)" },
+        { "step": "Проверить уведомление", "expected": "Уведомление содержит действие «Show log» (по REQ-14)" }
+      ],
+      "priority": "high",
+      "type": "negative",
+      "requirement_ref": "REQ-08",
+      "title_hash": "sha256:3f9a1c7e5b2d48a6c0f1e2d3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f10015"
+    },
+    {
+      "temp_id": "TC-022",
+      "title": "running + Shutdown отправляет ACPI-запрос и диалог не появляется сразу",
+      "precondition": "VM в состоянии running.",
+      "steps": [
+        { "step": "Выполнить команду Shutdown", "expected": "ACPI-запрос завершения отправлен" },
+        { "step": "Проверить UI сразу после отправки", "expected": "Диалог «Force stop / Wait more / Cancel» не появляется" }
+      ],
+      "priority": "high",
+      "type": "positive",
+      "requirement_ref": "REQ-09",
+      "title_hash": "sha256:3f9a1c7e5b2d48a6c0f1e2d3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f10016"
+    },
+    {
+      "temp_id": "TC-023",
+      "title": "Через N секунд при VM всё ещё running появляется диалог Shutdown",
+      "precondition": "VM в состоянии running; workspace setting таймаута = N секунд.",
+      "steps": [
+        { "step": "Выполнить команду Shutdown", "expected": "ACPI-запрос завершения отправлен" },
+        { "step": "Дождаться истечения N секунд, VM всё ещё running", "expected": "Появляется диалог «Force stop» / «Wait more» / «Cancel»" }
+      ],
+      "priority": "important",
+      "type": "positive",
+      "requirement_ref": "REQ-09",
+      "title_hash": "sha256:3f9a1c7e5b2d48a6c0f1e2d3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f10017"
+    },
+    {
+      "temp_id": "TC-024",
+      "title": "Если VM перешла в stopped до истечения таймаута, диалог не появляется",
+      "precondition": "VM в состоянии running; таймаут N секунд.",
+      "steps": [
+        { "step": "Выполнить команду Shutdown", "expected": "ACPI-запрос завершения отправлен" },
+        { "step": "Дождаться перехода VM в stopped до истечения N секунд", "expected": "—" },
+        { "step": "Проверить UI по истечении таймаута", "expected": "Диалог не появляется" }
+      ],
+      "priority": "normal",
+      "type": "positive",
+      "requirement_ref": "REQ-09",
+      "title_hash": "sha256:3f9a1c7e5b2d48a6c0f1e2d3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f10018"
+    },
+    {
+      "temp_id": "TC-025",
+      "title": "Кнопка Force stop в диалоге вызывает поведение REQ-10",
+      "precondition": "Открыт диалог Shutdown; VM всё ещё running.",
+      "steps": [
+        { "step": "Нажать «Force stop» в диалоге", "expected": "Выполняется force stop по REQ-10" },
+        { "step": "Проверить состояние VM", "expected": "VM переходит в stopped" }
+      ],
+      "priority": "high",
+      "type": "positive",
+      "requirement_ref": "REQ-09",
+      "title_hash": "sha256:3f9a1c7e5b2d48a6c0f1e2d3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f10019"
+    },
+    {
+      "temp_id": "TC-026",
+      "title": "Кнопка Wait more перезапускает таймер с тем же значением",
+      "precondition": "Открыт диалог Shutdown; таймаут N секунд.",
+      "steps": [
+        { "step": "Нажать «Wait more» в диалоге", "expected": "Таймер перезапускается с тем же значением N" },
+        { "step": "Проверить состояние диалога", "expected": "Диалог закрыт" },
+        { "step": "Дождаться повторного истечения N секунд при VM в running", "expected": "Диалог появляется снова" }
+      ],
+      "priority": "normal",
+      "type": "positive",
+      "requirement_ref": "REQ-09",
+      "title_hash": "sha256:3f9a1c7e5b2d48a6c0f1e2d3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1001a"
+    },
+    {
+      "temp_id": "TC-027",
+      "title": "Кнопка Cancel закрывает диалог и ACPI-запрос не отзывается",
+      "precondition": "Открыт диалог Shutdown.",
+      "steps": [
+        { "step": "Нажать «Cancel»", "expected": "Диалог закрывается" },
+        { "step": "Проверить ACPI-запрос", "expected": "ACPI-запрос не отозван; дальнейшие изменения состояния отражаются по REQ-13" }
+      ],
+      "priority": "important",
+      "type": "positive",
+      "requirement_ref": "REQ-09",
+      "title_hash": "sha256:3f9a1c7e5b2d48a6c0f1e2d3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1001b"
+    },
+    {
+      "temp_id": "TC-028",
+      "title": "Значение таймаута 4 (min-1) даёт inline error в настройке",
+      "precondition": "Открыта настройка таймаута Shutdown.",
+      "steps": [
+        { "step": "Ввести значение таймаута 4 секунды", "expected": "—" },
+        { "step": "Проверить валидацию настройки", "expected": "Показан inline error в настройке; значение вне 5–300 не принимается" }
+      ],
+      "priority": "important",
+      "type": "boundary",
+      "requirement_ref": "REQ-09",
+      "title_hash": "sha256:3f9a1c7e5b2d48a6c0f1e2d3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1001c"
+    },
+    {
+      "temp_id": "TC-029",
+      "title": "Значение таймаута 5 (min) принимается",
+      "precondition": "Открыта настройка таймаута Shutdown.",
+      "steps": [
+        { "step": "Ввести значение таймаута 5 секунд", "expected": "—" },
+        { "step": "Проверить настройку", "expected": "Значение принято без inline error" }
+      ],
+      "priority": "important",
+      "type": "boundary",
+      "requirement_ref": "REQ-09",
+      "title_hash": "sha256:3f9a1c7e5b2d48a6c0f1e2d3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1001d"
+    },
+    {
+      "temp_id": "TC-030",
+      "title": "Значение таймаута 6 (min+1) принимается",
+      "precondition": "Открыта настройка таймаута Shutdown.",
+      "steps": [
+        { "step": "Ввести значение таймаута 6 секунд", "expected": "—" },
+        { "step": "Проверить настройку", "expected": "Значение принято без inline error" }
+      ],
+      "priority": "important",
+      "type": "boundary",
+      "requirement_ref": "REQ-09",
+      "title_hash": "sha256:3f9a1c7e5b2d48a6c0f1e2d3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1001e"
+    },
+    {
+      "temp_id": "TC-031",
+      "title": "Значение таймаута 299 (max-1) принимается",
+      "precondition": "Открыта настройка таймаута Shutdown.",
+      "steps": [
+        { "step": "Ввести значение таймаута 299 секунд", "expected": "—" },
+        { "step": "Проверить настройку", "expected": "Значение принято без inline error" }
+      ],
+      "priority": "important",
+      "type": "boundary",
+      "requirement_ref": "REQ-09",
+      "title_hash": "sha256:3f9a1c7e5b2d48a6c0f1e2d3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1001f"
+    },
+    {
+      "temp_id": "TC-032",
+      "title": "Значение таймаута 300 (max) принимается",
+      "precondition": "Открыта настройка таймаута Shutdown.",
+      "steps": [
+        { "step": "Ввести значение таймаута 300 секунд", "expected": "—" },
+        { "step": "Проверить настройку", "expected": "Значение принято без inline error" }
+      ],
+      "priority": "important",
+      "type": "boundary",
+      "requirement_ref": "REQ-09",
+      "title_hash": "sha256:3f9a1c7e5b2d48a6c0f1e2d3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f10020"
+    },
+    {
+      "temp_id": "TC-033",
+      "title": "Значение таймаута 301 (max+1) даёт inline error в настройке",
+      "precondition": "Открыта настройка таймаута Shutdown.",
+      "steps": [
+        { "step": "Ввести значение таймаута 301 секунда", "expected": "—" },
+        { "step": "Проверить валидацию настройки", "expected": "Показан inline error в настройке; значение вне 5–300 не принимается" }
+      ],
+      "priority": "important",
+      "type": "boundary",
+      "requirement_ref": "REQ-09",
+      "title_hash": "sha256:3f9a1c7e5b2d48a6c0f1e2d3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f10021"
+    },
+    {
+      "temp_id": "TC-034",
+      "title": "Нецелое значение таймаута даёт inline error в настройке",
+      "precondition": "Открыта настройка таймаута Shutdown.",
+      "steps": [
+        { "step": "Ввести нецелое/нечисловое значение (например, 5.5)", "expected": "—" },
+        { "step": "Проверить валидацию настройки", "expected": "Показан inline error; значение не принято (настройка должна быть целым 5–300)" }
+      ],
+      "priority": "important",
+      "type": "negative",
+      "requirement_ref": "REQ-09",
+      "title_hash": "sha256:3f9a1c7e5b2d48a6c0f1e2d3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f10022"
+    },
+    {
+      "temp_id": "TC-035",
+      "title": "stopped + Shutdown команда disabled",
+      "precondition": "VM в состоянии stopped.",
+      "steps": [
+        { "step": "Выбрать VM в состоянии stopped", "expected": "—" },
+        { "step": "Проверить доступность команды Shutdown", "expected": "Команда Shutdown disabled" }
+      ],
+      "priority": "high",
+      "type": "negative",
+      "requirement_ref": "REQ-09",
+      "title_hash": "sha256:3f9a1c7e5b2d48a6c0f1e2d3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f10023"
+    },
+    {
+      "temp_id": "TC-036",
+      "title": "paused + Shutdown команда disabled",
+      "precondition": "VM в состоянии paused.",
+      "steps": [
+        { "step": "Выбрать VM в состоянии paused", "expected": "—" },
+        { "step": "Проверить доступность команды Shutdown", "expected": "Команда Shutdown disabled" }
+      ],
+      "priority": "high",
+      "type": "negative",
+      "requirement_ref": "REQ-09",
+      "title_hash": "sha256:3f9a1c7e5b2d48a6c0f1e2d3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f10024"
+    },
+    {
+      "temp_id": "TC-037",
+      "title": "suspended + Shutdown команда disabled",
+      "precondition": "VM в состоянии suspended.",
+      "steps": [
+        { "step": "Выбрать VM в состоянии suspended", "expected": "—" },
+        { "step": "Проверить доступность команды Shutdown", "expected": "Команда Shutdown disabled" }
+      ],
+      "priority": "high",
+      "type": "negative",
+      "requirement_ref": "REQ-09",
+      "title_hash": "sha256:3f9a1c7e5b2d48a6c0f1e2d3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f10025"
+    },
+    {
+      "temp_id": "TC-038",
+      "title": "crashed + Shutdown команда disabled",
+      "precondition": "VM в состоянии crashed.",
+      "steps": [
+        { "step": "Выбрать VM в состоянии crashed", "expected": "—" },
+        { "step": "Проверить доступность команды Shutdown", "expected": "Команда Shutdown disabled" }
+      ],
+      "priority": "high",
+      "type": "negative",
+      "requirement_ref": "REQ-09",
+      "title_hash": "sha256:3f9a1c7e5b2d48a6c0f1e2d3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f10026"
+    },
+    {
+      "temp_id": "TC-039",
+      "title": "Ошибка libvirt при Shutdown состояние не меняется, уведомление по REQ-14",
+      "precondition": "VM в состоянии running; смоделирована ошибка libvirt.",
+      "steps": [
+        { "step": "Выполнить команду Shutdown", "expected": "—" },
+        { "step": "Проверить состояние VM", "expected": "Состояние VM не изменилось (running)" },
+        { "step": "Проверить уведомление", "expected": "Показано уведомление об ошибке по REQ-14" }
+      ],
+      "priority": "high",
+      "type": "negative",
+      "requirement_ref": "REQ-09",
+      "title_hash": "sha256:3f9a1c7e5b2d48a6c0f1e2d3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f10027"
+    },
+    {
+      "temp_id": "TC-040",
+      "title": "running + Force stop переводит VM в stopped в течение 3 с",
+      "precondition": "VM в состоянии running.",
+      "steps": [
+        { "step": "Выбрать VM в состоянии running", "expected": "—" },
+        { "step": "Выполнить команду Force stop", "expected": "Процесс VM немедленно завершается" },
+        { "step": "Проверить состояние VM", "expected": "VM перешла в stopped в течение 3 с" }
+      ],
+      "priority": "high",
+      "type": "positive",
+      "requirement_ref": "REQ-10",
+      "title_hash": "sha256:3f9a1c7e5b2d48a6c0f1e2d3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f10028"
+    },
+    {
+      "temp_id": "TC-041",
+      "title": "paused + Force stop переводит VM в stopped в течение 3 с",
+      "precondition": "VM в состоянии paused.",
+      "steps": [
+        { "step": "Выбрать VM в состоянии paused", "expected": "—" },
+        { "step": "Выполнить команду Force stop", "expected": "Процесс VM немедленно завершается" },
+        { "step": "Проверить состояние VM", "expected": "VM перешла в stopped в течение 3 с" }
+      ],
+      "priority": "high",
+      "type": "positive",
+      "requirement_ref": "REQ-10",
+      "title_hash": "sha256:3f9a1c7e5b2d48a6c0f1e2d3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f10029"
+    },
+    {
+      "temp_id": "TC-042",
+      "title": "confirmForceStop=true показывает диалог с именем VM и предупреждением о потере данных",
+      "precondition": "VM в состоянии running; qemuManager.confirmForceStop = true.",
+      "steps": [
+        { "step": "Выполнить команду Force stop", "expected": "Показан диалог подтверждения" },
+        { "step": "Проверить содержимое диалога", "expected": "Диалог содержит имя VM и предупреждение «Unsaved data may be lost»" }
+      ],
+      "priority": "high",
+      "type": "positive",
+      "requirement_ref": "REQ-10",
+      "title_hash": "sha256:3f9a1c7e5b2d48a6c0f1e2d3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1002a"
+    },
+    {
+      "temp_id": "TC-043",
+      "title": "confirmForceStop=false выполняет Force stop без диалога",
+      "precondition": "VM в состоянии running; qemuManager.confirmForceStop = false.",
+      "steps": [
+        { "step": "Выполнить команду Force stop", "expected": "Команда выполняется без диалога подтверждения" },
+        { "step": "Проверить состояние VM", "expected": "VM переходит в stopped" }
+      ],
+      "priority": "important",
+      "type": "positive",
+      "requirement_ref": "REQ-10",
+      "title_hash": "sha256:3f9a1c7e5b2d48a6c0f1e2d3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1002b"
+    },
+    {
+      "temp_id": "TC-044",
+      "title": "Отмена диалога Force stop не меняет состояние VM",
+      "precondition": "VM в состоянии running; qemuManager.confirmForceStop = true; показан диалог подтверждения.",
+      "steps": [
+        { "step": "Отменить диалог подтверждения", "expected": "Диалог закрыт" },
+        { "step": "Проверить состояние VM", "expected": "Состояние VM не изменилось (running)" }
+      ],
+      "priority": "high",
+      "type": "positive",
+      "requirement_ref": "REQ-10",
+      "title_hash": "sha256:3f9a1c7e5b2d48a6c0f1e2d3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1002c"
+    },
+    {
+      "temp_id": "TC-045",
+      "title": "stopped + Force stop команда disabled",
+      "precondition": "VM в состоянии stopped.",
+      "steps": [
+        { "step": "Выбрать VM в состоянии stopped", "expected": "—" },
+        { "step": "Проверить доступность команды Force stop", "expected": "Команда Force stop disabled" }
+      ],
+      "priority": "high",
+      "type": "negative",
+      "requirement_ref": "REQ-10",
+      "title_hash": "sha256:3f9a1c7e5b2d48a6c0f1e2d3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1002d"
+    },
+    {
+      "temp_id": "TC-046",
+      "title": "suspended + Force stop команда disabled",
+      "precondition": "VM в состоянии suspended.",
+      "steps": [
+        { "step": "Выбрать VM в состоянии suspended", "expected": "—" },
+        { "step": "Проверить доступность команды Force stop", "expected": "Команда Force stop disabled" }
+      ],
+      "priority": "high",
+      "type": "negative",
+      "requirement_ref": "REQ-10",
+      "title_hash": "sha256:3f9a1c7e5b2d48a6c0f1e2d3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1002e"
+    },
+    {
+      "temp_id": "TC-047",
+      "title": "crashed + Force stop команда disabled",
+      "precondition": "VM в состоянии crashed.",
+      "steps": [
+        { "step": "Выбрать VM в состоянии crashed", "expected": "—" },
+        { "step": "Проверить доступность команды Force stop", "expected": "Команда Force stop disabled" }
+      ],
+      "priority": "high",
+      "type": "negative",
+      "requirement_ref": "REQ-10",
+      "title_hash": "sha256:3f9a1c7e5b2d48a6c0f1e2d3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1002f"
+    },
+    {
+      "temp_id": "TC-048",
+      "title": "Ошибка libvirt при Force stop состояние не меняется, уведомление по REQ-14",
+      "precondition": "VM в состоянии running; qemuManager.confirmForceStop = false; смоделирована ошибка libvirt.",
+      "steps": [
+        { "step": "Выполнить команду Force stop", "expected": "—" },
+        { "step": "Проверить состояние VM", "expected": "Состояние VM не изменилось (running)" },
+        { "step": "Проверить уведомление", "expected": "Показано уведомление об ошибке по REQ-14" }
+      ],
+      "priority": "high",
+      "type": "negative",
+      "requirement_ref": "REQ-10",
+      "title_hash": "sha256:3f9a1c7e5b2d48a6c0f1e2d3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f10030"
+    },
+    {
+      "temp_id": "TC-049",
+      "title": "running + Pause переводит VM в paused в течение 3 с",
+      "precondition": "VM в состоянии running.",
+      "steps": [
+        { "step": "Выбрать VM в состоянии running", "expected": "—" },
+        { "step": "Выполнить команду Pause", "expected": "Запрос паузы инициирован" },
+        { "step": "Проверить состояние VM", "expected": "VM перешла в paused в течение 3 с" }
+      ],
+      "priority": "important",
+      "type": "positive",
+      "requirement_ref": "REQ-11",
+      "title_hash": "sha256:3f9a1c7e5b2d48a6c0f1e2d3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f10031"
+    },
+    {
+      "temp_id": "TC-050",
+      "title": "paused + Resume переводит VM в running в течение 3 с",
+      "precondition": "VM в состоянии paused.",
+      "steps": [
+        { "step": "Выбрать VM в состоянии paused", "expected": "—" },
+        { "step": "Выполнить команду Resume", "expected": "Возобновление VM инициировано" },
+        { "step": "Проверить состояние VM", "expected": "VM перешла в running в течение 3 с" }
+      ],
+      "priority": "important",
+      "type": "positive",
+      "requirement_ref": "REQ-11",
+      "title_hash": "sha256:3f9a1c7e5b2d48a6c0f1e2d3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f10032"
+    },
+    {
+      "temp_id": "TC-051",
+      "title": "suspended + Resume выполняет поведение по REQ-21",
+      "precondition": "VM в состоянии suspended.",
+      "steps": [
+        { "step": "Выполнить команду Resume для VM в состоянии suspended", "expected": "Поведение соответствует REQ-21 (Resume возвращает VM в running)" },
+        { "step": "Проверить состояние VM", "expected": "VM перешла в running" }
+      ],
+      "priority": "important",
+      "type": "positive",
+      "requirement_ref": "REQ-11",
+      "title_hash": "sha256:3f9a1c7e5b2d48a6c0f1e2d3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f10033"
+    },
+    {
+      "temp_id": "TC-052",
+      "title": "paused + Pause команда disabled",
+      "precondition": "VM в состоянии paused.",
+      "steps": [
+        { "step": "Выбрать VM в состоянии paused", "expected": "—" },
+        { "step": "Проверить доступность команды Pause", "expected": "Команда Pause disabled" }
+      ],
+      "priority": "important",
+      "type": "negative",
+      "requirement_ref": "REQ-11",
+      "title_hash": "sha256:3f9a1c7e5b2d48a6c0f1e2d3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f10034"
+    },
+    {
+      "temp_id": "TC-053",
+      "title": "stopped + Pause команда disabled",
+      "precondition": "VM в состоянии stopped.",
+      "steps": [
+        { "step": "Выбрать VM в состоянии stopped", "expected": "—" },
+        { "step": "Проверить доступность команды Pause", "expected": "Команда Pause disabled" }
+      ],
+      "priority": "important",
+      "type": "negative",
+      "requirement_ref": "REQ-11",
+      "title_hash": "sha256:3f9a1c7e5b2d48a6c0f1e2d3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f10035"
+    },
+    {
+      "temp_id": "TC-054",
+      "title": "stopped + Resume команда disabled",
+      "precondition": "VM в состоянии stopped.",
+      "steps": [
+        { "step": "Выбрать VM в состоянии stopped", "expected": "—" },
+        { "step": "Проверить доступность команды Resume", "expected": "Команда Resume disabled" }
+      ],
+      "priority": "important",
+      "type": "negative",
+      "requirement_ref": "REQ-11",
+      "title_hash": "sha256:3f9a1c7e5b2d48a6c0f1e2d3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f10036"
+    },
+    {
+      "temp_id": "TC-055",
+      "title": "Ошибка libvirt при Pause/Resume состояние не меняется, уведомление по REQ-14",
+      "precondition": "VM в состоянии running; смоделирована ошибка libvirt.",
+      "steps": [
+        { "step": "Выполнить команду Pause", "expected": "—" },
+        { "step": "Проверить состояние VM", "expected": "Состояние VM не изменилось (running)" },
+        { "step": "Проверить уведомление", "expected": "Показано уведомление об ошибке по REQ-14" }
+      ],
+      "priority": "important",
+      "type": "negative",
+      "requirement_ref": "REQ-11",
+      "title_hash": "sha256:3f9a1c7e5b2d48a6c0f1e2d3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f10037"
+    },
+    {
+      "temp_id": "TC-056",
+      "title": "Интервал 0 включает только ручное обновление без polling и подписки",
+      "precondition": "Workspace setting интервала обновления = 0.",
+      "steps": [
+        { "step": "Установить интервал обновления 0", "expected": "—" },
+        { "step": "Наблюдать поведение обновления", "expected": "Polling не выполняется и подписка на libvirt events не устанавливается" },
+        { "step": "Проверить обновление вручную", "expected": "Состояние обновляется только по кнопке Refresh" }
+      ],
+      "priority": "high",
+      "type": "positive",
+      "requirement_ref": "REQ-13",
+      "title_hash": "sha256:3f9a1c7e5b2d48a6c0f1e2d3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f10038"
+    },
+    {
+      "temp_id": "TC-057",
+      "title": "Интервал 1 выполняет polling каждые 1 с",
+      "precondition": "Workspace setting интервала обновления = 1.",
+      "steps": [
+        { "step": "Установить интервал обновления 1", "expected": "—" },
+        { "step": "Наблюдать частоту обновления состояния", "expected": "Polling выполняется каждые 1 с" }
+      ],
+      "priority": "important",
+      "type": "positive",
+      "requirement_ref": "REQ-13",
+      "title_hash": "sha256:3f9a1c7e5b2d48a6c0f1e2d3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f10039"
+    },
+    {
+      "temp_id": "TC-058",
+      "title": "Интервал 60 выполняет polling каждые 60 с",
+      "precondition": "Workspace setting интервала обновления = 60.",
+      "steps": [
+        { "step": "Установить интервал обновления 60", "expected": "—" },
+        { "step": "Наблюдать частоту обновления состояния", "expected": "Polling выполняется каждые 60 с" }
+      ],
+      "priority": "important",
+      "type": "positive",
+      "requirement_ref": "REQ-13",
+      "title_hash": "sha256:3f9a1c7e5b2d48a6c0f1e2d3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1003a"
+    },
+    {
+      "temp_id": "TC-059",
+      "title": "domainEventSupport=true и interval>0 отключают polling в пользу подписки на события",
+      "precondition": "libvirt capabilities XML содержит флаг domainEventSupport; workspace setting интервала > 0.",
+      "steps": [
+        { "step": "Установить интервал обновления > 0 при domainEventSupport = true", "expected": "—" },
+        { "step": "Наблюдать механизм обновления", "expected": "Установлена подписка на libvirt events; polling не выполняется" }
+      ],
+      "priority": "important",
+      "type": "positive",
+      "requirement_ref": "REQ-13",
+      "title_hash": "sha256:3f9a1c7e5b2d48a6c0f1e2d3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1003b"
+    },
+    {
+      "temp_id": "TC-060",
+      "title": "Ошибка подписки на события откатывается к polling с warning в лог",
+      "precondition": "domainEventSupport = true; интервал > 0; смоделирована ошибка подписки на libvirt events.",
+      "steps": [
+        { "step": "Инициировать подписку на события при наличии ошибки подписки", "expected": "—" },
+        { "step": "Проверить механизм обновления", "expected": "Выполняется откат к polling; обновление состояния продолжается" },
+        { "step": "Проверить лог", "expected": "Записан warning без пользовательской ошибки" }
+      ],
+      "priority": "important",
+      "type": "positive",
+      "requirement_ref": "REQ-13",
+      "title_hash": "sha256:3f9a1c7e5b2d48a6c0f1e2d3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1003c"
+    },
+    {
+      "temp_id": "TC-061",
+      "title": "Кнопка Refresh доступна всегда",
+      "precondition": "Открыта панель VM при любом значении интервала обновления.",
+      "steps": [
+        { "step": "Проверить доступность кнопки Refresh", "expected": "Кнопка Refresh доступна" }
+      ],
+      "priority": "normal",
+      "type": "positive",
+      "requirement_ref": "REQ-13",
+      "title_hash": "sha256:3f9a1c7e5b2d48a6c0f1e2d3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1003d"
+    },
+    {
+      "temp_id": "TC-062",
+      "title": "Интервал 61 даёт inline error в настройке",
+      "precondition": "Открыта настройка интервала обновления.",
+      "steps": [
+        { "step": "Ввести значение интервала 61", "expected": "—" },
+        { "step": "Проверить валидацию настройки", "expected": "Показан inline error в настройке; значение вне 0 или 1–60 не принимается" }
+      ],
+      "priority": "important",
+      "type": "negative",
+      "requirement_ref": "REQ-13",
+      "title_hash": "sha256:3f9a1c7e5b2d48a6c0f1e2d3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1003e"
+    },
+    {
+      "temp_id": "TC-063",
+      "title": "Отрицательное/нецелое значение интервала даёт inline error в настройке",
+      "precondition": "Открыта настройка интервала обновления.",
+      "steps": [
+        { "step": "Ввести отрицательное или нецелое значение интервала (например, -1)", "expected": "—" },
+        { "step": "Проверить валидацию настройки", "expected": "Показан inline error; значение не принято" }
+      ],
+      "priority": "important",
+      "type": "negative",
+      "requirement_ref": "REQ-13",
+      "title_hash": "sha256:3f9a1c7e5b2d48a6c0f1e2d3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1003f"
+    },
+    {
+      "temp_id": "TC-064",
+      "title": "Интервал 0 (min-1, специальное значение) включает только ручное обновление",
+      "precondition": "Открыта настройка интервала обновления.",
+      "steps": [
+        { "step": "Ввести значение интервала 0", "expected": "Значение принято как режим только ручного обновления" },
+        { "step": "Наблюдать поведение обновления", "expected": "Polling и подписка на события не выполняются" }
+      ],
+      "priority": "high",
+      "type": "boundary",
+      "requirement_ref": "REQ-13",
+      "title_hash": "sha256:3f9a1c7e5b2d48a6c0f1e2d3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f10040"
+    },
+    {
+      "temp_id": "TC-065",
+      "title": "Интервал 1 (min) включает polling каждые 1 с",
+      "precondition": "Открыта настройка интервала обновления.",
+      "steps": [
+        { "step": "Ввести значение интервала 1", "expected": "Значение принято" },
+        { "step": "Наблюдать частоту обновления", "expected": "Polling выполняется каждые 1 с" }
+      ],
+      "priority": "important",
+      "type": "boundary",
+      "requirement_ref": "REQ-13",
+      "title_hash": "sha256:3f9a1c7e5b2d48a6c0f1e2d3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f10041"
+    },
+    {
+      "temp_id": "TC-066",
+      "title": "Интервал 2 (min+1) включает polling каждые 2 с",
+      "precondition": "Открыта настройка интервала обновления.",
+      "steps": [
+        { "step": "Ввести значение интервала 2", "expected": "Значение принято" },
+        { "step": "Наблюдать частоту обновления", "expected": "Polling выполняется каждые 2 с" }
+      ],
+      "priority": "important",
+      "type": "boundary",
+      "requirement_ref": "REQ-13",
+      "title_hash": "sha256:3f9a1c7e5b2d48a6c0f1e2d3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f10042"
+    },
+    {
+      "temp_id": "TC-067",
+      "title": "Интервал 59 (max-1) включает polling каждые 59 с",
+      "precondition": "Открыта настройка интервала обновления.",
+      "steps": [
+        { "step": "Ввести значение интервала 59", "expected": "Значение принято" },
+        { "step": "Наблюдать частоту обновления", "expected": "Polling выполняется каждые 59 с" }
+      ],
+      "priority": "important",
+      "type": "boundary",
+      "requirement_ref": "REQ-13",
+      "title_hash": "sha256:3f9a1c7e5b2d48a6c0f1e2d3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f10043"
+    },
+    {
+      "temp_id": "TC-068",
+      "title": "Интервал 60 (max) включает polling каждые 60 с",
+      "precondition": "Открыта настройка интервала обновления.",
+      "steps": [
+        { "step": "Ввести значение интервала 60", "expected": "Значение принято" },
+        { "step": "Наблюдать частоту обновления", "expected": "Polling выполняется каждые 60 с" }
+      ],
+      "priority": "important",
+      "type": "boundary",
+      "requirement_ref": "REQ-13",
+      "title_hash": "sha256:3f9a1c7e5b2d48a6c0f1e2d3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f10044"
+    },
+    {
+      "temp_id": "TC-069",
+      "title": "Интервал 61 (max+1) даёт inline error в настройке",
+      "precondition": "Открыта настройка интервала обновления.",
+      "steps": [
+        { "step": "Ввести значение интервала 61", "expected": "—" },
+        { "step": "Проверить валидацию настройки", "expected": "Показан inline error в настройке; значение не принято" }
+      ],
+      "priority": "important",
+      "type": "boundary",
+      "requirement_ref": "REQ-13",
+      "title_hash": "sha256:3f9a1c7e5b2d48a6c0f1e2d3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f10045"
+    },
+    {
+      "temp_id": "TC-070",
+      "title": "Любая libvirt/QMP-ошибка показывает уведомление без raw stack trace",
+      "precondition": "Смоделирована libvirt/QMP-ошибка при выполнении команды.",
+      "steps": [
+        { "step": "Выполнить команду, приводящую к libvirt/QMP-ошибке", "expected": "—" },
+        { "step": "Проверить уведомление", "expected": "Показано friendly-уведомление без raw stack trace" }
+      ],
+      "priority": "high",
+      "type": "positive",
+      "requirement_ref": "REQ-14",
+      "title_hash": "sha256:3f9a1c7e5b2d48a6c0f1e2d3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f10046"
+    },
+    {
+      "temp_id": "TC-071",
+      "title": "Show log открывает Output Channel и фокусирует последнюю запись",
+      "precondition": "Показано уведомление об ошибке с действием «Show log».",
+      "steps": [
+        { "step": "Нажать действие «Show log»", "expected": "Открывается Output Channel «QEMU Manager»" },
+        { "step": "Проверить фокус", "expected": "Фокусируется последняя запись лога" }
+      ],
+      "priority": "important",
+      "type": "positive",
+      "requirement_ref": "REQ-14",
+      "title_hash": "sha256:3f9a1c7e5b2d48a6c0f1e2d3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f10047"
+    },
+    {
+      "temp_id": "TC-072",
+      "title": "Unmapped ошибка даёт fallback Unexpected error: {code}",
+      "precondition": "Получена libvirt/QMP-ошибка, отсутствующая в таблице маппинга, с кодом {code}.",
+      "steps": [
+        { "step": "Смоделировать unmapped libvirt/QMP-ошибку", "expected": "—" },
+        { "step": "Проверить сообщение", "expected": "Показано «Unexpected error: {code}»" }
+      ],
+      "priority": "important",
+      "type": "positive",
+      "requirement_ref": "REQ-14",
+      "title_hash": "sha256:3f9a1c7e5b2d48a6c0f1e2d3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f10048"
+    },
+    {
+      "temp_id": "TC-073",
+      "title": "Каждая команда логируется на уровне info или debug",
+      "precondition": "Уровень логирования info или debug; Output Channel доступен.",
+      "steps": [
+        { "step": "Выполнить команду расширения", "expected": "—" },
+        { "step": "Проверить запись в Output Channel", "expected": "Команда отражена записью уровня info или debug" }
+      ],
+      "priority": "normal",
+      "type": "positive",
+      "requirement_ref": "REQ-14",
+      "title_hash": "sha256:3f9a1c7e5b2d48a6c0f1e2d3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f10049"
+    },
+    {
+      "temp_id": "TC-074",
+      "title": "Ошибочные ответы логируются на уровне error",
+      "precondition": "Смоделирован ошибочный ответ libvirt/QMP.",
+      "steps": [
+        { "step": "Получить ошибочный ответ", "expected": "—" },
+        { "step": "Проверить уровень записи", "expected": "Запись об ошибке имеет уровень error" }
+      ],
+      "priority": "important",
+      "type": "positive",
+      "requirement_ref": "REQ-14",
+      "title_hash": "sha256:3f9a1c7e5b2d48a6c0f1e2d3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1004a"
+    },
+    {
+      "temp_id": "TC-075",
+      "title": "Изменение уровня логирования применяется немедленно",
+      "precondition": "Текущий уровень логирования info.",
+      "steps": [
+        { "step": "Изменить уровень логирования на debug", "expected": "—" },
+        { "step": "Выполнить команду и проверить лог", "expected": "Новые записи пишутся на уровне debug без перезапуска расширения" }
+      ],
+      "priority": "normal",
+      "type": "positive",
+      "requirement_ref": "REQ-14",
+      "title_hash": "sha256:3f9a1c7e5b2d48a6c0f1e2d3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1004b"
+    },
+    {
+      "temp_id": "TC-076",
+      "title": "Запись активации без VM и подключения маркируется [system:-]",
+      "precondition": "Событие активации расширения не связано ни с VM, ни с подключением.",
+      "steps": [
+        { "step": "Вызвать событие активации", "expected": "—" },
+        { "step": "Проверить префикс записи", "expected": "Запись маркирована как `[system:-]`" }
+      ],
+      "priority": "normal",
+      "type": "positive",
+      "requirement_ref": "REQ-14",
+      "title_hash": "sha256:3f9a1c7e5b2d48a6c0f1e2d3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1004c"
+    },
+    {
+      "temp_id": "TC-077",
+      "title": "Запись, связанная с подключением, но не с VM, маркируется [conn:-]",
+      "precondition": "Событие связано с подключением, но не с VM.",
+      "steps": [
+        { "step": "Вызвать событие, связанное с подключением без VM", "expected": "—" },
+        { "step": "Проверить префикс записи", "expected": "Запись маркирована как `[conn:-]` с display name подключения" }
+      ],
+      "priority": "normal",
+      "type": "positive",
+      "requirement_ref": "REQ-14",
+      "title_hash": "sha256:3f9a1c7e5b2d48a6c0f1e2d3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1004d"
+    },
+    {
+      "temp_id": "TC-078",
+      "title": "Запись, связанная с VM, маркируется [conn:vm] с display names",
+      "precondition": "Событие связано с VM внутри подключения.",
+      "steps": [
+        { "step": "Вызвать событие, связанное с VM", "expected": "—" },
+        { "step": "Проверить префикс записи", "expected": "Запись маркирована как `[conn:vm]`, где conn и vm — display names (не URI/ID)" }
+      ],
+      "priority": "normal",
+      "type": "positive",
+      "requirement_ref": "REQ-14",
+      "title_hash": "sha256:3f9a1c7e5b2d48a6c0f1e2d3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1004e"
+    },
+    {
+      "temp_id": "TC-079",
+      "title": "Лог не содержит секретов после redaction",
+      "precondition": "В обрабатываемых данных присутствуют пароли, токены, SSH private keys, URI с embedded credentials.",
+      "steps": [
+        { "step": "Смоделировать операцию с секретами в данных", "expected": "—" },
+        { "step": "Проверить содержимое Output Channel", "expected": "Секреты отредактированы и отсутствуют в логе" }
+      ],
+      "priority": "high",
+      "type": "positive",
+      "requirement_ref": "REQ-14",
+      "title_hash": "sha256:3f9a1c7e5b2d48a6c0f1e2d3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1004f"
+    },
+    {
+      "temp_id": "TC-080",
+      "title": "VIR_ERR_NO_CONNECT маппится в Connection refused с действием Show log",
+      "precondition": "Получена ошибка VIR_ERR_NO_CONNECT.",
+      "steps": [
+        { "step": "Смоделировать ошибку VIR_ERR_NO_CONNECT", "expected": "—" },
+        { "step": "Проверить сообщение", "expected": "Показано «Connection refused»" },
+        { "step": "Проверить действие уведомления", "expected": "Действие «Show log» доступно" }
+      ],
+      "priority": "normal",
+      "type": "positive",
+      "requirement_ref": "REQ-14",
+      "title_hash": "sha256:3f9a1c7e5b2d48a6c0f1e2d3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f10050"
+    },
+    {
+      "temp_id": "TC-081",
+      "title": "VIR_ERR_NO_DOMAIN маппится в VM not found без действия Show log",
+      "precondition": "Получена ошибка VIR_ERR_NO_DOMAIN.",
+      "steps": [
+        { "step": "Смоделировать ошибку VIR_ERR_NO_DOMAIN", "expected": "—" },
+        { "step": "Проверить сообщение", "expected": "Показано «VM not found»" },
+        { "step": "Проверить действие уведомления", "expected": "Действие «Show log» не предлагается" }
+      ],
+      "priority": "normal",
+      "type": "positive",
+      "requirement_ref": "REQ-14",
+      "title_hash": "sha256:3f9a1c7e5b2d48a6c0f1e2d3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f10051"
+    },
+    {
+      "temp_id": "TC-082",
+      "title": "Значение env-переменной с триггер-подстрокой (KEY/TOKEN/PASS) редактируется в логе",
+      "precondition": "В процессе Extension Host задана env-переменная, имя которой содержит подстроку-триггер (например, API_KEY).",
+      "steps": [
+        { "step": "Смоделировать запись, затрагивающую значение env-переменной с триггер-подстрокой", "expected": "—" },
+        { "step": "Проверить лог", "expected": "Значение env-переменной отредактировано и не попадает в Output Channel" }
+      ],
+      "priority": "high",
+      "type": "negative",
+      "requirement_ref": "REQ-14",
+      "title_hash": "sha256:3f9a1c7e5b2d48a6c0f1e2d3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f10052"
+    },
+    {
+      "temp_id": "TC-083",
+      "title": "URI с embedded credentials user:pass@host редактируется в логе",
+      "precondition": "В сообщении присутствует URI вида user:pass@host.",
+      "steps": [
+        { "step": "Смоделировать запись с URI, содержащим embedded credentials", "expected": "—" },
+        { "step": "Проверить лог", "expected": "Credentials в URI отредактированы и не попадают в Output Channel" }
+      ],
+      "priority": "high",
+      "type": "negative",
+      "requirement_ref": "REQ-14",
+      "title_hash": "sha256:3f9a1c7e5b2d48a6c0f1e2d3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f10053"
+    },
+    {
+      "temp_id": "TC-084",
+      "title": "Буфер лога при 9999 строках не усекается",
+      "precondition": "Output Channel содержит 9999 строк (меньше лимита 10 000).",
+      "steps": [
+        { "step": "Заполнить буфер лога 9999 строками", "expected": "—" },
+        { "step": "Проверить буфер", "expected": "Все 9999 строк сохранены, усечения нет" }
+      ],
+      "priority": "normal",
+      "type": "boundary",
+      "requirement_ref": "REQ-14",
+      "title_hash": "sha256:3f9a1c7e5b2d48a6c0f1e2d3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f10054"
+    },
+    {
+      "temp_id": "TC-085",
+      "title": "Буфер лога при 10000 строках сохраняет лимит без усечения",
+      "precondition": "Output Channel содержит ровно 10 000 строк (лимит).",
+      "steps": [
+        { "step": "Заполнить буфер лога 10000 строками", "expected": "—" },
+        { "step": "Проверить буфер", "expected": "Буфер содержит 10 000 строк; усечения нет" }
+      ],
+      "priority": "normal",
+      "type": "boundary",
+      "requirement_ref": "REQ-14",
+      "title_hash": "sha256:3f9a1c7e5b2d48a6c0f1e2d3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f10055"
+    },
+    {
+      "temp_id": "TC-086",
+      "title": "Буфер лога при 10001 строке усекается до 10000 (удаляются старейшие)",
+      "precondition": "Output Channel содержит 10 000 строк (лимит достигнут).",
+      "steps": [
+        { "step": "Добавить 10001-ю строку в лог", "expected": "—" },
+        { "step": "Проверить буфер", "expected": "Буфер ограничен 10 000 строками; самая старая запись удалена" }
+      ],
+      "priority": "normal",
+      "type": "boundary",
+      "requirement_ref": "REQ-14",
+      "title_hash": "sha256:3f9a1c7e5b2d48a6c0f1e2d3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f10056"
+    },
+    {
+      "temp_id": "TC-087",
+      "title": "Дефолтный биндинг Start работает в Windows/Linux (Ctrl+Alt+Shift+Q)",
+      "precondition": "ОС Windows или Linux; выбрана VM в применимом состоянии (stopped).",
+      "steps": [
+        { "step": "Выбрать VM в состоянии stopped", "expected": "—" },
+        { "step": "Нажать Ctrl+Alt+Shift+Q", "expected": "Выполняется команда Start для выбранной VM" }
+      ],
+      "priority": "important",
+      "type": "positive",
+      "requirement_ref": "REQ-17",
+      "title_hash": "sha256:3f9a1c7e5b2d48a6c0f1e2d3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f10057"
+    },
+    {
+      "temp_id": "TC-088",
+      "title": "Дефолтный биндинг Start работает в macOS (Cmd+Alt+Shift+Q)",
+      "precondition": "ОС macOS; выбрана VM в применимом состоянии (stopped).",
+      "steps": [
+        { "step": "Выбрать VM в состоянии stopped", "expected": "—" },
+        { "step": "Нажать Cmd+Alt+Shift+Q", "expected": "Выполняется команда Start для выбранной VM" }
+      ],
+      "priority": "important",
+      "type": "positive",
+      "requirement_ref": "REQ-17",
+      "title_hash": "sha256:3f9a1c7e5b2d48a6c0f1e2d3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f10058"
+    },
+    {
+      "temp_id": "TC-089",
+      "title": "Дефолтный биндинг Shutdown работает для выбранной VM (Ctrl/Cmd+Alt+Shift+W)",
+      "precondition": "ОС Windows/Linux или macOS; выбрана VM в состоянии running.",
+      "steps": [
+        { "step": "Выбрать VM в состоянии running", "expected": "—" },
+        { "step": "Нажать Ctrl+Alt+Shift+W (Windows/Linux) или Cmd+Alt+Shift+W (macOS)", "expected": "Выполняется команда Shutdown для выбранной VM" }
+      ],
+      "priority": "important",
+      "type": "positive",
+      "requirement_ref": "REQ-17",
+      "title_hash": "sha256:3f9a1c7e5b2d48a6c0f1e2d3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f10059"
+    },
+    {
+      "temp_id": "TC-090",
+      "title": "Дефолтные биндинги не конфликтуют с built-in VS Code",
+      "precondition": "Расширение установлено; Keybindings UI доступен.",
+      "steps": [
+        { "step": "Открыть список конфликтов биндингов VS Code", "expected": "Для дефолтных биндингов QEMU Manager конфликтов с built-in VS Code нет" }
+      ],
+      "priority": "normal",
+      "type": "positive",
+      "requirement_ref": "REQ-17",
+      "title_hash": "sha256:3f9a1c7e5b2d48a6c0f1e2d3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1005a"
+    },
+    {
+      "temp_id": "TC-091",
+      "title": "Пользовательский биндинг через Keybindings JSON работает",
+      "precondition": "В Keybindings JSON задан пользовательский биндинг для команды расширения.",
+      "steps": [
+        { "step": "Задать пользовательский биндинг в Keybindings JSON", "expected": "—" },
+        { "step": "Нажать пользовательскую комбинацию для выбранной VM в применимом состоянии", "expected": "Выполняется соответствующая команда расширения" }
+      ],
+      "priority": "normal",
+      "type": "positive",
+      "requirement_ref": "REQ-17",
+      "title_hash": "sha256:3f9a1c7e5b2d48a6c0f1e2d3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1005b"
+    },
+    {
+      "temp_id": "TC-092",
+      "title": "Биндинг не срабатывает при неприменимом состоянии VM",
+      "precondition": "Выбрана VM в состоянии running; биндинг Start (Ctrl/Cmd+Alt+Shift+Q).",
+      "steps": [
+        { "step": "Выбрать VM в состоянии running", "expected": "—" },
+        { "step": "Нажать биндинг Start", "expected": "Команда не выполняется; состояние VM не меняется" }
+      ],
+      "priority": "important",
+      "type": "negative",
+      "requirement_ref": "REQ-17",
+      "title_hash": "sha256:3f9a1c7e5b2d48a6c0f1e2d3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1005c"
+    },
+    {
+      "temp_id": "TC-093",
+      "title": "Конфликт биндинга с другим расширением даёт стандартное предупреждение VS Code",
+      "precondition": "Установлено другое расширение с той же комбинацией.",
+      "steps": [
+        { "step": "Вызвать комбинацию, конфликтующую с другим расширением", "expected": "Показано стандартное предупреждение VS Code; расширение не переопределяет биндинг" }
+      ],
+      "priority": "normal",
+      "type": "negative",
+      "requirement_ref": "REQ-17",
+      "title_hash": "sha256:3f9a1c7e5b2d48a6c0f1e2d3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1005d"
+    },
+    {
+      "temp_id": "TC-094",
+      "title": "При выключенной телеметрии сетевые вызовы телеметрии не выполняются",
+      "precondition": "Телеметрия отключена (по умолчанию).",
+      "steps": [
+        { "step": "Выполнить обычные команды расширения", "expected": "—" },
+        { "step": "Наблюдать сетевую активность", "expected": "Сетевые вызовы телеметрии отсутствуют" }
+      ],
+      "priority": "high",
+      "type": "positive",
+      "requirement_ref": "REQ-19",
+      "title_hash": "sha256:3f9a1c7e5b2d48a6c0f1e2d3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1005e"
+    },
+    {
+      "temp_id": "TC-095",
+      "title": "При включённой телеметрии payload соответствует схеме",
+      "precondition": "Телеметрия включена; задано событие для отправки.",
+      "steps": [
+        { "step": "Включить телеметрию и вызвать событие", "expected": "—" },
+        { "step": "Проверить payload", "expected": "Payload содержит поля action, success, error_code, duration_ms, extension_version, os_family с типами по схеме" }
+      ],
+      "priority": "important",
+      "type": "positive",
+      "requirement_ref": "REQ-19",
+      "title_hash": "sha256:3f9a1c7e5b2d48a6c0f1e2d3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1005f"
+    },
+    {
+      "temp_id": "TC-096",
+      "title": "Отказ от first-run notification оставляет настройку false и откладывает повтор на 30 дней",
+      "precondition": "При первом запуске показано first-run notification телеметрии.",
+      "steps": [
+        { "step": "Отказаться от first-run notification", "expected": "Настройка qemuManager.telemetry.enabled остаётся false" },
+        { "step": "Проверить повторное уведомление", "expected": "Повторное уведомление не показывается раньше 30 дней" }
+      ],
+      "priority": "important",
+      "type": "positive",
+      "requirement_ref": "REQ-19",
+      "title_hash": "sha256:3f9a1c7e5b2d48a6c0f1e2d3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f10060"
+    },
+    {
+      "temp_id": "TC-097",
+      "title": "Payload телеметрии не содержит чувствительных данных",
+      "precondition": "Телеметрия включена; сгенерирован payload.",
+      "steps": [
+        { "step": "Сформировать payload телеметрии", "expected": "—" },
+        { "step": "Проверить отсутствие чувствительных полей", "expected": "Payload не содержит имён VM, путей к файлам, IP-адресов, URI/пользователей подключений, hostname" }
+      ],
+      "priority": "high",
+      "type": "negative",
+      "requirement_ref": "REQ-19",
+      "title_hash": "sha256:3f9a1c7e5b2d48a6c0f1e2d3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f10061"
+    },
+    {
+      "temp_id": "TC-098",
+      "title": "duration_ms = -1 (ниже min) не допускается схемой",
+      "precondition": "Телеметрия включена; подготовлен payload с duration_ms.",
+      "steps": [
+        { "step": "Проверить поведение схемы при duration_ms = -1", "expected": "—" },
+        { "step": "Проверить payload", "expected": "Значение duration_ms = -1 не допускается схемой (integer >= 0); такой payload не формируется" }
+      ],
+      "priority": "normal",
+      "type": "boundary",
+      "requirement_ref": "REQ-19",
+      "title_hash": "sha256:3f9a1c7e5b2d48a6c0f1e2d3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f10062"
+    },
+    {
+      "temp_id": "TC-099",
+      "title": "duration_ms = 0 (min) допускается схемой",
+      "precondition": "Телеметрия включена; событие с нулевой длительностью.",
+      "steps": [
+        { "step": "Сформировать payload с duration_ms = 0", "expected": "—" },
+        { "step": "Проверить payload", "expected": "duration_ms = 0 принят; тип значения integer" }
+      ],
+      "priority": "normal",
+      "type": "boundary",
+      "requirement_ref": "REQ-19",
+      "title_hash": "sha256:3f9a1c7e5b2d48a6c0f1e2d3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f10063"
+    },
+    {
+      "temp_id": "TC-100",
+      "title": "duration_ms = 1 (min+1) допускается схемой",
+      "precondition": "Телеметрия включена; событие длительностью 1 мс.",
+      "steps": [
+        { "step": "Сформировать payload с duration_ms = 1", "expected": "—" },
+        { "step": "Проверить payload", "expected": "duration_ms = 1 принят; тип значения integer" }
+      ],
+      "priority": "normal",
+      "type": "boundary",
+      "requirement_ref": "REQ-19",
+      "title_hash": "sha256:3f9a1c7e5b2d48a6c0f1e2d3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f10064"
+    },
+    {
+      "temp_id": "TC-101",
+      "title": "Повторное уведомление телеметрии на 29-й день не показывается",
+      "precondition": "Отказ от first-run notification зафиксирован.",
+      "steps": [
+        { "step": "Смоделировать 29-й день после отказа", "expected": "—" },
+        { "step": "Проверить уведомление", "expected": "Повторное уведомление не показывается" }
+      ],
+      "priority": "normal",
+      "type": "boundary",
+      "requirement_ref": "REQ-19",
+      "title_hash": "sha256:3f9a1c7e5b2d48a6c0f1e2d3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f10065"
+    },
+    {
+      "temp_id": "TC-102",
+      "title": "Повторное уведомление телеметрии на 30-й день показывается",
+      "precondition": "Отказ от first-run notification зафиксирован.",
+      "steps": [
+        { "step": "Смоделировать 30-й день после отказа", "expected": "—" },
+        { "step": "Проверить уведомление", "expected": "Повторное уведомление показывается" }
+      ],
+      "priority": "normal",
+      "type": "boundary",
+      "requirement_ref": "REQ-19",
+      "title_hash": "sha256:3f9a1c7e5b2d48a6c0f1e2d3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f10066"
+    },
+    {
+      "temp_id": "TC-103",
+      "title": "Повторное уведомление телеметрии на 31-й день показывается",
+      "precondition": "Отказ от first-run notification зафиксирован.",
+      "steps": [
+        { "step": "Смоделировать 31-й день после отказа", "expected": "—" },
+        { "step": "Проверить уведомление", "expected": "Повторное уведомление показывается" }
+      ],
+      "priority": "normal",
+      "type": "boundary",
+      "requirement_ref": "REQ-19",
+      "title_hash": "sha256:3f9a1c7e5b2d48a6c0f1e2d3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f10067"
+    },
+    {
+      "temp_id": "TC-104",
+      "title": "running + Suspend переводит VM в suspended в течение 5 с",
+      "precondition": "VM в состоянии running.",
+      "steps": [
+        { "step": "Выбрать VM в состоянии running", "expected": "—" },
+        { "step": "Выполнить команду Suspend", "expected": "Запрос S3-сна инициирован" },
+        { "step": "Проверить состояние VM", "expected": "VM перешла в suspended в течение 5 с" }
+      ],
+      "priority": "important",
+      "type": "positive",
+      "requirement_ref": "REQ-21",
+      "title_hash": "sha256:3f9a1c7e5b2d48a6c0f1e2d3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f10068"
+    },
+    {
+      "temp_id": "TC-105",
+      "title": "suspended + Resume переводит VM в running в течение 5 с",
+      "precondition": "VM в состоянии suspended.",
+      "steps": [
+        { "step": "Выбрать VM в состоянии suspended", "expected": "—" },
+        { "step": "Выполнить команду Resume", "expected": "Возврат из S3-сна инициирован" },
+        { "step": "Проверить состояние VM", "expected": "VM перешла в running в течение 5 с" }
+      ],
+      "priority": "important",
+      "type": "positive",
+      "requirement_ref": "REQ-21",
+      "title_hash": "sha256:3f9a1c7e5b2d48a6c0f1e2d3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f10069"
+    },
+    {
+      "temp_id": "TC-106",
+      "title": "suspended + Start команда disabled с tooltip Resume VM first",
+      "precondition": "VM в состоянии suspended.",
+      "steps": [
+        { "step": "Выбрать VM в состоянии suspended", "expected": "—" },
+        { "step": "Проверить доступность команды Start", "expected": "Команда Start disabled с tooltip «Resume VM first»" }
+      ],
+      "priority": "important",
+      "type": "negative",
+      "requirement_ref": "REQ-21",
+      "title_hash": "sha256:3f9a1c7e5b2d48a6c0f1e2d3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1006a"
+    },
+    {
+      "temp_id": "TC-107",
+      "title": "suspended + Shutdown команда disabled с tooltip Resume VM first",
+      "precondition": "VM в состоянии suspended.",
+      "steps": [
+        { "step": "Выбрать VM в состоянии suspended", "expected": "—" },
+        { "step": "Проверить доступность команды Shutdown", "expected": "Команда Shutdown disabled с tooltip «Resume VM first»" }
+      ],
+      "priority": "important",
+      "type": "negative",
+      "requirement_ref": "REQ-21",
+      "title_hash": "sha256:3f9a1c7e5b2d48a6c0f1e2d3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1006b"
+    },
+    {
+      "temp_id": "TC-108",
+      "title": "suspended + Force stop команда disabled с tooltip Resume VM first",
+      "precondition": "VM в состоянии suspended.",
+      "steps": [
+        { "step": "Выбрать VM в состоянии suspended", "expected": "—" },
+        { "step": "Проверить доступность команды Force stop", "expected": "Команда Force stop disabled с tooltip «Resume VM first»" }
+      ],
+      "priority": "important",
+      "type": "negative",
+      "requirement_ref": "REQ-21",
+      "title_hash": "sha256:3f9a1c7e5b2d48a6c0f1e2d3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1006c"
+    },
+    {
+      "temp_id": "TC-109",
+      "title": "suspended + Pause команда disabled с tooltip Resume VM first",
+      "precondition": "VM в состоянии suspended.",
+      "steps": [
+        { "step": "Выбрать VM в состоянии suspended", "expected": "—" },
+        { "step": "Проверить доступность команды Pause", "expected": "Команда Pause disabled с tooltip «Resume VM first»" }
+      ],
+      "priority": "important",
+      "type": "negative",
+      "requirement_ref": "REQ-21",
+      "title_hash": "sha256:3f9a1c7e5b2d48a6c0f1e2d3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1006d"
+    },
+    {
+      "temp_id": "TC-110",
+      "title": "Ошибка libvirt при Suspend/Resume состояние не меняется, уведомление по REQ-14",
+      "precondition": "VM в состоянии running; смоделирована ошибка libvirt.",
+      "steps": [
+        { "step": "Выполнить команду Suspend", "expected": "—" },
+        { "step": "Проверить состояние VM", "expected": "Состояние VM не изменилось (running)" },
+        { "step": "Проверить уведомление", "expected": "Показано уведомление об ошибке по REQ-14" }
+      ],
+      "priority": "important",
+      "type": "negative",
+      "requirement_ref": "REQ-21",
+      "title_hash": "sha256:3f9a1c7e5b2d48a6c0f1e2d3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1006e"
+    },
+    {
+      "temp_id": "TC-111",
+      "title": "Внешнее убийство QEMU-процесса переводит VM в crashed в течение интервала обновления",
+      "precondition": "VM в состоянии running; интервал обновления по REQ-13.",
+      "steps": [
+        { "step": "Внешне завершить QEMU-процесс VM аварийно", "expected": "—" },
+        { "step": "Дождаться цикла обновления состояния", "expected": "VM отображается как crashed в течение интервала обновления (REQ-13)" }
+      ],
+      "priority": "important",
+      "type": "positive",
+      "requirement_ref": "REQ-22",
+      "title_hash": "sha256:3f9a1c7e5b2d48a6c0f1e2d3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1006f"
+    },
+    {
+      "temp_id": "TC-112",
+      "title": "crashed + Start переводит VM в running в течение 5 с",
+      "precondition": "VM в состоянии crashed.",
+      "steps": [
+        { "step": "Выбрать VM в состоянии crashed", "expected": "—" },
+        { "step": "Выполнить команду Start", "expected": "Запуск VM инициирован" },
+        { "step": "Проверить состояние VM", "expected": "VM перешла в running в течение 5 с" }
+      ],
+      "priority": "high",
+      "type": "positive",
+      "requirement_ref": "REQ-22",
+      "title_hash": "sha256:3f9a1c7e5b2d48a6c0f1e2d3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f10070"
+    },
+    {
+      "temp_id": "TC-113",
+      "title": "crashed отображается с предупреждающей иконкой и tooltip",
+      "precondition": "VM находится в состоянии crashed.",
+      "steps": [
+        { "step": "Проверить отображение VM в дереве", "expected": "Отображается предупреждающая иконка" },
+        { "step": "Навести курсор на VM", "expected": "Показан tooltip «VM crashed unexpectedly. Use Start to recover.»" }
+      ],
+      "priority": "important",
+      "type": "positive",
+      "requirement_ref": "REQ-22",
+      "title_hash": "sha256:3f9a1c7e5b2d48a6c0f1e2d3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f10071"
+    }
+  ],
+  "coverage_summary": [
+    {
+      "requirement_ref": "NFR/Производительность",
+      "applicable_types": ["positive"],
+      "na_types": [
+        { "type": "negative", "reason": "требование информационное — задаёт условия измерения таймингов; ошибок и недопустимых входов не описывает" },
+        { "type": "boundary", "reason": "нет числового диапазона входа; конфигурация фиксированная (4 CPU, 8 GB), тайминговые пороги относятся к AC других требований" }
+      ]
+    },
+    {
+      "requirement_ref": "REQ-01",
+      "applicable_types": ["positive", "negative"],
+      "na_types": [
+        { "type": "boundary", "reason": "односторонний тайминговый лимит cold activation не более 1.5 с на эталонной конфигурации; диапазон входа min/max не задан" }
+      ]
+    },
+    {
+      "requirement_ref": "REQ-03",
+      "applicable_types": ["positive"],
+      "na_types": [
+        { "type": "negative", "reason": "требование описывает отображение дерева; веток отказа/недопустимого ввода не задаёт (временная недоступность данных описана как штатное поведение stale)" },
+        { "type": "boundary", "reason": "нет числовых, диапазонных или лимитных условий — поля vCPU/RAM только отображаются" }
+      ]
+    },
+    {
+      "requirement_ref": "REQ-08",
+      "applicable_types": ["positive", "negative"],
+      "na_types": [
+        { "type": "boundary", "reason": "тайминговый лимит перехода в running не более 5 с на эталонной конфигурации; диапазон входа min/max не задан" }
+      ]
+    },
+    {
+      "requirement_ref": "REQ-09",
+      "applicable_types": ["positive", "negative", "boundary"],
+      "na_types": []
+    },
+    {
+      "requirement_ref": "REQ-10",
+      "applicable_types": ["positive", "negative"],
+      "na_types": [
+        { "type": "boundary", "reason": "тайминговый лимит перехода в stopped не более 3 с на эталонной конфигурации; диапазон входа min/max не задан" }
+      ]
+    },
+    {
+      "requirement_ref": "REQ-11",
+      "applicable_types": ["positive", "negative"],
+      "na_types": [
+        { "type": "boundary", "reason": "тайминговые лимиты Pause/Resume не более 3 с на эталонной конфигурации; диапазон входа min/max не задан" }
+      ]
+    },
+    {
+      "requirement_ref": "REQ-13",
+      "applicable_types": ["positive", "negative", "boundary"],
+      "na_types": []
+    },
+    {
+      "requirement_ref": "REQ-14",
+      "applicable_types": ["positive", "negative", "boundary"],
+      "na_types": []
+    },
+    {
+      "requirement_ref": "REQ-17",
+      "applicable_types": ["positive", "negative"],
+      "na_types": [
+        { "type": "boundary", "reason": "нет числовых, диапазонных или лимитных условий — требование описывает перечислимые комбинации клавиш" }
+      ]
+    },
+    {
+      "requirement_ref": "REQ-19",
+      "applicable_types": ["positive", "negative", "boundary"],
+      "na_types": []
+    },
+    {
+      "requirement_ref": "REQ-21",
+      "applicable_types": ["positive", "negative"],
+      "na_types": [
+        { "type": "boundary", "reason": "тайминговые лимиты Suspend/Resume не более 5 с на эталонной конфигурации; диапазон входа min/max не задан" }
+      ]
+    },
+    {
+      "requirement_ref": "REQ-22",
+      "applicable_types": ["positive"],
+      "na_types": [
+        { "type": "negative", "reason": "требование описывает детекцию и отображение состояния crashed; веток отказа/недопустимого ввода не задаёт" },
+        { "type": "boundary", "reason": "нет собственных числовых или лимитных условий; привязка к интервалу обновления покрыта на REQ-13" }
+      ]
+    }
+  ],
+  "status": "completed",
+  "blocking_reason": ""
+}

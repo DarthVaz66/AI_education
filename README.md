@@ -103,7 +103,7 @@ QA Orchestrator (primary)
    TESTOMATIO_PROJECT_ID=12345
 
    # Quality gates
-   QA_GATE1_MAJOR_LIMIT=5
+   QA_GATE1_MAJOR_LIMIT=8
    ```
 
    `.env` добавлен в `.gitignore`. Токены не коммитятся.
@@ -260,7 +260,7 @@ opencode run --agent qa-orchestrator \
 | `TESTOMATIO_PROJECT_TOKEN` | Project token Testomat.io (`tstmt_...`) |
 | `TESTOMATIO_PROJECT_ID` | Числовой ID проекта Testomat.io (fallback для аргумента) |
 | `TESTOMATIO_BASE_URL` | Базовый URL Testomat.io (по умолчанию `https://app.testomat.io`) |
-| `QA_GATE1_MAJOR_LIMIT` | Порог major-находок для Gate 1 (по умолчанию `5`) |
+| `QA_GATE1_MAJOR_LIMIT` | Порог major-находок для Gate 1 (в проекте задано `8`) |
 
 > `QA_RESUME_MODE` больше не используется. Поведение при непустом
 > `.artifacts/.current/` детерминировано: принудительная архивация в `failed_*`
@@ -406,7 +406,7 @@ cat .artifacts/index.json
   (каждый прогон стартует с чистого state), но preflight-поиск должен
   исключать дубли.
 - **Артефакт не найден** — проверить `run_id` в `.artifacts/index.json`.
-- **Gate 1 упал при `major ≤ 5`** — проверить `QA_GATE1_MAJOR_LIMIT` в `.env`.
+- **Gate 1 упал при `major ≤ 8`** — проверить `QA_GATE1_MAJOR_LIMIT` в `.env`.
 - **Нужно вручную начать с чистого листа** — удалите `.artifacts/.current/`
   (он будет пересоздан при следующем запуске). Если хотите сохранить
   содержимое — переименуйте в `.artifacts/failed_<любое_имя>/` вручную.

@@ -1,0 +1,242 @@
+{
+  "artifact_id": "2026-11-16_21-57-01:02-task-design",
+  "run_id": "2026-11-16_21-57-01",
+  "requirement_version": "0.5",
+  "timestamp": "2026-11-17T00:58:00Z",
+  "revision": 0,
+  "revision_notes": "",
+  "jira_params": { "project": "QEMU", "issue_type": "Task" },
+  "tasks": [
+    {
+      "temp_id": "T-01",
+      "task_kind": "implementation",
+      "summary": "VM is created from the form and appears in the tree",
+      "description": "Task kind: implementation\nRequirement refs: REQ-04\nСоздание VM из формы: name, vcpu, ramMb, disks[], iso (опционально), network (см. REQ-12). Валидация двухуровневая: клиентская по списку VM, загруженному при открытии формы, затем повторная серверная проверка при submit. Авто-суффиксы имён не применяются.\nDependencies: T-03 (REQ-12, сетевая конфигурация), T-06 (REQ-16, валидация). Ошибки libvirt/QMP отображаются по REQ-14 (T-05).",
+      "acceptance_criteria": [
+        { "format": "given_when_then", "text": "Given форма создания VM и текущий список VM подключения, When пользователь вводит name, уже существующее в списке, Then показывается inline error «A VM with this name already exists in the connection», форма не отправляется и авто-суффикс к имени не добавляется." },
+        { "format": "given_when_then", "text": "Given форма создания VM, When значение vcpu вне 1–32, или ramMb вне 256–262144 / не кратно 128, или размер диска вне 1–2000 ГБ, Then показывается inline error с указанием нарушенного правила." },
+        { "format": "given_when_then", "text": "Given клиентская валидация формы пройдена, When пользователь отправляет форму, Then выполняется повторная серверная проверка уникальности имени." },
+        { "format": "given_when_then", "text": "Given валидные данные формы, When создание VM успешно завершено, Then созданная VM появляется в дереве." },
+        { "format": "given_when_then", "text": "Given ошибка libvirt или QMP при создании VM, When операция завершается ошибкой, Then показывается уведомление по REQ-14 и VM не добавляется в дерево." },
+        { "format": "invariant", "text": "name: 1–63 символа, допустимые символы [a-zA-Z0-9-], не начинается и не заканчивается на «-», уникально в пределах подключения." },
+        { "format": "invariant", "text": "disks[]: от 1 до 8 дисков; каждый — абсолютный путь на гипервизоре, размер 1–2000 ГБ, формат qcow2." },
+        { "format": "invariant", "text": "iso опционален и задаётся абсолютным путём на гипервизоре; networkType — согласно REQ-12." }
+      ],
+      "requirement_refs": ["REQ-04"],
+      "clarifies_findings": [],
+      "dependencies": ["T-03", "T-06"],
+      "dor_check": "pass",
+      "dor_failures": []
+    },
+    {
+      "temp_id": "T-02",
+      "task_kind": "implementation",
+      "summary": "Graceful shutdown sends ACPI request with configurable timeout and force-stop dialog",
+      "description": "Task kind: implementation\nRequirement refs: REQ-09\nКоманда «Shutdown» отправляет ACPI-запрос завершения. Таймаут берётся из workspace settings: целое 5–300 секунд; значение вне диапазона отклоняется с inline error в настройке. По истечении таймаута показывается диалог «Force stop» / «Wait more» / «Cancel». «Cancel» не отзывает отправленный ACPI-запрос.\nDependencies: T-04 (REQ-13, отражение изменений состояния). «Force stop» — команда REQ-10; ошибки libvirt/QMP — по REQ-14 (T-05). Конкретное значение таймаута по умолчанию не задано в тексте требования (см. clarification F-002 / T-09).",
+      "acceptance_criteria": [
+        { "format": "given_when_then", "text": "Given VM в состоянии running, When выполнена команда «Shutdown», Then отправляется ACPI-запрос завершения и таймер использует значение времени ожидания из workspace settings в секундах." },
+        { "format": "given_when_then", "text": "Given значение таймаута вне диапазона 5–300, When настройка применяется, Then в настройке показывается inline error и значение отклоняется." },
+        { "format": "given_when_then", "text": "Given VM всё ещё running, When истекает таймаут, Then показывается диалог с действиями «Force stop» / «Wait more» / «Cancel»." },
+        { "format": "given_when_then", "text": "Given диалог показан, When выбрано «Force stop», Then процесс VM немедленно завершается." },
+        { "format": "given_when_then", "text": "Given диалог показан, When выбрано «Wait more», Then таймер перезапускается с тем же значением из настроек." },
+        { "format": "given_when_then", "text": "Given диалог показан, When выбрано «Cancel», Then диалог закрывается, отправленный ACPI-запрос не отзывается, а дальнейшие изменения состояния VM отражаются по REQ-13." },
+        { "format": "given_when_then", "text": "Given VM перешла в stopped до истечения таймаута, When таймер истекает, Then диалог не показывается и переход отражается по REQ-13." }
+      ],
+      "requirement_refs": ["REQ-09"],
+      "clarifies_findings": [],
+      "dependencies": ["T-04"],
+      "dor_check": "pass",
+      "dor_failures": []
+    },
+    {
+      "temp_id": "T-03",
+      "task_kind": "implementation",
+      "summary": "Network configuration selects user-nat or bridged and shows resolved IP in the tree",
+      "description": "Task kind: implementation\nRequirement refs: REQ-12\nПоле networkType: user-nat (по умолчанию) или bridged. Для bridged пользователь выбирает bridge из списка, полученного от libvirt. Для user-nat IP определяется через libvirt API virDomainInterfaceAddresses или QMP guest-network-get-interfaces с таймаутом 2 секунды.\nDependencies: T-05 (REQ-14, логирование ошибки получения списка bridge). QMP-only-ветка связана с T-07 (REQ-18).",
+      "acceptance_criteria": [
+        { "format": "given_when_then", "text": "Given форма создания VM, When пользователь задаёт networkType, Then доступны значения user-nat (по умолчанию) и bridged." },
+        { "format": "given_when_then", "text": "Given список bridge от libvirt пуст, When пользователь открывает выбор bridged, Then опция bridged disabled с tooltip «No bridges available on host»." },
+        { "format": "given_when_then", "text": "Given получение списка bridge завершилось ошибкой, When форма отображается, Then опция bridged disabled с tooltip «Failed to load bridges» и ошибка логируется по REQ-14." },
+        { "format": "given_when_then", "text": "Given user-nat с определимым IP, When IP получен через libvirt API virDomainInterfaceAddresses или QMP guest-network-get-interfaces, Then IP отображается в дереве в течение 2 с." },
+        { "format": "given_when_then", "text": "Given user-nat с неопределимым IP, When истекает таймаут 2 с, Then в дереве отображается unknown без влияния на рендеринг дерева." },
+        { "format": "given_when_then", "text": "Given QMP-only (libvirt недоступен) при открытии формы, Then опция bridged disabled с tooltip." }
+      ],
+      "requirement_refs": ["REQ-12"],
+      "clarifies_findings": [],
+      "dependencies": ["T-05"],
+      "dor_check": "pass",
+      "dor_failures": []
+    },
+    {
+      "temp_id": "T-04",
+      "task_kind": "implementation",
+      "summary": "VM state auto-refreshes via polling or libvirt events with configurable interval",
+      "description": "Task kind: implementation\nRequirement refs: REQ-13\nИнтервал обновления — workspace setting: 0 (только ручное обновление) или 1–60 секунд; по умолчанию 5. При поддержке libvirt events (capabilities XML, флаг domainEventSupport) выполняется подписка на события вместо polling; при невозможности подписки — откат к polling с warning в лог. Кнопка «Refresh» доступна всегда.",
+      "acceptance_criteria": [
+        { "format": "given_when_then", "text": "Given интервал обновления = 0, When расширение работает, Then обновление состояния выполняется только вручную." },
+        { "format": "given_when_then", "text": "Given интервал обновления = 1, When polling активен, Then состояние обновляется каждые 1 с." },
+        { "format": "given_when_then", "text": "Given интервал обновления = 60, When polling активен, Then состояние обновляется каждые 60 с." },
+        { "format": "given_when_then", "text": "Given интервал обновления = 61, When настройка применяется, Then в настройке показывается inline error." },
+        { "format": "given_when_then", "text": "Given capabilities XML содержит domainEventSupport=true, When состояние обновляется, Then расширение подписывается на события и polling не выполняется." },
+        { "format": "given_when_then", "text": "Given ошибка подписки на события, When интервал обновления активен, Then выполняется откат к polling и в лог записывается warning." },
+        { "format": "invariant", "text": "значение интервала обновления по умолчанию — 5 секунд." },
+        { "format": "invariant", "text": "кнопка «Refresh» доступна всегда, независимо от значения интервала." }
+      ],
+      "requirement_refs": ["REQ-13"],
+      "clarifies_findings": [],
+      "dependencies": [],
+      "dor_check": "pass",
+      "dor_failures": []
+    },
+    {
+      "temp_id": "T-05",
+      "task_kind": "implementation",
+      "summary": "libvirt/QMP errors map to friendly messages with redacted logging and Show log",
+      "description": "Task kind: implementation\nRequirement refs: REQ-14\nОшибки libvirt/QMP маппятся в friendly-сообщения по таблице (VIR_ERR_NO_CONNECT, VIR_ERR_INVALID_CONN → Connection refused; VIR_ERR_AUTH_FAILED, VIR_ERR_AUTH_CANCELLED → Authentication failed; VIR_ERR_NO_DOMAIN → VM not found; VIR_ERR_OPERATION_UNSUPPORTED, VIR_ERR_NO_SUPPORT → Operation not supported; VIR_ERR_DISK_FULL, ENOSPC → Disk full; unmapped → «Unexpected error: {code}»). Redaction обязательна перед записью в Output Channel: passwords, tokens, SSH private keys, URI с embedded credentials, env-переменные Extension Host с именами SECRET|TOKEN|PASSWORD|KEY.",
+      "acceptance_criteria": [
+        { "format": "given_when_then", "text": "Given любая ошибка libvirt/QMP, When операция завершается ошибкой, Then показывается уведомление без raw stack trace." },
+        { "format": "given_when_then", "text": "Given уведомление об ошибке с действием «Show log», When действие активировано, Then открывается Output Channel." },
+        { "format": "given_when_then", "text": "Given unmapped ошибка libvirt/QMP, When операция завершается ошибкой, Then показывается fallback-сообщение «Unexpected error: {code}»." },
+        { "format": "given_when_then", "text": "Given ошибка из таблицы маппинга (VIR_ERR_NO_CONNECT / VIR_ERR_INVALID_CONN; VIR_ERR_AUTH_FAILED / VIR_ERR_AUTH_CANCELLED; VIR_ERR_NO_DOMAIN; VIR_ERR_OPERATION_UNSUPPORTED / VIR_ERR_NO_SUPPORT; VIR_ERR_DISK_FULL / ENOSPC), When операция завершается ошибкой, Then показывается соответствующее friendly-сообщение (Connection refused / Authentication failed / VM not found / Operation not supported / Disk full)." },
+        { "format": "given_when_then", "text": "Given в строку лога попадают passwords, tokens, SSH private keys, URI с embedded credentials или env-переменные Extension Host с именами SECRET|TOKEN|PASSWORD|KEY, When строка записывается в Output Channel, Then значения отредактированы и лог не содержит секретов." }
+      ],
+      "requirement_refs": ["REQ-14"],
+      "clarifies_findings": [],
+      "dependencies": [],
+      "dor_check": "pass",
+      "dor_failures": []
+    },
+    {
+      "temp_id": "T-06",
+      "task_kind": "implementation",
+      "summary": "Client-side and libvirt validation gate the create form submit",
+      "description": "Task kind: implementation\nRequirement refs: REQ-16\nКлиентская валидация выполняется синхронно до отправки в libvirt: формат числовых полей; диапазоны vcpu 1–32, ramMb 256–262144, размер диска 1–2000 ГБ; длина и допустимые символы для name; количество дисков 1–8; уникальность имени по текущему списку VM (см. REQ-04). Submit disabled до прохождения клиентской валидации. Серверная валидация libvirt: существование родительской директории диска, ISO-файла, доступность storage pool.\nDependencies: T-05 (REQ-14, уведомления об ошибках серверной валидации).",
+      "acceptance_criteria": [
+        { "format": "given_when_then", "text": "Given поле формы пустое / нечисловое / выходящее за границы / некратное, When пользователь вводит значение, Then показывается inline error и submit disabled." },
+        { "format": "given_when_then", "text": "Given name содержит недопустимые символы, превышает допустимую длину или дублирует существующее имя, When пользователь вводит значение, Then показывается inline error и submit disabled." },
+        { "format": "given_when_then", "text": "Given все клиентские проверки пройдены, When форма заполнена, Then submit enabled." },
+        { "format": "given_when_then", "text": "Given клиентская валидация пройдена и активен libvirt-режим, When выполняется submit, Then серверная валидация libvirt проверяет существование родительской директории диска, ISO-файла и доступность storage pool." },
+        { "format": "given_when_then", "text": "Given ошибка серверной валидации libvirt, When submit завершается, Then показывается уведомление по REQ-14 после submit." },
+        { "format": "invariant", "text": "диапазоны: vcpu 1–32, ramMb 256–262144, размер диска 1–2000 ГБ, количество дисков 1–8; клиентская валидация выполняется синхронно до отправки в libvirt." }
+      ],
+      "requirement_refs": ["REQ-16"],
+      "clarifies_findings": [],
+      "dependencies": ["T-05"],
+      "dor_check": "pass",
+      "dor_failures": []
+    },
+    {
+      "temp_id": "T-07",
+      "task_kind": "implementation",
+      "summary": "Extension installs cross-platform with runtime detection and degraded state",
+      "description": "Task kind: implementation\nRequirement refs: REQ-18\nПлатформы: Windows 10+, macOS 12+, Ubuntu 22.04+. libvirt-режим: libvirt 8.0+ с QEMU 6.0+. QMP-only: QEMU 6.0+ с QMP-сокетом без libvirt. При отсутствии runtime расширение переходит в состояние degraded, не приводя к падению или зависанию VS Code.\nDependencies: T-03 (REQ-12, bridged disabled в QMP-only), T-04 (REQ-13, автообновление через polling в QMP-only).",
+      "acceptance_criteria": [
+        { "format": "given_when_then", "text": "Given Windows 10+, macOS 12+ или Ubuntu 22.04+, When расширение устанавливается, Then оно устанавливается и активируется на всех трёх ОС." },
+        { "format": "given_when_then", "text": "Given runtime отсутствует (нет ни libvirt 8.0+ с QEMU 6.0+, ни QMP-only QEMU 6.0+ с QMP-сокетом), When расширение активируется, Then оно переходит в состояние degraded." },
+        { "format": "invariant", "text": "в состоянии degraded расширение не приводит к падению или зависанию VS Code." },
+        { "format": "given_when_then", "text": "Given активен QMP-only режим, When расширение работает, Then bridged disabled по REQ-12 и автообновление выполняется через polling." }
+      ],
+      "requirement_refs": ["REQ-18"],
+      "clarifies_findings": [],
+      "dependencies": ["T-03", "T-04"],
+      "dor_check": "pass",
+      "dor_failures": []
+    },
+    {
+      "temp_id": "T-08",
+      "task_kind": "clarification",
+      "summary": "[Clarification] F-001: не определён SLA появления VM в дереве после создания",
+      "description": "Task kind: clarification\nClarifies findings: F-001\nRequirement refs: REQ-04\nEvidence: REQ-04 — «После успешного создания VM должна появиться в дереве быстро». Соответствующий AC: «успешное создание → VM появляется в дереве» — без временной границы, тогда как REQ-12 задаёт явную границу «в течение 2 с».\nImpact: test-designer не может вывести детерминированный AC по времени появления VM в дереве; критерий pass/fail для «появляется в дереве» неизмерим.\nRecommendation: заменить «быстро» на конкретный SLA (например, «в течение 3 с»), повторить ту же границу в AC и уточнить связь с интервалом polling 0 из REQ-13.",
+      "acceptance_criteria": [
+        { "format": "given_when_then", "text": "Given finding F-001 (не определён SLA появления VM в дереве после создания), When требование уточнено и requirement-review перевыпущен, Then finding F-001 отсутствует или его severity снижена." }
+      ],
+      "requirement_refs": ["REQ-04"],
+      "clarifies_findings": ["F-001"],
+      "dependencies": [],
+      "dor_check": "pass",
+      "dor_failures": []
+    },
+    {
+      "temp_id": "T-09",
+      "task_kind": "clarification",
+      "summary": "[Clarification] F-002: не задан дефолтный таймаут graceful shutdown",
+      "description": "Task kind: clarification\nClarifies findings: F-002\nRequirement refs: REQ-09\nEvidence: REQ-09 — «По умолчанию используется разумный таймаут.» — конкретное значение не задано; в REQ-13 для аналогичной настройки default указан явно (5).\nImpact: дефолтный таймаут shutdown непроверяем; AC «таймер использует значение из настроек в секундах» нельзя проверить против дефолта, поведение при первом запуске не определено.\nRecommendation: задать явный числовой дефолт (например, 60 с) в диапазоне 5–300 и добавить AC, проверяющий значение по умолчанию.",
+      "acceptance_criteria": [
+        { "format": "given_when_then", "text": "Given finding F-002 (не задан дефолтный таймаут shutdown), When требование уточнено и requirement-review перевыпущен, Then finding F-002 отсутствует или его severity снижена." }
+      ],
+      "requirement_refs": ["REQ-09"],
+      "clarifies_findings": ["F-002"],
+      "dependencies": [],
+      "dor_check": "pass",
+      "dor_failures": []
+    },
+    {
+      "temp_id": "T-10",
+      "task_kind": "clarification",
+      "summary": "[Clarification] F-003: не определён триггер и путь резолва IP для user-nat",
+      "description": "Task kind: clarification\nClarifies findings: F-003\nRequirement refs: REQ-12\nEvidence: REQ-12 — «Для user-nat IP определяется при необходимости через libvirt API virDomainInterfaceAddresses или QMP guest-network-get-interfaces с таймаутом 2 секунды».\nImpact: триггер определения IP не определён (открытие формы? рендер дерева? по запросу?), но AC «user-nat с определимым IP → IP в дереве в течение 2 с» предполагает, что это происходит всегда; шаги теста невозможно вывести детерминированно.\nRecommendation: определить, когда именно резолвится IP и какой путь (libvirt vs QMP) применяется в каждом режиме; согласовать AC с этим триггером.",
+      "acceptance_criteria": [
+        { "format": "given_when_then", "text": "Given finding F-003 (не определён триггер и путь резолва IP для user-nat), When требование уточнено и requirement-review перевыпущен, Then finding F-003 отсутствует или его severity снижена." }
+      ],
+      "requirement_refs": ["REQ-12"],
+      "clarifies_findings": ["F-003"],
+      "dependencies": [],
+      "dor_check": "pass",
+      "dor_failures": []
+    },
+    {
+      "temp_id": "T-11",
+      "task_kind": "clarification",
+      "summary": "[Clarification] F-004: не задан tooltip для bridged disabled в QMP-only",
+      "description": "Task kind: clarification\nClarifies findings: F-004\nRequirement refs: REQ-12, REQ-18\nEvidence: AC REQ-12: «QMP-only + открытие формы → bridged disabled с tooltip.» Текст задаёт текст tooltip только для пустого списка («No bridges available on host») и ошибки получения списка («Failed to load bridges»); для случая QMP-only / недоступности libvirt tooltip не определён.\nImpact: сообщение при отключённом bridged в QMP-only не специфицировано; тест не может проверить точный текст tooltip, возможен разнобой UI-текста.\nRecommendation: задать текст tooltip для случая QMP-only (нет libvirt) и добавить его в AC.",
+      "acceptance_criteria": [
+        { "format": "given_when_then", "text": "Given finding F-004 (не задан tooltip для bridged disabled в QMP-only), When требование уточнено и requirement-review перевыпущен, Then finding F-004 отсутствует или его severity снижена." }
+      ],
+      "requirement_refs": ["REQ-12", "REQ-18"],
+      "clarifies_findings": ["F-004"],
+      "dependencies": [],
+      "dor_check": "pass",
+      "dor_failures": []
+    },
+    {
+      "temp_id": "T-12",
+      "task_kind": "clarification",
+      "summary": "[Clarification] F-005: разрывная нумерация REQ-разделов документа",
+      "description": "Task kind: clarification\nClarifies findings: F-005\nRequirement refs: (нет in-scope ref; finding относится к документу целиком)\nEvidence: на странице присутствуют только REQ-04, REQ-09, REQ-12, REQ-13, REQ-14, REQ-16, REQ-18; разделов REQ-01–03, REQ-05–08, REQ-10–11, REQ-15, REQ-17 нет.\nImpact: нумерация требований разрывна; ссылки вида «REQ-14», «REQ-13», «REQ-12» разрешаются, но пробелы мешают трассировке/проверке покрытия и могут скрывать удалённые или пропущенные требования.\nRecommendation: подтвердить, является ли страница выдержкой; если это полный документ — добавить отсутствующие REQ-разделы или перенумеровать непрерывно.",
+      "acceptance_criteria": [
+        { "format": "given_when_then", "text": "Given finding F-005 (разрывная нумерация REQ-разделов), When требование уточнено и requirement-review перевыпущен, Then finding F-005 отсутствует или его severity снижена." }
+      ],
+      "requirement_refs": [],
+      "clarifies_findings": ["F-005"],
+      "dependencies": [],
+      "dor_check": "pass",
+      "dor_failures": []
+    },
+    {
+      "temp_id": "T-13",
+      "task_kind": "clarification",
+      "summary": "[Clarification] F-006: отсутствуют разделы Non-Goals, NFR и Glossary",
+      "description": "Task kind: clarification\nClarifies findings: F-006\nRequirement refs: (нет in-scope ref; finding относится к документу целиком)\nEvidence: в документе отсутствуют разделы Non-Goals, NFR (производительность/безопасность/доступность) и Glossary; присутствуют только функциональные REQ-разделы.\nImpact: границы scope не зафиксированы (например, конфигурация bridge, управление storage pool), а нефункциональные ожидания (латентность обновления «быстро», гарантии redaction) не оформлены как NFR, поэтому design/tests не могут их проверить.\nRecommendation: добавить явные Non-Goals, раздел NFR (производительность, безопасность/redaction, доступность) и глоссарий терминов «degraded», «friendly-сообщение», «unknown».",
+      "acceptance_criteria": [
+        { "format": "given_when_then", "text": "Given finding F-006 (отсутствуют разделы Non-Goals, NFR и Glossary), When требование уточнено и requirement-review перевыпущен, Then finding F-006 отсутствует или его severity снижена." }
+      ],
+      "requirement_refs": [],
+      "clarifies_findings": ["F-006"],
+      "dependencies": [],
+      "dor_check": "pass",
+      "dor_failures": []
+    }
+  ],
+  "duplicates": [
+    { "temp_id": "T-02", "existing_key": "QEMU-23", "summary": "Graceful shutdown sends ACPI request with configurable timeout dialog" },
+    { "temp_id": "T-04", "existing_key": "QEMU-26", "summary": "Automatic state refresh via polling or libvirt events with configurable interval" },
+    { "temp_id": "T-05", "existing_key": "QEMU-27", "summary": "Friendly libvirt/QMP error mapping, redacted logging and Show log" }
+  ],
+  "trace_coverage": {
+    "requirements_covered": ["REQ-04", "REQ-09", "REQ-12", "REQ-13", "REQ-14", "REQ-16", "REQ-18"],
+    "requirements_uncovered": [],
+    "clarification_findings_covered": ["F-001", "F-002", "F-003", "F-004", "F-005", "F-006"]
+  },
+  "status": "completed",
+  "blocking_reason": ""
+}
