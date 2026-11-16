@@ -1,0 +1,47 @@
+{
+  "run_id": "2026-11-16_02-44-13",
+  "jira": {
+    "project": "QA",
+    "label": "qemu-manager-req-0.5",
+    "status": "completed",
+    "items": [
+      { "temp_id": "T-01", "summary": "[Реализация] NFR/Производительность: бюджеты активации и UI-операций", "status": "created", "external_id": "QA-42" },
+      { "temp_id": "T-02", "summary": "[Реализация] NFR/Безопасность: секреты не пишутся в логи/настройки, redaction, opt-in телеметрия", "status": "created", "external_id": "QA-43" },
+      { "temp_id": "T-03", "summary": "[Реализация] NFR/Доступность: все операции как VS Code commands и keyboard navigation", "status": "created", "external_id": "QA-44" },
+      { "temp_id": "T-04", "summary": "[Реализация] NFR/Совместимость: поддержка VS Code 1.85+ / libvirt 8.0+ / QEMU 6.0+", "status": "created", "external_id": "QA-45" },
+      { "temp_id": "T-05", "summary": "[Реализация] REQ-01: активация расширения и degraded при ошибке активации", "status": "created", "external_id": "QA-46" },
+      { "temp_id": "T-06", "summary": "[Реализация] REQ-02: управление подключениями (add/edit/delete, лимит 10, workspace settings)", "status": "created", "external_id": "QA-47" },
+      { "temp_id": "T-07", "summary": "[Реализация] REQ-03: дерево VM (группировка по подключениям, 5 состояний, stale, сортировка)", "status": "created", "external_id": "QA-48" },
+      { "temp_id": "T-08", "summary": "[Реализация] REQ-04: создание VM (форма, поля, двухуровневая валидация, QMP-only)", "status": "created", "external_id": "QA-49" },
+      { "temp_id": "T-09", "summary": "[Реализация] REQ-05: переименование VM (только stopped, уникальность имени)", "status": "created", "external_id": "QA-50" },
+      { "temp_id": "T-10", "summary": "[Реализация] REQ-06: клонирование VM (только stopped, копия дисков, отмена, без ISO, user-nat)", "status": "created", "external_id": "QA-51" },
+      { "temp_id": "T-11", "summary": "[Реализация] REQ-07: удаление VM (две фазы, чекбокс дисков, partially_completed)", "status": "created", "external_id": "QA-52" },
+      { "temp_id": "T-12", "summary": "[Реализация] REQ-08: запуск VM (stopped/crashed, destroy+start)", "status": "created", "external_id": "QA-53" },
+      { "temp_id": "T-13", "summary": "[Реализация] REQ-09: graceful shutdown (ACPI, таймаут из настроек, диалог)", "status": "created", "external_id": "QA-54" },
+      { "temp_id": "T-14", "summary": "[Реализация] REQ-10: force stop (подтверждение, настройка отключения)", "status": "created", "external_id": "QA-55" },
+      { "temp_id": "T-15", "summary": "[Реализация] REQ-11: пауза и возобновление (единая контекстная Resume)", "status": "created", "external_id": "QA-56" },
+      { "temp_id": "T-16", "summary": "[Реализация] REQ-12: сетевая конфигурация (user-nat/bridged, определение IP, QMP-only)", "status": "created", "external_id": "QA-57" },
+      { "temp_id": "T-17", "summary": "[Реализация] REQ-13: автообновление состояния (events/polling, интервал, Refresh)", "status": "created", "external_id": "QA-58" },
+      { "temp_id": "T-18", "summary": "[Реализация] REQ-14: обработка ошибок (маппинг libvirt/QMP, redaction, уведомления)", "status": "created", "external_id": "QA-59" },
+      { "temp_id": "T-19", "summary": "[Реализация] REQ-15: логирование (Output Channel, формат, ring buffer, уровень)", "status": "created", "external_id": "QA-60" },
+      { "temp_id": "T-20", "summary": "[Реализация] REQ-16: валидация входных данных (клиентская/серверная, submit disabled)", "status": "created", "external_id": "QA-61" },
+      { "temp_id": "T-21", "summary": "[Реализация] REQ-17: горячие клавиши (дефолтные биндинги, настраиваемость, конфликты)", "status": "created", "external_id": "QA-62" },
+      { "temp_id": "T-22", "summary": "[Реализация] REQ-18: кроссплатформенность и runtime detection (degraded runtime_missing)", "status": "created", "external_id": "QA-63" },
+      { "temp_id": "T-23", "summary": "[Реализация] REQ-19: телеметрия opt-in (payload без PII, first-run prompt)", "status": "created", "external_id": "QA-64" },
+      { "temp_id": "T-24", "summary": "[Реализация] REQ-20: экспорт и импорт конфигурации VM (схема v1, валидация, коллизии)", "status": "created", "external_id": "QA-65" },
+      { "temp_id": "T-25", "summary": "[Реализация] REQ-21: Suspend/Resume VM (PMSUSPENDED, блокировка команд)", "status": "created", "external_id": "QA-66" },
+      { "temp_id": "T-26", "summary": "[Реализация] REQ-22: детекция состояния crashed (libvirt/QMP, отображение, recovery)", "status": "created", "external_id": "QA-67" },
+      { "temp_id": "T-27", "summary": "[Clarification] F-001: не заданы ключи workspace-настроек (shutdownTimeout/refreshInterval/logLevel)", "status": "created", "external_id": "QA-68" },
+      { "temp_id": "T-28", "summary": "[Clarification] F-002: не разделены таймаут резолва IP (2 с) и обновление узла дерева", "status": "created", "external_id": "QA-69" },
+      { "temp_id": "T-29", "summary": "[Clarification] F-004: не описано поведение Rename/Clone/Delete/Suspend в QMP-only режиме", "status": "created", "external_id": "QA-70" },
+      { "temp_id": "T-30", "summary": "[Clarification] F-005: не заданы итоговое состояние импортируемой VM и правило bridged при QMP-only", "status": "created", "external_id": "QA-71" }
+    ]
+  },
+  "testomat": {
+    "project_id": "test-cc3c0",
+    "suite_id": null,
+    "status": "error",
+    "error": "Testomat.io read/search endpoints unavailable after retries. All resource list endpoints (tests, suites, tags, labels, milestones, runs, requirements, branches, steps, snippets) returned 'fetch failed' / 'Request timed out', while system_ping and project_info succeeded. Idempotency preflight search (test == '{title}' and suite == '{suite_id}') impossible -> publish aborted fail-closed to avoid duplicates.",
+    "items": []
+  }
+}

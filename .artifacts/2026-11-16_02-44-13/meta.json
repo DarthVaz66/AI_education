@@ -1,0 +1,29 @@
+{
+  "run_id": "2026-11-16_02-44-13",
+  "requirement_version": "0.5",
+  "confluence_page_id": "2228226",
+  "jira_project": "QA",
+  "testomat_project_id": "test-cc3c0",
+  "testomat_project_id_source": "argument",
+  "testomat_suite_id": null,
+  "started_at": "2026-11-16T02:44:13Z",
+  "status": "blocked",
+  "stopped_at": "Publish — Testomat.io preflight/create",
+  "blocking_reason": "partial_publish",
+  "preflight_decision": "fresh_start",
+  "archived_previous_run_id": null,
+  "archived_previous_path": null,
+  "human_override": null,
+  "gate_results": {
+    "gate1": "pass",
+    "gate2a": "pass",
+    "gate2b": "pass",
+    "gate2c": "pass"
+  },
+  "gate_retries": {
+    "jira": 0,
+    "test": 0
+  },
+  "blocking_findings_present": false,
+  "finished_at": "2026-11-16T02:52:00Z"
+}

@@ -27,5 +27,8 @@ task-design / test-design → Gate 2a / 2b / 2c → Publish → Report → фи�
   severity blocker/critical — **не запускай** task-design/test-design и
   **не создавай** Jira-задачи/Testomat-кейсы;
 - при любой ошибке после retry — Blocking Report, без partial create;
+- при непрохождении Gate 2a/2b оркестратор возвращает артефакт субагенту на
+  исправление (retry) — не более `QA_RETRY_LIMIT` (дефолт 5; максимум 5 на Jira и
+  5 на Test); при исчерпании лимита — Blocking Report без partial create;
 - `major` findings при PASS Gate 1 могут порождать clarification-задачи
   в task-design, но не отменяют запрет на publish при blocking findings.

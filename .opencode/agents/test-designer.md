@@ -101,7 +101,9 @@ decision tables, priority rubric, правила N/A.
 - `artifact_path_out` — `.artifacts/.current/03-test-design.json`;
 - `testomat_project_id` — опционально. Если передан — использовать как есть,
   не резолвить повторно;
-- `testomat_suite_id` — опционально.
+- `testomat_suite_id` — опционально;
+- `retry_request` — **опционально**. Перечень нарушенных критериев Gate 2b и
+  требуемых исправлений. При наличии — включить **Retry / Revision Mode**.
 
 Если `01-requirement-review.json` отсутствует, `status != completed` или
 `requirements[]` пуст — вернуть `status = blocked`, не формировать модель.
@@ -167,6 +169,24 @@ if resolved == null:
 16. **Return** — вернуть `artifact_path_out`, `cases_count`, `coverage_summary`,
     `na_summary`, `resolved_project_id`.
 
+## Retry / Revision Mode
+
+Если оркестратор передал `retry_request` (повторный вызов после FAIL Gate 2b):
+
+1. Прочитать `01-requirement-review.json` и **существующий** `03-test-design.json`.
+2. Исправить **только** кейсы/элементы, указанные в `retry_request`:
+   - кейс с ожиданием «не падает» → добавить **конкретный наблюдаемый результат**;
+   - неполный boundary → добавить отсутствующие граничные значения
+     (min-1, min, min+1, max-1, max, max+1) или зафиксировать `N/A` с `reason`;
+   - отсутствие positive на AC → добавить кейс;
+   - недиагностируемый `expected` → разбить на атомарные пары `step + expected`;
+   - отсутствующий `requirement_ref` / `priority` → заполнить.
+3. Остальные кейсы **не менять**; `temp_id` и `coverage_summary` — консистентны.
+4. Инкрементировать `revision` (int, старт `0`) и записать `revision_notes`.
+5. Пройти self-check skill `test-design` п.9 и вернуть `status=completed`.
+6. Если замечание неустранимо без домысливания отсутствующего поведения —
+   `status=blocked`, `blocking_reason="retry_unresolvable: {text}"`.
+
 ## Tools
 
 - **`read`** — чтение `.artifacts/.current/01-requirement-review.json`.
@@ -210,6 +230,8 @@ if resolved == null:
   "run_id": "...",
   "requirement_version": "...",
   "timestamp": "ISO-8601",
+  "revision": 0,
+  "revision_notes": "",
   "testomat_params": {
     "project_id": 12345,
     "project_id_source": "env | mcp_project_info | argument",
@@ -279,5 +301,9 @@ in-scope `requirements[].ref` есть ≥ 1 positive; все непримени
   с backoff; auth/403 не ретраить.
 - **Ошибка записи артефакта** — `status = blocked`,
   `blocking_reason = "artifact_write_failed: {text}"`.
+- **`retry_request` присутствует, но `03` отсутствует/повреждён** — `status = blocked`,
+  `blocking_reason = "retry_upstream_artifact_not_ready"`.
+- **Замечание не устранимо без домысливания поведения** — `status = blocked`,
+  `blocking_reason = "retry_unresolvable: {text}"`.
 
 Не формировать Blocking Report — это делает оркестратор.

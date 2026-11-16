@@ -102,7 +102,9 @@ Gate 1 PASS и нет превышения `QA_GATE1_MAJOR_LIMIT`, ты може
 - `artifact_path_in` — `.artifacts/.current/01-requirement-review.json`;
 - `artifact_path_out` — `.artifacts/.current/02-task-design.json`;
 - `jira_project` — ключ проекта Jira;
-- `jira_issue_type` — тип задачи (опционально; по умолчанию `Task`).
+- `jira_issue_type` — тип задачи (опционально; по умолчанию `Task`);
+- `retry_request` — **опционально**. Перечень нарушенных критериев Gate 2a и
+  требуемых исправлений. При наличии — включить **Retry / Revision Mode**.
 
 Если `01-requirement-review.json` отсутствует, `status != completed` или
 `requirements[]` пуст — вернуть `status = blocked`, не формировать payload.
@@ -157,6 +159,22 @@ Gate 1 PASS и нет превышения `QA_GATE1_MAJOR_LIMIT`, ты може
 13. **Return** — вернуть `artifact_path_out`, `tasks_count`, `duplicates_count`,
     `clarification_count`.
 
+## Retry / Revision Mode
+
+Если оркестратор передал `retry_request` (повторный вызов после FAIL Gate 2a):
+
+1. Прочитать `01-requirement-review.json` и **существующий** `02-task-design.json`.
+2. Исправить **только** элементы, указанные в `retry_request`:
+   - добавить отсутствующие `acceptance_criteria[]` / `requirement_refs[]`;
+   - исправить `clarifies_findings[]` (только `major` findings);
+   - устранить дубли по `summary + requirement_refs`;
+   - довести `dor_check` до `pass`.
+3. Остальные задачи **не менять**; scope, набор требований и `temp_id` — стабильны.
+4. Инкрементировать `revision` (int, старт `0`) и записать краткий `revision_notes`.
+5. Пройти self-check skill `task-design` и вернуть `status=completed`.
+6. Если замечание неустранимо без изменения требований — `status=blocked`,
+   `blocking_reason="retry_unresolvable: {text}"`.
+
 ## Tools
 
 - **`read`** — чтение `.artifacts/.current/01-requirement-review.json`.
@@ -198,6 +216,8 @@ Gate 1 PASS и нет превышения `QA_GATE1_MAJOR_LIMIT`, ты може
   "run_id": "...",
   "requirement_version": "...",
   "timestamp": "ISO-8601",
+  "revision": 0,
+  "revision_notes": "",
   "jira_params": { "project": "QA", "issue_type": "Task" },
   "tasks": [
     {
@@ -256,5 +276,9 @@ Gate 1 PASS и нет превышения `QA_GATE1_MAJOR_LIMIT`, ты може
   `blocking_reason = "jira_search_failed: {text}"`.
 - **Ошибка записи артефакта** — `status = blocked`,
   `blocking_reason = "artifact_write_failed: {text}"`.
+- **`retry_request` присутствует, но `02` отсутствует/повреждён** — `status = blocked`,
+  `blocking_reason = "retry_upstream_artifact_not_ready"`.
+- **Замечание не устранимо без изменения требований** — `status = blocked`,
+  `blocking_reason = "retry_unresolvable: {text}"`.
 
 Не формировать Blocking Report — это делает оркестратор.

@@ -3,7 +3,7 @@
   "mcp": {
     "jira-confluence": {
       "type": "local",
-      "command": ["npx", "-y", "mcp-jira-confluence"],
+      "command": ["node", "{env:QA_WORK_DIR}.opencode/mcp/mcp-jira-confluence/dist/index.js"],
       "environment": {
         "ATLASSIAN_SITE": "{env:ATLASSIAN_SITE}",
         "ATLASSIAN_EMAIL": "{env:ATLASSIAN_EMAIL}",

@@ -1,0 +1,22 @@
+{
+  "artifact_id": "2026-11-16_00-26-01:01-requirement-review",
+  "run_id": "2026-11-16_00-26-01",
+  "requirement_version": "draft-2026-11-16",
+  "confluence_page_id": "2228226",
+  "timestamp": "2026-11-16T00:26:01Z",
+  "requirements": [],
+  "findings": [
+    {
+      "id": "F-001",
+      "category": "completeness",
+      "severity": "critical",
+      "requirement_refs": ["DOCUMENT"],
+      "evidence": "jira-confluence_get_confluence_page(pageId=2228226) returns HTTP 200 with a non-empty body, but the MCP output layer truncated it: \"...81984 bytes truncated...\". The saved tool output stores the page body as a single JSON line larger than 64 KB (file has 8 lines; header lines 1-6, body on line 7, closing brace on line 8). The only permitted read path (.opencode/skills/requirement-review/**) cannot reach the saved output, and the grep tool aborts on the body line with \"Ripgrep JSON record exceeded 65536 bytes\".",
+      "impact": "The requirement set of Confluence page 2228226 cannot be extracted verbatim, so no requirement-level contradiction / ambiguity / completeness / prompt-injection review is possible. Downstream stages (task design, test design) have no valid input.",
+      "recommendation": "Unblock the tool-output read path for the reviewer (or raise the MCP output/record limit, or return the page body in chunks) and re-run the review. Do not reconstruct requirements from other documents or from prior runs — that would fabricate the source of truth."
+    }
+  ],
+  "severity_summary": { "blocker": 0, "critical": 1, "major": 0, "minor": 0 },
+  "status": "blocked",
+  "blocking_reason": "requirements_extraction_failed: the body of Confluence page 2228226 (~82 KB) was truncated by the MCP output layer (81984 bytes) and is not retrievable with the permitted tools. requirement_version could not be determined (page body unreadable). Checklist categories not evaluated: contradiction, ambiguity, completeness, prompt_injection — no requirements were extracted, so the review checklist could not be applied."
+}

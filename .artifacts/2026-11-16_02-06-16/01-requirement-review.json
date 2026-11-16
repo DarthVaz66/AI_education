@@ -1,0 +1,507 @@
+{
+  "artifact_id": "2026-11-16_02-06-16:01-requirement-review",
+  "run_id": "2026-11-16_02-06-16",
+  "requirement_version": "0.5",
+  "confluence_page_id": "2228226",
+  "timestamp": "2026-11-16T02:06:16Z",
+  "requirements": [
+    {
+      "ref": "Meta",
+      "title": "Мета",
+      "text": "Версия документа: 0.5. Статус: ready for review. Изменения относительно 0.4: F-001 (critical → blocker): REQ-02 запрещает credentials в URI подключения; NFR и REQ-02 больше не противоречат друг другу, добавлены AC на отсутствие plaintext-секретов в workspace settings. F-002 (major): REQ-02 при неудачном reconnect показывает `disconnected` + `(stale)` последние известные VM — согласовано с REQ-03, дерево больше не очищается. F-003 (major): REQ-17: Windows/Linux-биндинги заменены на `Ctrl+Alt+Shift+Q` / `Ctrl+Alt+Shift+W`, не конфликтующие с built-in VS Code. F-004 (minor): REQ-07: `partially_completed` явно определён как исход операции, а не состояние VM. F-005 (minor): REQ-02: reconnect выполняется только при изменении URI; name-only edit не перезаключает соединение. F-006 (minor): REQ-12: механизм и таймаут определения IP для `user-nat` зафиксированы. F-007 (minor): REQ-14: redaction применяется к переменным окружения процесса Extension Host; область действия зафиксирована. F-008 (major): REQ-14: добавлена QMP-ветка маппинга ошибок; таблица соответствует заявленному scope «libvirt / QMP». F-009 (minor): REQ-04: проверка доступности storage pool перенесена в серверную валидацию REQ-04 и получила AC. F-010 (minor): Non-Goals: список QMP-only ограничений дополнен REQ-18 и REQ-22. Добавлен Glossary.",
+      "acceptance_criteria": [],
+      "in_scope": false
+    },
+    {
+      "ref": "Dependencies",
+      "title": "Dependencies",
+      "text": "Runtime: VS Code 1.85+ (Extension Host, TreeView, WebView, OutputChannel, WorkspaceConfiguration, Keybindings, Commands). libvirt 8.0+ — обязательная зависимость для полного набора функций (bridge-list, event-based auto-refresh, серверная валидация путей). QEMU 6.0+ — обязательная зависимость во всех режимах; в QMP-only режиме — без libvirt. Node.js — предоставляется VS Code Extension Host; отдельная установка не требуется. External systems (не для runtime расширения): Confluence, Jira, Testomat.io — используются только пайплайном документации; расширение в runtime на них не опирается. Not dependencies: расширение не зависит от сторонних npm-пакетов для основных функций; выбор механизма интеграции с libvirt / QMP — реализационное решение, не требование. Телеметрия использует стандартный VS Code telemetry API; сторонние аналитические SDK не подключаются.",
+      "acceptance_criteria": [],
+      "in_scope": false
+    },
+    {
+      "ref": "Non-Goals/1",
+      "title": "Bridge/DHCP configuration",
+      "text": "Создание, удаление и конфигурация bridge-интерфейсов и DHCP-серверов не входит в scope. Расширение только выбирает существующий bridge из списка, полученного от libvirt, но не создаёт и не модифицирует bridge-интерфейсы на хосте.",
+      "acceptance_criteria": [],
+      "in_scope": false
+    },
+    {
+      "ref": "Non-Goals/2",
+      "title": "VM migration",
+      "text": "Миграция VM между хостами не поддерживается.",
+      "acceptance_criteria": [],
+      "in_scope": false
+    },
+    {
+      "ref": "Non-Goals/3",
+      "title": "QEMU/libvirt auto-update",
+      "text": "Автоматическое обновление QEMU / libvirt на хосте не выполняется.",
+      "acceptance_criteria": [],
+      "in_scope": false
+    },
+    {
+      "ref": "Non-Goals/4",
+      "title": "Localization",
+      "text": "UI локализуется только на английский язык в v1; i18n-фреймворк не требуется.",
+      "acceptance_criteria": [],
+      "in_scope": false
+    },
+    {
+      "ref": "Non-Goals/5",
+      "title": "QEMU without libvirt and without QMP",
+      "text": "Поддержка QEMU без libvirt и без QMP не входит в scope. QMP-only режим (без libvirt) поддерживается с ограничениями, описанными в REQ-04, REQ-12, REQ-13, REQ-18, REQ-22.",
+      "acceptance_criteria": [],
+      "in_scope": false
+    },
+    {
+      "ref": "Non-Goals/6",
+      "title": "Overwrite on import",
+      "text": "Функция overwrite существующей VM при импорте (REQ-20) не поддерживается в v0.5. Коллизия имени → ошибка; пользователь удаляет существующую VM через REQ-07 и повторяет импорт.",
+      "acceptance_criteria": [],
+      "in_scope": false
+    },
+    {
+      "ref": "NFR/Производительность",
+      "title": "Performance",
+      "text": "активация ≤ 1.5 с на 4 ядрах / 8 ГБ RAM; операции UI ≤ 3 с до отражения результата, если иное не указано в REQ.",
+      "acceptance_criteria": [],
+      "in_scope": true
+    },
+    {
+      "ref": "NFR/Безопасность",
+      "title": "Security",
+      "text": "секреты (токены, пароли, SSH-ключи, URI с credentials) не пишутся в логи и настройки. URI подключения не может содержать credentials в формате `user:pass@` (см. REQ-02). Redaction обязательна перед записью в Output Channel (REQ-14, REQ-15). Телеметрия — только opt-in, без PII (REQ-19).",
+      "acceptance_criteria": [],
+      "in_scope": true
+    },
+    {
+      "ref": "NFR/Доступность",
+      "title": "Accessibility",
+      "text": "все операции доступны как VS Code commands и через Command Palette; webview-формы навигируются клавиатурой.",
+      "acceptance_criteria": [],
+      "in_scope": true
+    },
+    {
+      "ref": "NFR/Совместимость",
+      "title": "Compatibility",
+      "text": "см. раздел Dependencies.",
+      "acceptance_criteria": [],
+      "in_scope": true
+    },
+    {
+      "ref": "REQ-01",
+      "title": "Активация расширения",
+      "text": "Расширение активируется по `onStartupFinished`, при вызове любой команды расширения, или при наличии файла `.qemu-manager.json` в корне рабочей области. Назначение файла `.qemu-manager.json` — только activation trigger. Его содержимое не валидируется, не парсится и не используется ни для хранения подключений, ни для конфигурации VM. Хранение подключений — только workspace settings (REQ-02); экспорт конфигурации VM (REQ-20) не связан с этим файлом. Активация не блокирует запуск VS Code: cold activation ≤ 1.5 с на референсном железе (4 ядра, 8 ГБ RAM). При ошибке активации расширение переходит в состояние `degraded` с `degradedReason = \"activation_failed\"`: показывает уведомление «QEMU Manager: activation failed» с действием «Retry» и ожидает явного повторного запуска. Acceptance criteria: после установки команда `QEMU: Connect` доступна в Command Palette; cold activation ≤ 1.5 с; ошибка активации → состояние `degraded` с `degradedReason = \"activation_failed\"`, уведомление с действием «Retry», без silent fail; файл `.qemu-manager.json` с произвольным содержимым (включая пустой) триггерит активацию без ошибок валидации содержимого; отсутствие `.qemu-manager.json` не мешает активации.",
+      "acceptance_criteria": [
+        "после установки команда `QEMU: Connect` доступна в Command Palette",
+        "cold activation ≤ 1.5 с",
+        "ошибка активации → состояние `degraded` с `degradedReason = \"activation_failed\"`, уведомление с действием «Retry», без silent fail",
+        "файл `.qemu-manager.json` с произвольным содержимым (включая пустой) триггерит активацию без ошибок валидации содержимого",
+        "отсутствие `.qemu-manager.json` не мешает активации"
+      ],
+      "in_scope": true
+    },
+    {
+      "ref": "REQ-02",
+      "title": "Управление подключениями",
+      "text": "Пользователь может добавлять, редактировать и удалять подключения. Подключение: имя (1–32 символа, `[a-zA-Z0-9 _-]`, уникально в рабочей области) и URI (`qemu:///system`, `qemu:///session`, `qemu+ssh://...`) либо абсолютный путь к QMP-сокету, оканчивающийся на `.sock`. URI не может содержать credentials в формате `user:pass@`. Для SSH-подключений используется аутентификация по SSH-ключам или `ssh-agent`; пароли в URI запрещены. Для QMP-сокетов доступ регулируется файловыми правами на хосте. Попытка сохранить URI с credentials → inline error «Credentials in connection URI are not allowed»; форма не отправляется. Подключения хранятся только в workspace settings и никогда — в user/global settings. Поддерживается не более 10 подключений одновременно. После перезагрузки VS Code подключения восстанавливаются; недоступное подключение отображается со статусом `disconnected` и кнопкой «Retry». Edit: пользователь может изменить имя и URI существующего подключения. Новое имя проверяется на уникальность по правилам add. Если изменился только имя — соединение не перезаключается, дерево не очищается, отображается новое имя подключения. Если изменился URI — расширение разрывает соединение со старым URI и устанавливает новое. При неудаче подключение переходит в `disconnected`, дерево сохраняет последнее известное состояние с суффиксом `(stale)` согласно REQ-03. Delete: при удалении показывается диалог подтверждения с именем подключения. Если подключение активно и в нём есть VM в состоянии `running` — диалог содержит предупреждение «This connection has running VMs. Delete anyway?». На подтверждении подключение удаляется из workspace settings; дерево обновляется; соединение разрывается. Acceptance criteria: добавление без обязательных полей заблокировано; дубликат имени при add / edit → inline error «Connection name already exists»; URI с `user:pass@` → inline error «Credentials in connection URI are not allowed», форма не отправляется; после reload VS Code подключения восстановлены; недоступное подключение → статус `disconnected` и действие «Retry»; попытка добавить 11-е подключение → форма заблокирована inline error «Maximum 10 connections allowed»; edit с валидными полями и изменённым URI → подключение обновлено; если активно — переподключено с новым URI; при ошибке переподключения — `disconnected`, дерево показывает последние известные VM с `(stale)`; edit с изменённым только именем → переподключения нет, дерево не очищается, отображается новое имя; delete с подтверждением → подключение удалено из workspace settings, дерево обновлено; delete активного подключения с running-VM → диалог с предупреждением; подтверждение удаляет подключение, отмена — без изменений; workspace settings не содержат plaintext-секретов (проверяется по redaction-паттернам REQ-14).",
+      "acceptance_criteria": [
+        "добавление без обязательных полей заблокировано",
+        "дубликат имени при add / edit → inline error «Connection name already exists»",
+        "URI с `user:pass@` → inline error «Credentials in connection URI are not allowed», форма не отправляется",
+        "после reload VS Code подключения восстановлены",
+        "недоступное подключение → статус `disconnected` и действие «Retry»",
+        "попытка добавить 11-е подключение → форма заблокирована inline error «Maximum 10 connections allowed»",
+        "edit с валидными полями и изменённым URI → подключение обновлено; если активно — переподключено с новым URI; при ошибке переподключения — `disconnected`, дерево показывает последние известные VM с `(stale)`",
+        "edit с изменённым только именем → переподключения нет, дерево не очищается, отображается новое имя",
+        "delete с подтверждением → подключение удалено из workspace settings, дерево обновлено",
+        "delete активного подключения с running-VM → диалог с предупреждением; подтверждение удаляет подключение, отмена — без изменений",
+        "workspace settings не содержат plaintext-секретов (проверяется по redaction-паттернам REQ-14)"
+      ],
+      "in_scope": true
+    },
+    {
+      "ref": "REQ-03",
+      "title": "Дерево виртуальных машин",
+      "text": "VM отображаются в боковой панели, сгруппированные по подключениям. Для каждой VM: имя, состояние (`running` / `stopped` / `paused` / `suspended` / `crashed`), vCPU, RAM в МБ. Сортировка по умолчанию — по имени, case-insensitive, по возрастанию. Состояние обновляется в соответствии с REQ-13. Acceptance criteria: подключение без VM показывает placeholder «No VMs»; если данные VM временно недоступны — отображается последнее известное состояние с суффиксом `(stale)` (согласовано с REQ-02); сортировка и группировка соблюдаются после обновления состояния; каждое из пяти состояний имеет хотя бы одну REQ, определяющую переход в него: `running` — REQ-08; `stopped` — REQ-09/REQ-10; `paused` — REQ-11; `suspended` — REQ-21; `crashed` — REQ-22.",
+      "acceptance_criteria": [
+        "подключение без VM показывает placeholder «No VMs»",
+        "если данные VM временно недоступны — отображается последнее известное состояние с суффиксом `(stale)` (согласовано с REQ-02)",
+        "сортировка и группировка соблюдаются после обновления состояния",
+        "каждое из пяти состояний имеет хотя бы одну REQ, определяющую переход в него: `running` — REQ-08; `stopped` — REQ-09/REQ-10; `paused` — REQ-11; `suspended` — REQ-21; `crashed` — REQ-22"
+      ],
+      "in_scope": true
+    },
+    {
+      "ref": "REQ-04",
+      "title": "Создание VM",
+      "text": "Форма содержит поля: name (1–63 символа, `[a-zA-Z0-9-]`, не начинается и не заканчивается на `-`, уникально в пределах подключения; при дубликате — inline error «A VM with this name already exists in the connection»; авто-суффиксы не применяются); vcpu (целое 1–32); ramMb (256–262144, кратно 128); disks[] (от 1 до 8 дисков; каждый — абсолютный путь на гипервизоре, размер 1–2000 ГБ, формат qcow2); iso (опционально, абсолютный путь на гипервизоре); network (см. REQ-12). Валидация выполняется в два уровня (см. REQ-16): клиентская — формат, диапазоны, длины, символы, уникальность имени; серверная (libvirt) — существование родительской директории диска и ISO-файла; доступность storage pool; проверяется при отправке запроса в libvirt. QMP-only режим (без libvirt): если подключение установлено по QMP-сокету без libvirt, серверная валидация путей и storage pool недоступна; клиентская валидация выполняется в полном объёме; путь родительской директории, ISO-файла и storage pool не проверяются до отправки; если путь невалиден, QEMU вернёт ошибку на этапе create; ошибка маппится через REQ-14 и показывается пользователю как уведомление; VM в дерево не добавляется. Acceptance criteria: дубликат имени → inline error, форма не отправляется; невалидное числовое поле → inline error с указанием правила; в libvirt-режиме несуществующая родительская директория диска, несуществующий ISO или недоступный storage pool → ошибка маппится через REQ-14, VM не создана; в QMP-only режиме несуществующая родительская директория диска или несуществующий ISO → QEMU возвращает ошибку, ошибка маппится через REQ-14, VM не создана; успешное создание → VM появляется в дереве в течение 3 с (принудительное обновление дерева выполняется независимо от интервала polling REQ-13); ошибка libvirt или QMP → уведомление (REQ-14), полный текст в логе (REQ-15), VM в дерево не добавляется.",
+      "acceptance_criteria": [
+        "дубликат имени → inline error, форма не отправляется",
+        "невалидное числовое поле → inline error с указанием правила",
+        "в libvirt-режиме несуществующая родительская директория диска, несуществующий ISO или недоступный storage pool → ошибка маппится через REQ-14, VM не создана",
+        "в QMP-only режиме несуществующая родительская директория диска или несуществующий ISO → QEMU возвращает ошибку, ошибка маппится через REQ-14, VM не создана",
+        "успешное создание → VM появляется в дереве в течение 3 с (принудительное обновление дерева выполняется независимо от интервала polling REQ-13)",
+        "ошибка libvirt или QMP → уведомление (REQ-14), полный текст в логе (REQ-15), VM в дерево не добавляется"
+      ],
+      "in_scope": true
+    },
+    {
+      "ref": "REQ-05",
+      "title": "Переименование VM",
+      "text": "Команда «Rename» доступна только для VM в состоянии `stopped`; в остальных состояниях команда disabled с tooltip «VM must be stopped». Новое имя подчиняется правилам REQ-04 и проверяется на уникальность в пределах подключения. Acceptance criteria: запущенная VM → команда disabled с tooltip; дубликат имени → inline error, изменения в libvirt не отправляются; успешное переименование → новое имя в дереве в течение 3 с.",
+      "acceptance_criteria": [
+        "запущенная VM → команда disabled с tooltip",
+        "дубликат имени → inline error, изменения в libvirt не отправляются",
+        "успешное переименование → новое имя в дереве в течение 3 с"
+      ],
+      "in_scope": true
+    },
+    {
+      "ref": "REQ-06",
+      "title": "Клонирование VM",
+      "text": "Команда «Clone» доступна только для VM в состоянии `stopped`. Создаётся новая VM с полной копией дисков. Имя новой VM — по правилам REQ-04, уникально в подключении. Клонирование копирует только диски. ISO-путь и network-конфигурация исходной VM не копируются; клон создаётся без ISO и с `user-nat` network. Это задокументированное ограничение v0.5. Операция показывает progress notification в VS Code и отменяема. Acceptance criteria: запущенная VM → команда disabled с tooltip; отмена во время клонирования → частично созданная VM удаляется, исходная не изменяется; успешное клонирование → новая VM в дереве в состоянии `stopped`; клон не содержит ISO-пути и имеет `user-nat` network независимо от исходной VM; ошибка disk full на хосте во время клонирования → частичная VM удаляется, исходная VM не изменяется, уведомление по REQ-14; коллизия путей (целевой путь диска уже существует) → клонирование прерывается, частичная VM удаляется, уведомление по REQ-14; сбой копирования отдельного диска при multi-disk клонировании → все частично созданные диски новой VM удаляются, частичная VM удаляется, исходная VM не изменяется, уведомление по REQ-14.",
+      "acceptance_criteria": [
+        "запущенная VM → команда disabled с tooltip",
+        "отмена во время клонирования → частично созданная VM удаляется, исходная не изменяется",
+        "успешное клонирование → новая VM в дереве в состоянии `stopped`",
+        "клон не содержит ISO-пути и имеет `user-nat` network независимо от исходной VM",
+        "ошибка disk full на хосте во время клонирования → частичная VM удаляется, исходная VM не изменяется, уведомление по REQ-14",
+        "коллизия путей (целевой путь диска уже существует) → клонирование прерывается, частичная VM удаляется, уведомление по REQ-14",
+        "сбой копирования отдельного диска при multi-disk клонировании → все частично созданные диски новой VM удаляются, частичная VM удаляется, исходная VM не изменяется, уведомление по REQ-14"
+      ],
+      "in_scope": true
+    },
+    {
+      "ref": "REQ-07",
+      "title": "Удаление VM",
+      "text": "Команда «Delete» доступна только для VM в состоянии `stopped`. Диалог подтверждения содержит: имя VM и опциональный чекбокс «Also delete disk files» (по умолчанию выключен). Операция выполняется в две фазы. Фаза 1 — обратимая: Undefine VM в libvirt; при ошибке — VM остаётся в дереве, состояние не меняется, файлы дисков не тронуты, показывается уведомление по REQ-14. Фаза 2 — необратимая: удаление файлов дисков, только если чекбокс включён; выполняется только после успешной Фазы 1; удаление файлов qcow2 необратимо и не откатывается. Если удаление упало на середине (часть файлов удалена, часть — нет), исход операции переходит в `partially_completed` (это не состояние VM — см. Glossary): VM уже undefined и в дереве отсутствует; в Output Channel и в уведомлении показывается отчёт: список удалённых файлов и список оставшихся; автоматическое восстановление не выполняется; пользователю предлагается действие «Show report». Acceptance criteria: подтверждение без чекбокса → VM undefined, диски остаются; подтверждение с чекбоксом и успешное удаление всех файлов → VM undefined, файлы дисков удалены; ошибка в Фазе 1 → VM остаётся в дереве, состояние не меняется, файлы не тронуты, уведомление по REQ-14; ошибка в Фазе 2 → уведомление с исходом `partially_completed` и списком удалённых и оставшихся файлов; файлы не восстанавливаются; действие «Show report» открывает Output Channel с отчётом; отмена в диалоге подтверждения → изменений нет.",
+      "acceptance_criteria": [
+        "подтверждение без чекбокса → VM undefined, диски остаются",
+        "подтверждение с чекбоксом и успешное удаление всех файлов → VM undefined, файлы дисков удалены",
+        "ошибка в Фазе 1 → VM остаётся в дереве, состояние не меняется, файлы не тронуты, уведомление по REQ-14",
+        "ошибка в Фазе 2 → уведомление с исходом `partially_completed` и списком удалённых и оставшихся файлов; файлы не восстанавливаются; действие «Show report» открывает Output Channel с отчётом",
+        "отмена в диалоге подтверждения → изменений нет"
+      ],
+      "in_scope": true
+    },
+    {
+      "ref": "REQ-08",
+      "title": "Запуск VM",
+      "text": "Команда «Start» доступна только для VM в состоянии `stopped` или `crashed`. В остальных состояниях команда disabled. Переход из `crashed` реализуется как `destroy` + `start`: сначала сбрасывается зависшее состояние домена, затем выполняется запуск. Acceptance criteria: `stopped` + Start → состояние `running` в течение 5 с; `crashed` + Start → libvirt выполняет `destroy`, затем `start`; состояние `running` в течение 5 с; при ошибке libvirt состояние не меняется, показывается уведомление с действием «Show log».",
+      "acceptance_criteria": [
+        "`stopped` + Start → состояние `running` в течение 5 с",
+        "`crashed` + Start → libvirt выполняет `destroy`, затем `start`; состояние `running` в течение 5 с",
+        "при ошибке libvirt состояние не меняется, показывается уведомление с действием «Show log»"
+      ],
+      "in_scope": true
+    },
+    {
+      "ref": "REQ-09",
+      "title": "Graceful shutdown",
+      "text": "Команда «Shutdown» отправляет ACPI-запрос завершения. Таймаут берётся из workspace settings: целое 5–300 секунд, по умолчанию 30. По истечении таймаута показывается диалог с действиями: «Force stop» / «Wait more» / «Cancel». Force stop → выполняется REQ-10; Wait more → таймер перезапускается с тем же значением; Cancel → диалог закрывается, состояние VM не меняется. Если ACPI не поддерживается гостевой ОС, таймаут истекает как обычно — диалог показывается в штатном режиме. Acceptance criteria: таймер использует значение из настроек в секундах; диалог появляется по истечении таймаута; «Force stop» вызывает REQ-10; «Wait more» перезапускает таймер с тем же значением; «Cancel» не меняет состояние VM; при отсутствии ACPI-поддержки в госте диалог показывается по таймауту так же, как в штатном сценарии.",
+      "acceptance_criteria": [
+        "таймер использует значение из настроек в секундах",
+        "диалог появляется по истечении таймаута",
+        "«Force stop» вызывает REQ-10",
+        "«Wait more» перезапускает таймер с тем же значением",
+        "«Cancel» не меняет состояние VM",
+        "при отсутствии ACPI-поддержки в госте диалог показывается по таймауту так же, как в штатном сценарии"
+      ],
+      "in_scope": true
+    },
+    {
+      "ref": "REQ-10",
+      "title": "Force stop",
+      "text": "Команда «Force stop» немедленно завершает процесс VM. Перед выполнением показывается подтверждение с именем VM и предупреждением «Unsaved data may be lost». Подтверждение можно отключить настройкой `qemuManager.confirmForceStop` (по умолчанию `true`). Acceptance criteria: подтверждение содержит имя VM; отмена подтверждения не меняет состояние; после force stop состояние становится `stopped` в течение 3 с.",
+      "acceptance_criteria": [
+        "подтверждение содержит имя VM",
+        "отмена подтверждения не меняет состояние",
+        "после force stop состояние становится `stopped` в течение 3 с"
+      ],
+      "in_scope": true
+    },
+    {
+      "ref": "REQ-11",
+      "title": "Пауза и возобновление",
+      "text": "«Pause» доступна для `running`. В остальных состояниях команда disabled. «Resume» — единая контекстная команда: для `paused` выполняет REQ-11, для `suspended` выполняет REQ-21. В остальных состояниях disabled. Acceptance criteria: `running` + Pause → состояние `paused` в течение 3 с; `paused` + Resume → состояние `running` в течение 3 с; `suspended` + Resume → поведение по REQ-21 (см. REQ-21 AC); ошибка libvirt → состояние не меняется, ошибка показана.",
+      "acceptance_criteria": [
+        "`running` + Pause → состояние `paused` в течение 3 с",
+        "`paused` + Resume → состояние `running` в течение 3 с",
+        "`suspended` + Resume → поведение по REQ-21 (см. REQ-21 AC)",
+        "ошибка libvirt → состояние не меняется, ошибка показана"
+      ],
+      "in_scope": true
+    },
+    {
+      "ref": "REQ-12",
+      "title": "Сетевая конфигурация",
+      "text": "Поле `networkType`: `user-nat` (по умолчанию) или `bridged`. Для `bridged`: пользователь выбирает bridge из списка, полученного от libvirt. Если список пуст → опция `bridged` disabled с tooltip «No bridges available on host». Для `user-nat`: IP определяется через libvirt API `virDomainInterfaceAddresses` (libvirt-режим) или QMP `guest-network-get-interfaces` (QMP-only режим) с таймаутом 2 секунды. Если за 2 секунды IP не получен или интерфейс не найден — отображается `unknown` без влияния на рендеринг дерева. QMP-only режим (без libvirt): если подключение установлено по QMP-сокету без libvirt, список bridge недоступен: опция `bridged` disabled с tooltip «Bridge selection requires libvirt connection»; опция `user-nat` доступна и используется по умолчанию. Acceptance criteria: `bridged` без доступных интерфейсов (libvirt-подключение) → опция disabled с tooltip; `user-nat` с определимым IP → IP отображается в дереве в течение 2 с; `user-nat` с неопределимым IP (таймаут 2 с) → в дереве `unknown`; `bridged` с выбранным интерфейсом → VM создаётся с указанным bridge; QMP-only + открытие формы → `bridged` disabled с tooltip «Bridge selection requires libvirt connection»; QMP-only + выбор `user-nat` → VM создаётся с `user-nat`.",
+      "acceptance_criteria": [
+        "`bridged` без доступных интерфейсов (libvirt-подключение) → опция disabled с tooltip",
+        "`user-nat` с определимым IP → IP отображается в дереве в течение 2 с",
+        "`user-nat` с неопределимым IP (таймаут 2 с) → в дереве `unknown`",
+        "`bridged` с выбранным интерфейсом → VM создаётся с указанным bridge",
+        "QMP-only + открытие формы → `bridged` disabled с tooltip «Bridge selection requires libvirt connection»",
+        "QMP-only + выбор `user-nat` → VM создаётся с `user-nat`"
+      ],
+      "in_scope": true
+    },
+    {
+      "ref": "REQ-13",
+      "title": "Автообновление состояния",
+      "text": "Интервал обновления — workspace setting: `0` (только ручное обновление) или `1–60` секунд; по умолчанию `5`. При поддержке libvirt events (проверка возможностей через capabilities XML с флагом `domainEventSupport`) расширение подписывается на события вместо polling. Если подписка на события невозможна — расширение откатывается к polling, пишет warning в лог (REQ-15) и не показывает пользователю ошибку. Кнопка «Refresh» в дереве доступна всегда. QMP-only режим (без libvirt): подписка на libvirt events не выполняется; polling используется всегда, независимо от capability probe; warning про event subscription не пишется (это ожидаемое поведение, не ошибка). Acceptance criteria: интервал `0` → только ручное обновление; интервал `1` → polling каждые 1 с; интервал `60` → polling каждые 60 с; интервал `61` → значение отклоняется с inline error в настройке; libvirt-подключение с поддержкой events → polling не выполняется (проверяется по логу); ошибка подписки на события (libvirt-подключение) → polling продолжается, warning в логе; QMP-only + интервал 5 → polling каждые 5 с; QMP-only + отсутствие warning в логе про event subscription.",
+      "acceptance_criteria": [
+        "интервал `0` → только ручное обновление",
+        "интервал `1` → polling каждые 1 с",
+        "интервал `60` → polling каждые 60 с",
+        "интервал `61` → значение отклоняется с inline error в настройке",
+        "libvirt-подключение с поддержкой events → polling не выполняется (проверяется по логу)",
+        "ошибка подписки на события (libvirt-подключение) → polling продолжается, warning в логе",
+        "QMP-only + интервал 5 → polling каждые 5 с",
+        "QMP-only + отсутствие warning в логе про event subscription"
+      ],
+      "in_scope": true
+    },
+    {
+      "ref": "REQ-14",
+      "title": "Обработка ошибок",
+      "text": "Все ошибки libvirt / QMP маппятся в пользовательские сообщения по таблице соответствий. Таблица маппинга покрывает минимум: `VIR_ERR_NO_CONNECT`, `VIR_ERR_INVALID_CONN` → «Connection refused» (Show log показывается); `VIR_ERR_AUTH_FAILED`, `VIR_ERR_AUTH_CANCELLED` → «Authentication failed» (показывается); `VIR_ERR_NO_DOMAIN` → «VM not found» (не показывается); `VIR_ERR_OPERATION_UNSUPPORTED`, `VIR_ERR_NO_SUPPORT` → «Operation not supported» (показывается); `VIR_ERR_DISK_FULL`, system `ENOSPC` → «Disk full» (показывается); `VIR_ERR_RESOURCE_BUSY`, system `EBUSY` → «Resource busy» (не показывается); QMP `GenericError` с `desc`, содержащим `No space left` → «Disk full» (показывается); QMP `CommandNotFound`, `KVMMissingCap` → «Operation not supported» (показывается); QMP `DeviceNotFound` → «VM not found» (не показывается); любая unmapped libvirt-ошибка → «Unexpected error: {code}» (показывается); любая unmapped QMP-ошибка → «Unexpected error: {code}» (показывается). Новые коды ошибок допускаются, но должны маппиться в одну из перечисленных friendly-категорий; unmapped попадают в fallback-ветку. QMP-ошибки маппятся по семантике (класс + описание) в те же friendly-категории; unmapped QMP-ошибки попадают в fallback. Redaction: полный сырой текст ошибки (stack, request, response) пишется в Output Channel с timestamp, после redaction. Redaction обязательна перед записью: passwords, tokens, SSH private keys, URI с embedded credentials (`user:pass@host`), значения переменных окружения процесса Extension Host (не хоста libvirt и не удалённого хоста), чьи имена соответствуют паттерну `SECRET|TOKEN|PASSWORD|KEY`. Уведомление: пользователь видит уведомление: friendly message + действия «Show log» и «Dismiss» (состав действий по таблице выше). Acceptance criteria: любая libvirt- или QMP-ошибка → уведомление без raw stack trace в тексте; «Show log» открывает Output Channel и фокусирует последнюю запись; unmapped libvirt-ошибки попадают в fallback «Unexpected error: {code}» с действием «Show log»; unmapped QMP-ошибки попадают в fallback «Unexpected error: {code}» с действием «Show log»; запись в Output Channel не содержит passwords, tokens, SSH keys, URI с embedded credentials — только после redaction; лог-запись из неудачной аутентификации не содержит введённого пароля; redaction сканирует переменные окружения процесса Extension Host (не хоста libvirt).",
+      "acceptance_criteria": [
+        "любая libvirt- или QMP-ошибка → уведомление без raw stack trace в тексте",
+        "«Show log» открывает Output Channel и фокусирует последнюю запись",
+        "unmapped libvirt-ошибки попадают в fallback «Unexpected error: {code}» с действием «Show log»",
+        "unmapped QMP-ошибки попадают в fallback «Unexpected error: {code}» с действием «Show log»",
+        "запись в Output Channel не содержит passwords, tokens, SSH keys, URI с embedded credentials — только после redaction",
+        "лог-запись из неудачной аутентификации не содержит введённого пароля",
+        "redaction сканирует переменные окружения процесса Extension Host (не хоста libvirt)"
+      ],
+      "in_scope": true
+    },
+    {
+      "ref": "REQ-15",
+      "title": "Логирование",
+      "text": "Output Channel «QEMU Manager». Формат строки: `YYYY-MM-DDTHH:MM:SSZ [LEVEL] [conn:vm] message`. Правила заполнения `[conn:vm]`: `conn` — display name подключения (не URI, не ID); `vm` — display name VM (не ID); если запись не связана с VM — `[conn:-]`; если запись не связана ни с VM, ни с подключением (например, активация расширения) — `[system:-]`. Ring buffer: последние 10 000 строк, более старые отбрасываются. Уровень логирования — workspace setting: `error` / `info` / `debug` (по умолчанию `info`). Redaction секретов выполняется перед записью (см. REQ-14). Acceptance criteria: каждая команда → запись уровня `info` или `debug`; ошибочные ответы → запись уровня `error`; размер буфера ограничен 10 000 строками; изменение уровня применяется немедленно; запись активации без VM и подключения → `[system:-]`; запись, связанная с подключением, но не с VM → `[conn:-]`; запись, связанная с VM → `[conn:vm]` с display names; лог не содержит секретов (проверяется по redaction-паттернам).",
+      "acceptance_criteria": [
+        "каждая команда → запись уровня `info` или `debug`",
+        "ошибочные ответы → запись уровня `error`",
+        "размер буфера ограничен 10 000 строками",
+        "изменение уровня применяется немедленно",
+        "запись активации без VM и подключения → `[system:-]`",
+        "запись, связанная с подключением, но не с VM → `[conn:-]`",
+        "запись, связанная с VM → `[conn:vm]` с display names",
+        "лог не содержит секретов (проверяется по redaction-паттернам)"
+      ],
+      "in_scope": true
+    },
+    {
+      "ref": "REQ-16",
+      "title": "Валидация входных данных",
+      "text": "Валидация формы создания VM выполняется в два уровня. Клиентская валидация — синхронно, до отправки в libvirt: формат числовых полей (integer, кратность); диапазоны (vcpu 1–32, ramMb 256–262144, размер диска 1–2000 ГБ); длина и допустимые символы для строковых полей (name, paths); уникальность имени в пределах подключения; количество дисков (1–8). Ошибки клиентской валидации показываются inline рядом с полем с текстом, отражающим нарушенное правило (например, «RAM must be between 256 and 262144 MB, multiple of 128»). Submit disabled до прохождения клиентской валидации. Серверная валидация (libvirt) — выполняется при отправке запроса: существование родительской директории для каждого диска; существование ISO-файла (если указан); доступность storage pool. Ошибки серверной валидации показываются как уведомление по REQ-14; inline-ошибок для них нет (пользователь узнаёт о проблеме после submit). В QMP-only режиме серверная валидация не выполняется (см. REQ-04); ошибки путей и storage pool приходят от QEMU и маппятся через REQ-14. Acceptance criteria: пустое / нечисловое / выходящее за границы / некратное значение → inline error, submit disabled; текст / длина / недопустимые символы / дубликат имени → inline error, submit disabled; валидная форма → submit enabled и клиентская валидация проходит; в libvirt-режиме несуществующий путь диска / ISO или недоступный storage pool → после submit уведомление по REQ-14, VM не создана; в QMP-only режиме несуществующий путь → уведомление по REQ-14 после ответа QEMU, VM не создана.",
+      "acceptance_criteria": [
+        "пустое / нечисловое / выходящее за границы / некратное значение → inline error, submit disabled",
+        "текст / длина / недопустимые символы / дубликат имени → inline error, submit disabled",
+        "валидная форма → submit enabled и клиентская валидация проходит",
+        "в libvirt-режиме несуществующий путь диска / ISO или недоступный storage pool → после submit уведомление по REQ-14, VM не создана",
+        "в QMP-only режиме несуществующий путь → уведомление по REQ-14 после ответа QEMU, VM не создана"
+      ],
+      "in_scope": true
+    },
+    {
+      "ref": "REQ-17",
+      "title": "Горячие клавиши",
+      "text": "По умолчанию: Windows / Linux: `Ctrl+Alt+Shift+Q` → Start, `Ctrl+Alt+Shift+W` → Shutdown; macOS: `Cmd+Alt+Shift+Q` → Start, `Cmd+Alt+Shift+W` → Shutdown (на macOS `Cmd+Shift+Q` занят системным Log Out и не используется). Выбранные комбинации не конфликтуют с built-in командами VS Code. Комбинации настраиваются через стандартный Keybindings UI VS Code. Конфликты с другими расширениями — VS Code показывает штатное предупреждение, расширение не переопределяет чужие биндинги. Конфликты с built-in командами VS Code — VS Code показывает штатное предупреждение; расширение не переопределяет built-in биндинги; при желании пользователь переопределяет через Keybindings JSON. Команда срабатывает только если выбрана VM и команда применима к её состоянию. Acceptance criteria: дефолтный биндинг выполняет команду для выбранной VM в применимом состоянии на каждой из трёх ОС; дефолтные биндинги не конфликтуют с built-in командами VS Code (проверяется по `keybindings.json` VS Code); при неприменимом состоянии VM биндинг не срабатывает; пользовательский биндинг через Keybindings JSON работает; конфликт с другим расширением → стандартное предупреждение VS Code, расширение не переопределяет.",
+      "acceptance_criteria": [
+        "дефолтный биндинг выполняет команду для выбранной VM в применимом состоянии на каждой из трёх ОС",
+        "дефолтные биндинги не конфликтуют с built-in командами VS Code (проверяется по `keybindings.json` VS Code)",
+        "при неприменимом состоянии VM биндинг не срабатывает",
+        "пользовательский биндинг через Keybindings JSON работает",
+        "конфликт с другим расширением → стандартное предупреждение VS Code, расширение не переопределяет"
+      ],
+      "in_scope": true
+    },
+    {
+      "ref": "REQ-18",
+      "title": "Кроссплатформенность и runtime detection",
+      "text": "Поддерживаемые ОС: Windows 10+, macOS 12+, Ubuntu 22.04+. Требования к runtime: libvirt-режим — libvirt 8.0+ с QEMU 6.0+; QMP-only режим — QEMU 6.0+ с QMP-сокетом, без libvirt. Полный набор функций доступен только в libvirt-режиме. Ограничения QMP-only описаны в REQ-04, REQ-12, REQ-13, REQ-22. При отсутствии runtime — при активации показывается уведомление «QEMU Manager: libvirt/QEMU not detected» с действием «Show setup instructions»; расширение переходит в состояние `degraded` с `degradedReason = \"runtime_missing\"`, дерево пустое, команды возвращают friendly-ошибку по REQ-14. Состояние `degraded` единое для обоих сценариев (`activation_failed`, `runtime_missing`); различие — в `degradedReason` и в составе действий уведомления. Выход из состояния — успешный Retry (для `activation_failed`) или успешный runtime detection при повторной активации (для `runtime_missing`). Acceptance criteria: расширение устанавливается и активируется на всех трёх ОС; отсутствие runtime → состояние `degraded` с `degradedReason = \"runtime_missing\"`, уведомление «libvirt/QEMU not detected» с действием «Show setup instructions»; состояние `degraded` не приводит к падению или зависанию VS Code; libvirt-режим → доступны все команды, включая `bridged` и event-based автообновление; QMP-only режим → доступны все команды, кроме `bridged` (disabled с tooltip по REQ-12); автообновление через polling.",
+      "acceptance_criteria": [
+        "расширение устанавливается и активируется на всех трёх ОС",
+        "отсутствие runtime → состояние `degraded` с `degradedReason = \"runtime_missing\"`, уведомление «libvirt/QEMU not detected» с действием «Show setup instructions»",
+        "состояние `degraded` не приводит к падению или зависанию VS Code",
+        "libvirt-режим → доступны все команды, включая `bridged` и event-based автообновление",
+        "QMP-only режим → доступны все команды, кроме `bridged` (disabled с tooltip по REQ-12); автообновление через polling"
+      ],
+      "in_scope": true
+    },
+    {
+      "ref": "REQ-19",
+      "title": "Телеметрия (opt-in)",
+      "text": "Телеметрия по умолчанию отключена. Включается только явно: через first-run prompt или настройку `qemuManager.telemetry.enabled`. Payload содержит только: тип действия (например, `vm.start`), success/failure, код ошибки (если есть), `duration_ms`, версию расширения, семейство ОС (`windows` / `macos` / `linux`). Payload не содержит: имена VM, пути к файлам, IP-адреса, URI/пользователей подключений, hostname. Acceptance criteria: телеметрия выключена → никаких сетевых вызовов от телеметрии; телеметрия включена → payload соответствует схеме выше; отказ от first-run prompt → настройка остаётся `false`, повторный prompt не раньше чем через 30 дней.",
+      "acceptance_criteria": [
+        "телеметрия выключена → никаких сетевых вызовов от телеметрии",
+        "телеметрия включена → payload соответствует схеме выше",
+        "отказ от first-run prompt → настройка остаётся `false`, повторный prompt не раньше чем через 30 дней"
+      ],
+      "in_scope": true
+    },
+    {
+      "ref": "REQ-20",
+      "title": "Экспорт и импорт конфигурации VM",
+      "text": "Экспорт создаёт JSON со схемой `qemuManager.vmConfig` версии 1. Поля: `name`, `vcpu`, `ramMb`, `disks[]` (`path`, `sizeGb`, `format`), `network` (`type`, `bridge` для bridged), `iso`. Импорт: валидирует версию схемы — принимается только `1`; иначе ошибка «Unsupported config version: {version}» и импорт прерывается; валидирует обязательные поля по правилам REQ-04 (клиентская валидация); если VM с таким именем уже существует в целевом подключении — импорт прерывается с ошибкой «VM '{name}' already exists in the target connection. Delete it via REQ-07 or choose a different name.» Функция overwrite не поддерживается (см. Non-Goals). Пользователь должен удалить существующую VM через REQ-07 и повторить импорт; при любой ошибке валидации — отчёт с построчными сообщениями, импорт прерывается без частичных изменений. Стратегия версионирования схемы: в текущем релизе (v0.5) поддерживается только схема версии 1. Будущие версии схемы потребуют явной миграции (ручной или через отдельный инструмент); автоматическая миграция не реализуется. Конфиги с версией ≠ 1 отклоняются явной ошибкой. Acceptance criteria: экспорт → валидный JSON, все обязательные поля присутствуют; импорт валидного конфига версии 1 без коллизии → VM создана; импорт конфига с версией 2 или иной → ошибка «Unsupported config version: {version}», импорт прерван; импорт валидного конфига с коллизией имени → ошибка «VM '{name}' already exists in the target connection...», импорт прерван, существующая VM не изменена; импорт невалидного конфига (например, отсутствует обязательное поле) → отчёт с построчными сообщениями, VM не создана, никаких частичных изменений.",
+      "acceptance_criteria": [
+        "экспорт → валидный JSON, все обязательные поля присутствуют",
+        "импорт валидного конфига версии 1 без коллизии → VM создана",
+        "импорт конфига с версией 2 или иной → ошибка «Unsupported config version: {version}», импорт прерван",
+        "импорт валидного конфига с коллизией имени → ошибка «VM '{name}' already exists in the target connection...», импорт прерван, существующая VM не изменена",
+        "импорт невалидного конфига (например, отсутствует обязательное поле) → отчёт с построчными сообщениями, VM не создана, никаких частичных изменений"
+      ],
+      "in_scope": true
+    },
+    {
+      "ref": "REQ-21",
+      "title": "Suspend и Resume VM (PMSUSPENDED)",
+      "text": "Команда «Suspend» доступна для VM в состоянии `running`. Команда «Resume» для состояния `suspended` — часть контекстной команды Resume (см. REQ-11). Suspend переводит VM в S3-сон (`VIR_DOMAIN_PMSUSPENDED`); Resume возвращает в `running`. Пока VM в `suspended`, остальные команды (Start, Shutdown, Force stop, Pause) недоступны с tooltip «Resume VM first». Acceptance criteria: `running` + Suspend → состояние `suspended` в течение 5 с; `suspended` + Resume → состояние `running` в течение 5 с; `suspended` + Start / Shutdown / Force stop / Pause → команда disabled с tooltip «Resume VM first»; при ошибке libvirt состояние не меняется, показывается уведомление по REQ-14.",
+      "acceptance_criteria": [
+        "`running` + Suspend → состояние `suspended` в течение 5 с",
+        "`suspended` + Resume → состояние `running` в течение 5 с",
+        "`suspended` + Start / Shutdown / Force stop / Pause → команда disabled с tooltip «Resume VM first»",
+        "при ошибке libvirt состояние не меняется, показывается уведомление по REQ-14"
+      ],
+      "in_scope": true
+    },
+    {
+      "ref": "REQ-22",
+      "title": "Детекция состояния crashed",
+      "text": "Состояние `crashed` соответствует libvirt `VIR_DOMAIN_CRASHED`: QEMU-процесс завершился аварийно, но домен остаётся определён. Детекция: libvirt-режим — через libvirt events (`virConnectDomainEventRegisterAny`) или при polling — по полю `state` в ответе `virDomainGetState`; QMP-only режим — через QMP event `SHUTDOWN` с `reason = \"guest-panic\"` или при polling — по ответу `query-status` с `status = \"internal-error\"` или `status = \"shutdown\"` с соответствующим `reason`. При детекции `crashed` расширение отображает состояние `crashed` в дереве с предупреждающей иконкой и tooltip «VM crashed unexpectedly. Use Start to recover.». Пользователь восстанавливает VM через REQ-08 Start (`destroy` + `start`). Acceptance criteria: libvirt-режим + внешнее убийство QEMU-процесса → дерево показывает `crashed` в течение интервала обновления (REQ-13); QMP-only + внешнее убийство QEMU-процесса → дерево показывает `crashed` в течение интервала polling (REQ-13); `crashed` + Start → VM переходит в `running` в течение 5 с (REQ-08); `crashed` отображается с предупреждающей иконкой и tooltip «VM crashed unexpectedly. Use Start to recover.».",
+      "acceptance_criteria": [
+        "libvirt-режим + внешнее убийство QEMU-процесса → дерево показывает `crashed` в течение интервала обновления (REQ-13)",
+        "QMP-only + внешнее убийство QEMU-процесса → дерево показывает `crashed` в течение интервала polling (REQ-13)",
+        "`crashed` + Start → VM переходит в `running` в течение 5 с (REQ-08)",
+        "`crashed` отображается с предупреждающей иконкой и tooltip «VM crashed unexpectedly. Use Start to recover.»"
+      ],
+      "in_scope": true
+    }
+  ],
+  "findings": [
+    {
+      "id": "F-001",
+      "category": "contradiction",
+      "severity": "major",
+      "requirement_refs": ["REQ-17"],
+      "evidence": "«Выбранные комбинации **не конфликтуют с built-in командами VS Code**.» И далее в том же разделе: «Конфликты с built-in командами VS Code — VS Code показывает штатное предупреждение; расширение не переопределяет built-in биндинги».",
+      "impact": "Нельзя однозначно вывести требование: либо конфликтов с built-in быть не должно (тогда ветка обработки конфликтов избыточна), либо обработка конфликтов обязательна (тогда утверждение «не конфликтуют» ложно). Тест-дизайн получит взаимоисключающие ожидания.",
+      "recommendation": "Убрать противоречие: либо зафиксировать гарантию отсутствия конфликтов и удалить описание обработки конфликтов built-in, либо явно описать сценарий конфликта с built-in как поддерживаемый."
+    },
+    {
+      "id": "F-002",
+      "category": "contradiction",
+      "severity": "major",
+      "requirement_refs": ["REQ-15"],
+      "evidence": "«Уровень логирования — workspace setting: `error` / `info` / `debug` (по умолчанию `info`).» Против AC: «каждая команда → запись уровня `info` или `debug`».",
+      "impact": "При уровне логирования `error` записи уровней `info`/`debug` не создаются, поэтому AC «каждая команда → запись info/debug» невыполним. Тесты логирования будут противоречивы.",
+      "recommendation": "Уточнить, что команды логируются только при уровне `info`/`debug`; при `error` — только ошибки. Переформулировать AC с учётом уровня."
+    },
+    {
+      "id": "F-003",
+      "category": "completeness",
+      "severity": "major",
+      "requirement_refs": ["REQ-03", "REQ-12"],
+      "evidence": "REQ-03: «Для каждой VM: имя, состояние ..., vCPU, RAM в МБ.» Против REQ-12 AC: «`user-nat` с определимым IP → IP отображается в дереве в течение 2 с».",
+      "impact": "Множество отображаемых в дереве полей несогласовано: REQ-12 требует показывать IP, REQ-03 его не перечисляет. Тесты рендеринга дерева неоднозначны.",
+      "recommendation": "Добавить IP (и условие его отображения/`unknown`) в перечень полей REQ-03 или явно указать, что список в REQ-03 неполон."
+    },
+    {
+      "id": "F-004",
+      "category": "ambiguity",
+      "severity": "major",
+      "requirement_refs": ["REQ-05", "REQ-06", "REQ-07", "REQ-09", "REQ-10", "REQ-11"],
+      "evidence": "REQ-05/REQ-06/REQ-07: «Команда ... доступна только для VM в состоянии `stopped`; в остальных состояниях команда disabled», но AC перечисляют только `running`; доступность Shutdown/Force stop для `paused`/`suspended`/`crashed` не определена.",
+      "impact": "Полная матрица «команда × 5 состояний» не выводима из текста. Проектирование UI-состояний и негативные тесты будут неполными.",
+      "recommendation": "Добавить явную таблицу доступности команд для всех пяти состояний VM."
+    },
+    {
+      "id": "F-005",
+      "category": "completeness",
+      "severity": "major",
+      "requirement_refs": ["REQ-07", "REQ-08", "REQ-22"],
+      "evidence": "REQ-07/REQ-05/REQ-06 требуют состояния `stopped`; REQ-22: «Пользователь восстанавливает VM через REQ-08 Start (`destroy` + `start`)» — единственный переход из `crashed`. Перехода `crashed` → `stopped` не определено.",
+      "impact": "VM в состоянии `crashed` невозможно удалить/переименовать/клонировать (все требуют `stopped`). Non-Goals перекладывают удаление существующей VM на REQ-07, что невыполнимо для running/crashed.",
+      "recommendation": "Определить путь к `stopped` из `crashed` (например, Force stop) или разрешить Delete/Rename/Clone для `crashed`."
+    },
+    {
+      "id": "F-006",
+      "category": "ambiguity",
+      "severity": "major",
+      "requirement_refs": ["REQ-14", "REQ-15"],
+      "evidence": "REQ-14: «значения переменных окружения процесса Extension Host ..., чьи имена соответствуют паттерну `SECRET|TOKEN|PASSWORD|KEY`».",
+      "impact": "Семантика сопоставления не определена (подстрока vs слово, регистр). Паттерн `KEY` приведёт к over-redaction (например, `KEYBOARD_LAYOUT`, `SSH_AUTH_SOCK` не покрыт) либо к under-redaction. Тесты redaction неоднозначны.",
+      "recommendation": "Зафиксировать регистронезависимое сопоставление по подстроке и явный список/исключения паттернов."
+    },
+    {
+      "id": "F-007",
+      "category": "ambiguity",
+      "severity": "major",
+      "requirement_refs": ["NFR/Производительность", "REQ-04", "REQ-08", "REQ-11", "REQ-12", "REQ-21"],
+      "evidence": "NFR: «операции UI ≤ 3 с до отражения результата, если иное не указано в REQ»; при этом REQ-12 — «в течение 2 с», REQ-08/REQ-21 — «в течение 5 с». Не указано, какое событие измеряется (отражение в дереве vs завершение операции libvirt).",
+      "impact": "NFR становится необязательным (оговорка «если иное не указано»), а пороги таймингов дублируются и не привязаны к измеримому событию — тесты производительности неопределимы.",
+      "recommendation": "Зафиксировать измеримое событие (например, отражение в дереве) и свести все тайминги в единую таблицу."
+    },
+    {
+      "id": "F-008",
+      "category": "ambiguity",
+      "severity": "minor",
+      "requirement_refs": ["REQ-02", "REQ-04"],
+      "evidence": "REQ-02: имя подключения «1–32 символа, `[a-zA-Z0-9 _-]`, уникально в рабочей области» — без правил для ведущих/замыкающих и повторных пробелов, тогда как REQ-04 для имени VM явно запрещает начинаться/заканчиваться на `-`.",
+      "impact": "Правила валидации имени подключения неполны; тесты на граничные случаи (пробелы) неоднозначны.",
+      "recommendation": "Уточнить допустимость ведущих/замыкающих/повторных пробелов в имени подключения."
+    },
+    {
+      "id": "F-009",
+      "category": "completeness",
+      "severity": "minor",
+      "requirement_refs": ["REQ-13", "REQ-15"],
+      "evidence": "Ключи settings заданы явно только для `qemuManager.confirmForceStop` (REQ-10) и `qemuManager.telemetry.enabled` (REQ-19); для интервала обновления (REQ-13) и уровня логирования (REQ-15) ключи не указаны.",
+      "impact": "Реализация и тесты не могут ссылаться на ключи настроек — возможны расхождения при интеграции.",
+      "recommendation": "Задать ключи, например `qemuManager.refreshInterval` и `qemuManager.logLevel`."
+    },
+    {
+      "id": "F-010",
+      "category": "completeness",
+      "severity": "minor",
+      "requirement_refs": ["REQ-03"],
+      "evidence": "REQ-03: «Сортировка по умолчанию — по имени, case-insensitive, по возрастанию»; порядок подключений (групп) не определён.",
+      "impact": "Порядок групп подключений в дереве недетерминирован → нестабильные UI-тесты.",
+      "recommendation": "Задать сортировку подключений (например, по display name, case-insensitive)."
+    },
+    {
+      "id": "F-011",
+      "category": "completeness",
+      "severity": "minor",
+      "requirement_refs": ["REQ-12"],
+      "evidence": "REQ-12: IP для `user-nat` определяется через `virDomainInterfaceAddresses` / QMP `guest-network-get-interfaces`. Требование о наличии guest agent в гостевой ОС не указано.",
+      "impact": "Без guest agent IP не определится; неясно, покрывает ли таймаут-ветка `unknown` этот случай.",
+      "recommendation": "Явно указать поведение (fallback `unknown`) при отсутствии guest agent/интерфейсов."
+    },
+    {
+      "id": "F-012",
+      "category": "completeness",
+      "severity": "minor",
+      "requirement_refs": ["Non-Goals/5", "REQ-18", "REQ-06", "REQ-20"],
+      "evidence": "Список ограничений QMP-only: REQ-04, REQ-12, REQ-13, REQ-18, REQ-22. Поведение Clone (REQ-06) и импорта конфигурации с `network.type = bridged` (REQ-20) в QMP-only режиме не описано.",
+      "impact": "Не определено, поддерживаются ли Clone и импорт bridged-конфигов в QMP-only режиме.",
+      "recommendation": "Добавить в Non-Goals/REQ-18 явные ограничения для REQ-06 и REQ-20 в QMP-only."
+    },
+    {
+      "id": "F-013",
+      "category": "ambiguity",
+      "severity": "minor",
+      "requirement_refs": ["REQ-11", "REQ-21"],
+      "evidence": "REQ-11: «для `suspended` выполняет REQ-21»; REQ-21: «Команда «Resume» для состояния `suspended` — часть контекстной команды Resume (см. REQ-11)» — взаимные ссылки без единого владельца.",
+      "impact": "Дублирование/циклические ссылки усложняют трассировку требований и тестов.",
+      "recommendation": "Назначить единственный источник поведения Resume и убрать взаимную ссылку."
+    }
+  ],
+  "severity_summary": { "blocker": 0, "critical": 0, "major": 7, "minor": 6 },
+  "status": "completed"
+}

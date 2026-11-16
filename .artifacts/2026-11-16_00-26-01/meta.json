@@ -1,0 +1,22 @@
+{
+  "run_id": "2026-11-16_00-26-01",
+  "requirement_version": "draft-2026-11-16",
+  "confluence_page_id": "2228226",
+  "jira_project": "QA",
+  "testomat_project_id": "test-cc3c0",
+  "testomat_project_id_source": "argument",
+  "testomat_suite_id": null,
+  "started_at": "2026-11-16T00:26:01Z",
+  "status": "blocked",
+  "preflight_decision": "fresh_start",
+  "archived_previous_run_id": null,
+  "archived_previous_path": null,
+  "human_override": null,
+  "gate_results": {
+    "gate1": "fail",
+    "gate2a": null,
+    "gate2b": null,
+    "gate2c": null
+  },
+  "blocking_findings_present": true
+}

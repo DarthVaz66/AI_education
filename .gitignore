@@ -2,3 +2,6 @@
 .idea
 .gigacode_vsc/agent-manager.json
 .opencode/.env
+# local vendored MCP fork (patch) + rollback bundle
+.opencode/mcp/
+.mcp-rollback/

@@ -131,6 +131,50 @@
       "jira_created": 29,
       "testomat_created": 193,
       "path": ".artifacts/2026-11-09T18-00-00_0.5/"
+    },
+    {
+      "run_id": "2026-11-16_00-26-01",
+      "confluence_page_id": "2228226",
+      "jira_project": "QA",
+      "testomat_project_id": "test-cc3c0",
+      "testomat_project_id_source": "argument",
+      "requirement_version": "draft-2026-11-16",
+      "status": "blocked",
+      "stopped_at": "Gate 1 — Requirement Review Gate",
+      "blocking_reason": "gate_fail",
+      "started_at": "2026-11-16T00:26:01Z",
+      "finished_at": "2026-11-16T00:43:41Z",
+      "path": ".artifacts/2026-11-16_00-26-01/"
+    },
+    {
+      "run_id": "2026-11-16_02-06-16",
+      "confluence_page_id": "2228226",
+      "jira_project": "QA",
+      "testomat_project_id": "test-cc3c0",
+      "testomat_project_id_source": "argument",
+      "requirement_version": "0.5",
+      "status": "blocked",
+      "stopped_at": "Gate 2b — Test Model Quality Gate",
+      "blocking_reason": "gate_fail",
+      "started_at": "2026-11-16T02:06:16Z",
+      "finished_at": "2026-11-16T02:25:13Z",
+      "path": ".artifacts/2026-11-16_02-06-16/"
+    },
+    {
+      "run_id": "2026-11-16_02-44-13",
+      "confluence_page_id": "2228226",
+      "jira_project": "QA",
+      "testomat_project_id": "test-cc3c0",
+      "testomat_project_id_source": "argument",
+      "requirement_version": "0.5",
+      "status": "blocked",
+      "stopped_at": "Publish — Testomat.io preflight/create",
+      "blocking_reason": "partial_publish",
+      "started_at": "2026-11-16T02:44:13Z",
+      "finished_at": "2026-11-16T02:52:00Z",
+      "jira_created": 30,
+      "testomat_created": 0,
+      "path": ".artifacts/2026-11-16_02-44-13/"
     }
   ]
 }

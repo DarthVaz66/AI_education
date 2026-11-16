@@ -1,0 +1,25 @@
+{
+  "run_id": "2026-11-16_02-06-16",
+  "requirement_version": "0.5",
+  "confluence_page_id": "2228226",
+  "jira_project": "QA",
+  "testomat_project_id": "test-cc3c0",
+  "testomat_project_id_source": "argument",
+  "testomat_suite_id": null,
+  "started_at": "2026-11-16T02:06:16Z",
+  "status": "blocked",
+  "preflight_decision": "fresh_start",
+  "archived_previous_run_id": null,
+  "archived_previous_path": null,
+  "human_override": null,
+  "gate_results": {
+    "gate1": "pass",
+    "gate2a": "pass",
+    "gate2b": "fail",
+    "gate2c": null
+  },
+  "blocking_findings_present": true,
+  "stopped_at": "Gate 2b — Test Model Quality Gate",
+  "blocking_reason": "gate_fail",
+  "blocking_detail": "TC-120 (REQ-18, positive): expected=\"VS Code не падает и не зависает (AC3)\" — ожидание «не падает» без конкретного наблюдаемого результата"
+}

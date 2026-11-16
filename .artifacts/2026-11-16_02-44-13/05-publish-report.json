@@ -1,0 +1,33 @@
+{
+  "run_id": "2026-11-16_02-44-13",
+  "requirement_version": "0.5",
+  "status": "partial",
+  "reason": "partial_publish",
+  "jira": {
+    "project": "QA",
+    "label": "qemu-manager-req-0.5",
+    "created": 30,
+    "existing": 0,
+    "failed": 0,
+    "stale": 0,
+    "issues": {
+      "T-01": "QA-42", "T-02": "QA-43", "T-03": "QA-44", "T-04": "QA-45", "T-05": "QA-46",
+      "T-06": "QA-47", "T-07": "QA-48", "T-08": "QA-49", "T-09": "QA-50", "T-10": "QA-51",
+      "T-11": "QA-52", "T-12": "QA-53", "T-13": "QA-54", "T-14": "QA-55", "T-15": "QA-56",
+      "T-16": "QA-57", "T-17": "QA-58", "T-18": "QA-59", "T-19": "QA-60", "T-20": "QA-61",
+      "T-21": "QA-62", "T-22": "QA-63", "T-23": "QA-64", "T-24": "QA-65", "T-25": "QA-66",
+      "T-26": "QA-67", "T-27": "QA-68", "T-28": "QA-69", "T-29": "QA-70", "T-30": "QA-71"
+    }
+  },
+  "testomat": {
+    "project_id": "test-cc3c0",
+    "suite_id": null,
+    "created": 0,
+    "existing": 0,
+    "failed": 0,
+    "stale": 0,
+    "pending_not_published": 237,
+    "status": "error",
+    "error": "Testomat.io read/search endpoints unavailable after retries ('fetch failed' / 'Request timed out'). Preflight idempotency search impossible; publish aborted fail-closed to avoid creating duplicates in a project that already holds tests from prior runs."
+  }
+}
