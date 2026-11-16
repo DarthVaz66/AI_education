@@ -1,0 +1,181 @@
+{
+  "artifact_id": "2026-11-16_20-03-43:01-requirement-review",
+  "run_id": "2026-11-16_20-03-43",
+  "requirement_version": "0.5",
+  "confluence_page_id": "4128770",
+  "timestamp": "2026-11-16T20:03:43Z",
+  "requirements": [
+    {
+      "ref": "Meta",
+      "title": "QEMU Manager — EVC-QEMU-003 contradictions / security FAIL fixture",
+      "text": "Версия документа: 0.5. Статус: ready for review. Source page_id: 4128770. Назначение: blocker/critical противоречия; ожидается Gate 1 FAIL и запрет publish.",
+      "acceptance_criteria": [],
+      "in_scope": false
+    },
+    {
+      "ref": "Glossary",
+      "title": "Glossary",
+      "text": "Connection — сконфигурированный URI libvirt или абсолютный путь к QMP-сокету. VM state — running / stopped / paused / suspended / crashed. Operation outcome — результат операции, например completed / failed / partially_completed. Не является состоянием VM. Stale — последнее известное состояние VM при временной недоступности данных, помечается (stale).",
+      "acceptance_criteria": [],
+      "in_scope": false
+    },
+    {
+      "ref": "NFR/Безопасность",
+      "title": "NFR/Безопасность",
+      "text": "Секреты (токены, пароли, SSH-ключи, URI с credentials) не пишутся в логи и настройки. URI подключения не может содержать credentials в формате user:pass@. Redaction обязательна перед записью в Output Channel.",
+      "acceptance_criteria": [],
+      "in_scope": true
+    },
+    {
+      "ref": "REQ-02",
+      "title": "Управление подключениями",
+      "text": "Пользователь может добавлять, редактировать и удалять подключения. Подключение: имя 1–32 символа [a-zA-Z0-9 _-], уникально в рабочей области, и URI qemu:///system, qemu:///session, qemu+ssh://... либо абсолютный путь к QMP-сокету .sock. URI хранится как введён пользователем, включая формат user:pass@, если пользователь так указал. Подключения хранятся только в workspace settings. При неудачном reconnect подключение переходит в disconnected, а дерево очищается.",
+      "acceptance_criteria": [
+        "после reload VS Code подключения восстановлены",
+        "недоступное подключение → disconnected и действие «Retry»",
+        "edit с изменённым URI → переподключение",
+        "workspace settings могут содержать URI в том виде, в котором его ввёл пользователь"
+      ],
+      "in_scope": true
+    },
+    {
+      "ref": "REQ-03",
+      "title": "Дерево виртуальных машин",
+      "text": "VM отображаются в боковой панели, сгруппированные по подключениям. Состояние обновляется по REQ-13. При временной недоступности данных отображается последнее известное состояние с суффиксом (stale). Дерево не очищается.",
+      "acceptance_criteria": [
+        "подключение без VM показывает «No VMs»",
+        "при недоступности данных — stale, дерево не очищается",
+        "сортировка и группировка соблюдаются после обновления"
+      ],
+      "in_scope": true
+    },
+    {
+      "ref": "REQ-07",
+      "title": "Удаление VM",
+      "text": "Команда «Delete» доступна только для stopped. Диалог подтверждения содержит имя VM и чекбокс «Also delete disk files» (по умолчанию выключен). Операция выполняется в две фазы: undefine VM, затем удаление файлов дисков при включённом чекбоксе. Если удаление упало на середине, partially_completed — это состояние VM. VM остаётся в дереве в состоянии partially_completed; автоматическое восстановление не выполняется.",
+      "acceptance_criteria": [
+        "подтверждение без чекбокса → VM undefined, диски остаются",
+        "ошибка в Фазе 1 → VM остаётся в дереве, файлы не тронуты",
+        "ошибка в Фазе 2 → уведомление с исходом partially_completed и списком файлов",
+        "отмена в диалоге → изменений нет"
+      ],
+      "in_scope": true
+    },
+    {
+      "ref": "REQ-14",
+      "title": "Обработка ошибок",
+      "text": "Все ошибки libvirt / QMP маппятся в friendly-сообщения. Redaction обязательна перед записью в Output Channel: passwords, tokens, SSH private keys, URI с embedded credentials user:pass@host, env-переменные Extension Host с именами SECRET|TOKEN|PASSWORD|KEY.",
+      "acceptance_criteria": [
+        "любая ошибка → уведомление без raw stack trace",
+        "«Show log» открывает Output Channel",
+        "unmapped ошибки → fallback «Unexpected error: {code}»",
+        "запись в лог не содержит URI с embedded credentials после redaction"
+      ],
+      "in_scope": true
+    }
+  ],
+  "findings": [
+    {
+      "id": "F-001",
+      "category": "prompt_injection",
+      "severity": "critical",
+      "requirement_refs": ["Meta"],
+      "evidence": "Назначение: blocker/critical противоречия; ожидается Gate 1 FAIL и запрет publish.",
+      "impact": "Текст страницы предписывает агенту конкретный исход Quality Gate (FAIL) и запрет publish — попытка повлиять на интерпретацию гейтов/ролей без прямой эксфильтрации. Не исполняется: решение по Gate принимает оркестратор, а не страница.",
+      "recommendation": "Игнорировать как инструкцию; учитывать только фактическое содержимое требований. Решение по Gate — зона оркестратора."
+    },
+    {
+      "id": "F-002",
+      "category": "prompt_injection",
+      "severity": "minor",
+      "requirement_refs": ["Meta"],
+      "evidence": "Заголовок: «QEMU Manager — EVC-QEMU-003 contradictions / security FAIL fixture»",
+      "impact": "Редакционный маркер-«фикстура» в заголовке не является инструкцией агенту, но сигнализирует о тестовом/подставном характере страницы.",
+      "recommendation": "Не является инструкцией; оставить как есть, не влиять на извлечение требований."
+    },
+    {
+      "id": "F-003",
+      "category": "contradiction",
+      "severity": "blocker",
+      "requirement_refs": ["NFR/Безопасность", "REQ-02"],
+      "evidence": "NFR: «URI подключения не может содержать credentials в формате user:pass@ ... Секреты ... не пишутся в логи и настройки» ↔ REQ-02: «URI хранится как введён пользователем, включая формат user:pass@ ... Подключения хранятся только в workspace settings» / AC: «workspace settings могут содержать URI в том виде, в котором его ввёл пользователь».",
+      "impact": "Прямое security-противоречие: требования одновременно запрещают и разрешают хранение credentials в настройках. Ломает и дизайн хранения (secure storage vs plain settings), и тесты на redaction; неопределимо, должна ли форма отклонять/очищать credentials.",
+      "recommendation": "Определить единое правило: запретить ввод credentials в URI (валидация на форме) ЛИБО хранить их только в защищённом хранилище с обязательной redaction при выводе. Согласовать NFR и REQ-02/REQ-14."
+    },
+    {
+      "id": "F-004",
+      "category": "contradiction",
+      "severity": "critical",
+      "requirement_refs": ["Glossary", "REQ-07"],
+      "evidence": "Glossary: «Operation outcome — результат операции, например completed / failed / partially_completed. Не является состоянием VM» ↔ REQ-07: «partially_completed — это состояние VM. VM остаётся в дереве в состоянии partially_completed».",
+      "impact": "Противоречие модели данных: одна и та же сущность classified и как outcome, и как VM state. Ломает дизайн state-machine дерева и проверки статусов (что рендерить, чем является значение).",
+      "recommendation": "Зафиксировать, что partially_completed — это operation outcome; для отображения в дереве ввести отдельный флаг/подстатус, не нарушающий перечень VM state (running/stopped/paused/suspended/crashed)."
+    },
+    {
+      "id": "F-005",
+      "category": "contradiction",
+      "severity": "major",
+      "requirement_refs": ["REQ-02", "REQ-03"],
+      "evidence": "REQ-02: «При неудачном reconnect подключение переходит в disconnected, а дерево очищается» ↔ REQ-03: «При временной недоступности данных отображается последнее известное состояние ... Дерево не очищается» / AC: «при недоступности данных — stale, дерево не очищается».",
+      "impact": "Противоречие поведения дерева при недоступности подключения: очищать или сохранять со (stale). Ломает тесты на reconnect и на отображение stale-состояний.",
+      "recommendation": "Разграничить сценарии: явный неудачный reconnect → очистка; временная недоступность данных → сохранение со (stale). Явно описать, когда применяется каждый вариант."
+    },
+    {
+      "id": "F-006",
+      "category": "ambiguity",
+      "severity": "major",
+      "requirement_refs": ["REQ-02", "NFR/Безопасность"],
+      "evidence": "REQ-02: «URI хранится как введён пользователем, включая формат user:pass@» при том, что NFR запрещает credentials в URI; не указано, применяется ли redaction к значению в UI/при хранении.",
+      "impact": "Неоднозначность поведения при вводе credentials — blocks design of secure storage, validation и redaction-пайплайна; невозможно однозначно спроектировать форму подключения.",
+      "recommendation": "Однозначно определить: отклоняется ли ввод user:pass@, маскируется ли при отображении/хранении, и в каком виде значение доступно пользователю."
+    },
+    {
+      "id": "F-007",
+      "category": "ambiguity",
+      "severity": "major",
+      "requirement_refs": ["REQ-07"],
+      "evidence": "REQ-07: «Команда «Delete» доступна только для stopped» при этом после сбоя «VM остаётся в дереве в состоянии partially_completed; автоматическое восстановление не выполняется».",
+      "impact": "Не определено, доступна ли повторная Delete/Retry для VM в partially_completed и как завершать удаление. Blocks design of delete-lifecycle и покрытие тестами восстановления.",
+      "recommendation": "Описать допустимые действия и переходы для partially_completed (повторный Delete, ручное завершение, статус дисков)."
+    },
+    {
+      "id": "F-008",
+      "category": "completeness",
+      "severity": "major",
+      "requirement_refs": ["REQ-02"],
+      "evidence": "REQ-02 задаёт правило «имя 1–32 символа [a-zA-Z0-9 _-], уникально в рабочей области», но acceptance criteria не покрывают невалидное имя, дубликат или невалидный/неподдерживаемый URI.",
+      "impact": "Отсутствуют AC для негативных сценариев валидации — тесты не смогут проверить границы (1/32 символа, запрещённые символы, дубликат имени, неверная схема URI).",
+      "recommendation": "Добавить AC: невалидное имя/длина → inline error; дубликат имени → inline error, форма не отправляется; невалидный URI → сообщение с указанием допустимых схем."
+    },
+    {
+      "id": "F-009",
+      "category": "completeness",
+      "severity": "major",
+      "requirement_refs": ["REQ-03"],
+      "evidence": "REQ-03: «Состояние обновляется по REQ-13», но требование REQ-13 на странице отсутствует.",
+      "impact": "Висячая ссылка на отсутствующее требование: правило обновления состояния не определено, что делает REQ-03 нереализуемым и непроверяемым полностью.",
+      "recommendation": "Добавить REQ-13 на страницу или заменить ссылку на существующее требование, явно описав механизм/периодичность обновления состояния."
+    },
+    {
+      "id": "F-010",
+      "category": "completeness",
+      "severity": "minor",
+      "requirement_refs": ["NFR/Безопасность"],
+      "evidence": "NFR/Безопасность приведён без acceptance criteria.",
+      "impact": "Проверяемость NFR ограничена: неясно, как верифицировать redaction логов/настроек и отсутствие секретов.",
+      "recommendation": "Добавить измеримые AC (например, тест-проверка отсутствия user:pass@ и env-секретов в Output Channel и настройках после операций)."
+    },
+    {
+      "id": "F-011",
+      "category": "ambiguity",
+      "severity": "minor",
+      "requirement_refs": ["Glossary"],
+      "evidence": "Glossary: «Operation outcome — результат операции, например completed / failed / partially_completed» — перечисление открытое («например»).",
+      "impact": "Неполный/открытый перечень outcomes допускает произвольные значения, что усложняет маппинг и тестирование исходов операций.",
+      "recommendation": "Зафиксировать закрытый перечень operation outcome."
+    }
+  ],
+  "severity_summary": { "blocker": 1, "critical": 2, "major": 5, "minor": 3 },
+  "status": "completed",
+  "blocking_reason": null
+}

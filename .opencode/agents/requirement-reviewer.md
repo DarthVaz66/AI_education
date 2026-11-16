@@ -21,8 +21,8 @@ tools:
   # MCP: jira-confluence
   jira-confluence_get_confluence_page: true
   jira-confluence_search_confluence: true
-  jira-confluence_search_jira_issues: false
-  jira-confluence_create_jira_issue: false
+  jira-confluence_jira_search: false
+  jira-confluence_jira_create_issue: false
   # MCP: qase
   qase_get_project: false
   qase_list_suites: false

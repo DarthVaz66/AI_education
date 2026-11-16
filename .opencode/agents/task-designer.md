@@ -22,8 +22,8 @@ tools:
   # MCP: jira-confluence
   jira-confluence_get_confluence_page: false
   jira-confluence_search_confluence: false
-  jira-confluence_search_jira_issues: true
-  jira-confluence_create_jira_issue: false
+  jira-confluence_jira_search: true
+  jira-confluence_jira_create_issue: false
   # MCP: qase
   qase_get_project: false
   qase_list_suites: false
@@ -78,7 +78,7 @@ Gate 1 PASS и нет превышения `QA_GATE1_MAJOR_LIMIT`, ты може
 
 **Разрешено:**
 - читать `.artifacts/.current/01-requirement-review.json`;
-- читать Jira для проверки дублей (`search_jira_issues` — read-only);
+- читать Jira для проверки дублей (`jira_search` — read-only);
 - писать единственный файл `.artifacts/.current/02-task-design.json`;
 - загружать skill `task-design`.
 
@@ -87,7 +87,7 @@ Gate 1 PASS и нет превышения `QA_GATE1_MAJOR_LIMIT`, ты може
   `REPORT.md`, `meta.json`, `04-publish-state.json`, `05-publish-report.json`,
   `index.json`, а также любых файлов прошлых прогонов и каталогов проекта
   вне `.opencode/skills/task-design/`;
-- создание задач в Jira (`create_jira_issue` отключён);
+- создание задач в Jira (`jira_create_issue` отключён);
 - анализ требований (это requirement-reviewer);
 - проектирование тест-кейсов (это test-designer);
 - принятие решения по Gate (`gate_recommendation` запрещён);
@@ -148,7 +148,7 @@ Gate 1 PASS и нет превышения `QA_GATE1_MAJOR_LIMIT`, ты може
      иначе `fail` с `dor_failures`.
    Clarification-задачи **не покрывают** требования в `trace_coverage`.
    Не создавать clarification по blocker/critical и по `minor`.
-10. **Deduplicate** — `jira-confluence_search_jira_issues` по каждой задаче:
+10. **Deduplicate** — `jira-confluence_jira_search` по каждой задаче:
     JQL `project = "{jira_project}" AND summary ~ "{summary}"`.
     Найденное — зафиксировать в `duplicates`. Read-retry: до 3 попыток с backoff;
     auth/403 не ретраить.
@@ -179,10 +179,10 @@ Gate 1 PASS и нет превышения `QA_GATE1_MAJOR_LIMIT`, ты може
 
 - **`read`** — чтение `.artifacts/.current/01-requirement-review.json`.
 - **`skill`** — загрузка методологии `task-design`.
-- **`jira-confluence_search_jira_issues`** — read-only проверка дублей.
+- **`jira-confluence_jira_search`** — read-only проверка дублей.
 - **`edit`** — запись `.artifacts/.current/02-task-design.json`.
 
-`create_jira_issue` отключён — публикация на этапе Publish у оркестратора.
+`jira_create_issue` отключён — публикация на этапе Publish у оркестратора.
 
 ## Constraints
 
@@ -272,7 +272,7 @@ Gate 1 PASS и нет превышения `QA_GATE1_MAJOR_LIMIT`, ты може
   `status = completed`. Оркестратор решит, что делать.
 - **Требование не покрыто задачей** — зафиксировать в
   `trace_coverage.requirements_uncovered`; если критично — `status = blocked`.
-- **Ошибка `search_jira_issues` после retry** — `status = blocked`,
+- **Ошибка `jira_search` после retry** — `status = blocked`,
   `blocking_reason = "jira_search_failed: {text}"`.
 - **Ошибка записи артефакта** — `status = blocked`,
   `blocking_reason = "artifact_write_failed: {text}"`.

@@ -1,0 +1,222 @@
+{
+  "artifact_id": "2026-11-16_20-00-18:01-requirement-review",
+  "run_id": "2026-11-16_20-00-18",
+  "requirement_version": "0.5",
+  "confluence_page_id": "4096002",
+  "timestamp": "2026-11-16T20:00:18Z",
+  "requirements": [
+    {
+      "ref": "NFR/Производительность",
+      "title": "NFR/Производительность",
+      "text": "Операции UI ≤ 3 с до отражения результата, если иное не указано в REQ. Активация ≤ 1.5 с на 4 ядрах / 8 ГБ RAM.",
+      "acceptance_criteria": [],
+      "in_scope": true
+    },
+    {
+      "ref": "REQ-04",
+      "title": "Создание VM",
+      "text": "Форма содержит:\n- `name`: 1–63 символа, `[a-zA-Z0-9-]`, не начинается и не заканчивается на `-`, уникально в пределах подключения;\n- `vcpu`: целое 1–32;\n- `ramMb`: 256–262144, кратно 128;\n- `disks[]`: от 1 до 8 дисков; каждый — абсолютный путь на гипервизоре, размер 1–2000 ГБ, формат qcow2;\n- `iso` опционально: абсолютный путь на гипервизоре;\n- `network`: см. REQ-12.\n\nПосле успешного создания VM должна появиться в дереве быстро. При дубликате имени — inline error «A VM with this name already exists in the connection»; авто-суффиксы не применяются. Валидация двухуровневая: клиентская и серверная.\nAcceptance criteria:\n- дубликат имени → inline error, форма не отправляется;\n- невалидное числовое поле → inline error с указанием правила;\n- успешное создание → VM появляется в дереве в течение 3 с;\n- ошибка libvirt или QMP → уведомление по REQ-14, VM в дерево не добавляется.",
+      "acceptance_criteria": [
+        "дубликат имени → inline error, форма не отправляется",
+        "невалидное числовое поле → inline error с указанием правила",
+        "успешное создание → VM появляется в дереве в течение 3 с",
+        "ошибка libvirt или QMP → уведомление по REQ-14, VM в дерево не добавляется"
+      ],
+      "in_scope": true
+    },
+    {
+      "ref": "REQ-09",
+      "title": "Graceful shutdown",
+      "text": "Команда «Shutdown» отправляет ACPI-запрос завершения. Таймаут берётся из workspace settings: целое 5–300 секунд; по умолчанию используется разумный таймаут. По истечении таймаута показывается диалог: «Force stop» / «Wait more» / «Cancel».\nAcceptance criteria:\n- таймер использует значение из настроек в секундах;\n- диалог появляется по истечении таймаута;\n- «Force stop» вызывает REQ-10;\n- «Wait more» перезапускает таймер с тем же значением;\n- «Cancel» не меняет состояние VM.",
+      "acceptance_criteria": [
+        "таймер использует значение из настроек в секундах",
+        "диалог появляется по истечении таймаута",
+        "«Force stop» вызывает REQ-10",
+        "«Wait more» перезапускает таймер с тем же значением",
+        "«Cancel» не меняет состояние VM"
+      ],
+      "in_scope": true
+    },
+    {
+      "ref": "REQ-12",
+      "title": "Сетевая конфигурация",
+      "text": "Поле `networkType`: `user-nat` (по умолчанию) или `bridged`. Для bridged пользователь выбирает bridge из списка, полученного от libvirt. Если список пуст → опция bridged disabled с tooltip «No bridges available on host». Для user-nat IP определяется при необходимости через libvirt API `virDomainInterfaceAddresses` или QMP `guest-network-get-interfaces` с таймаутом 2 секунды. Если IP не получен — unknown без влияния на рендеринг дерева.\nAcceptance criteria:\n- bridged без доступных интерфейсов → опция disabled с tooltip;\n- user-nat с определимым IP → IP в дереве в течение 2 с;\n- user-nat с неопределимым IP → unknown;\n- QMP-only + открытие формы → bridged disabled с tooltip.",
+      "acceptance_criteria": [
+        "bridged без доступных интерфейсов → опция disabled с tooltip",
+        "user-nat с определимым IP → IP в дереве в течение 2 с",
+        "user-nat с неопределимым IP → unknown",
+        "QMP-only + открытие формы → bridged disabled с tooltip"
+      ],
+      "in_scope": true
+    },
+    {
+      "ref": "REQ-13",
+      "title": "Автообновление состояния",
+      "text": "Интервал обновления — workspace setting: 0 или 1–60 секунд; по умолчанию 5. При поддержке libvirt events расширение подписывается на события вместо polling. При невозможности — откат к polling, warning в лог. Кнопка «Refresh» доступна всегда.\nAcceptance criteria:\n- интервал 0 → только ручное обновление;\n- интервал 1 → polling каждые 1 с;\n- интервал 60 → polling каждые 60 с;\n- интервал 61 → inline error в настройке;\n- ошибка подписки на события → polling продолжается, warning в логе.",
+      "acceptance_criteria": [
+        "интервал 0 → только ручное обновление",
+        "интервал 1 → polling каждые 1 с",
+        "интервал 60 → polling каждые 60 с",
+        "интервал 61 → inline error в настройке",
+        "ошибка подписки на события → polling продолжается, warning в логе"
+      ],
+      "in_scope": true
+    },
+    {
+      "ref": "REQ-16",
+      "title": "Валидация входных данных",
+      "text": "Клиентская валидация — синхронно до отправки в libvirt: формат числовых полей, диапазоны vcpu 1–32, ramMb 256–262144, размер диска 1–2000 ГБ, длина и допустимые символы name/paths, уникальность имени, количество дисков 1–8. Submit disabled до прохождения клиентской валидации.\nСерверная валидация libvirt — существование родительской директории диска, ISO-файла, доступность storage pool. Ошибки серверной валидации — уведомление по REQ-14.\nAcceptance criteria:\n- пустое / нечисловое / выходящее за границы / некратное значение → inline error, submit disabled;\n- текст / длина / недопустимые символы / дубликат имени → inline error, submit disabled;\n- валидная форма → submit enabled;\n- несуществующий путь в libvirt-режиме → уведомление по REQ-14 после submit.",
+      "acceptance_criteria": [
+        "пустое / нечисловое / выходящее за границы / некратное значение → inline error, submit disabled",
+        "текст / длина / недопустимые символы / дубликат имени → inline error, submit disabled",
+        "валидная форма → submit enabled",
+        "несуществующий путь в libvirt-режиме → уведомление по REQ-14 после submit"
+      ],
+      "in_scope": true
+    },
+    {
+      "ref": "REQ-18",
+      "title": "Кроссплатформенность и runtime detection",
+      "text": "Поддерживаемые ОС: Windows 10+, macOS 12+, Ubuntu 22.04+. libvirt-режим: libvirt 8.0+ с QEMU 6.0+. QMP-only: QEMU 6.0+ с QMP-сокетом без libvirt. При отсутствии runtime расширение переходит в degraded с `degradedReason = \"runtime_missing\"`, дерево пустое, команды возвращают friendly-ошибку.\nAcceptance criteria:\n- расширение устанавливается и активируется на всех трёх ОС;\n- отсутствие runtime → degraded с `degradedReason = \"runtime_missing\"`;\n- degraded не приводит к падению или зависанию VS Code;\n- QMP-only → bridged disabled по REQ-12, автообновление через polling.",
+      "acceptance_criteria": [
+        "расширение устанавливается и активируется на всех трёх ОС",
+        "отсутствие runtime → degraded с `degradedReason = \"runtime_missing\"`",
+        "degraded не приводит к падению или зависанию VS Code",
+        "QMP-only → bridged disabled по REQ-12, автообновление через polling"
+      ],
+      "in_scope": true
+    },
+    {
+      "ref": "REQ-14",
+      "title": "Обработка ошибок",
+      "text": "Ошибки libvirt / QMP маппятся в friendly-сообщения. Redaction обязательна перед записью в Output Channel: passwords, tokens, SSH private keys, URI с embedded credentials, env-переменные Extension Host с именами `SECRET|TOKEN|PASSWORD|KEY`.\nAcceptance criteria:\n- любая libvirt/QMP-ошибка → уведомление без raw stack trace;\n- «Show log» открывает Output Channel;\n- unmapped ошибки → fallback «Unexpected error: {code}»;\n- лог не содержит секретов после redaction.",
+      "acceptance_criteria": [
+        "любая libvirt/QMP-ошибка → уведомление без raw stack trace",
+        "«Show log» открывает Output Channel",
+        "unmapped ошибки → fallback «Unexpected error: {code}»",
+        "лог не содержит секретов после redaction"
+      ],
+      "in_scope": true
+    },
+    {
+      "ref": "Meta",
+      "title": "Document metadata",
+      "text": "Версия документа: 0.5. Статус: ready for review. Source page_id: 4096002. Назначение: major-неоднозначности, которые не блокируют design, плюс числовые границы.",
+      "acceptance_criteria": [],
+      "in_scope": false
+    }
+  ],
+  "findings": [
+    {
+      "id": "F-001",
+      "category": "contradiction",
+      "severity": "major",
+      "requirement_refs": ["REQ-04", "REQ-12", "REQ-13"],
+      "evidence": "REQ-04 AC: «успешное создание → VM появляется в дереве в течение 3 с»; REQ-12 AC: «user-nat с определимым IP → IP в дереве в течение 2 с»; REQ-13: «Интервал обновления — workspace setting: 0 или 1–60 секунд; по умолчанию 5 ... интервал 0 → только ручное обновление».",
+      "impact": "Новые данные обязаны отражаться в дереве за 2–3 с, но при интервале polling по умолчанию 5 с (и тем более при 0 = только ручное обновление) дерево физически не успеет обновиться. Требование невыполнимо без отдельного немедленного refresh/подписки на событие при создании VM и при определении IP. blocks design: без явного механизма немедленного обновления нельзя ни спроектировать, ни протестировать заявленные SLA.",
+      "recommendation": "Явно указать, что создание VM и определение IP триггерят немедленный refresh дерева независимо от интервала polling, и/или ограничить SLA появления в дереве только для интервала > 0; зафиксировать поведение при интервале 0."
+    },
+    {
+      "id": "F-002",
+      "category": "ambiguity",
+      "severity": "major",
+      "requirement_refs": ["REQ-04"],
+      "evidence": "REQ-04: «уникально в пределах подключения».",
+      "impact": "Не определено, что такое «подключение» (connection): один libvirt-хост, одно workspace-подключение, несколько QMP-сокетов? От этого зависит область проверки уникальности имени. Тесты на дубликат имени неоднозначны, а серверная проверка может быть реализована в неверной области.",
+      "recommendation": "Определить «подключение» (например, «в пределах одного libvirt/QMP-подключения к хосту») и указать, как формируется ключ уникальности."
+    },
+    {
+      "id": "F-003",
+      "category": "completeness",
+      "severity": "major",
+      "requirement_refs": ["REQ-09"],
+      "evidence": "REQ-09 AC: ««Force stop» вызывает REQ-10», при этом REQ-10 на странице отсутствует.",
+      "impact": "Поведение «Force stop» (принудительная остановка VM) не описано на странице: нет требований к эффекту команды, обработке ошибок и обновлению состояния. Тест-дизайнер не может верифицировать этот путь. blocks design: dangling-ссылка на несуществующий REQ-10.",
+      "recommendation": "Добавить на страницу REQ-10 (принудительная остановка) или инлайнить его поведение в REQ-09 (что именно делает Force stop, какие уведомления/AC)."
+    },
+    {
+      "id": "F-004",
+      "category": "ambiguity",
+      "severity": "major",
+      "requirement_refs": ["REQ-09"],
+      "evidence": "REQ-09: «Таймаут берётся из workspace settings: целое 5–300 секунд; по умолчанию используется разумный таймаут.»",
+      "impact": "«Разумный таймаут» не имеет числового значения, поэтому дефолтное поведение невоспроизводимо и не может быть проверено автотестом/ручным тестом. blocks design: значение по умолчанию придётся выдумывать.",
+      "recommendation": "Задать конкретное значение по умолчанию (например, 30 с) и добавить AC на дефолт."
+    },
+    {
+      "id": "F-005",
+      "category": "ambiguity",
+      "severity": "major",
+      "requirement_refs": ["REQ-12"],
+      "evidence": "REQ-12: «Для user-nat IP определяется при необходимости через libvirt API ... или QMP ...».",
+      "impact": "Не определено, когда именно наступает «необходимость»: при открытии формы, при раскрытии узла VM, по кнопке Refresh? От этого зависит момент/частота вызовов libvirt/QMP и проверка SLA «IP в дереве в течение 2 с». Тесты неоднозначны.",
+      "recommendation": "Заменить «при необходимости» на явный триггер (например, «при первом отображении/раскрытии VM или по кнопке Refresh») и указать, кэшируется ли результат."
+    },
+    {
+      "id": "F-006",
+      "category": "ambiguity",
+      "severity": "major",
+      "requirement_refs": ["REQ-13"],
+      "evidence": "REQ-13: «При поддержке libvirt events расширение подписывается на события вместо polling. При невозможности — откат к polling, warning в лог.»",
+      "impact": "Не определено, как детектируется «невозможность» подписки на события (ошибка API, отсутствие возможностей, таймаут?) и в какой момент выполняется откат. Ветка fallback невоспроизводима в тестах.",
+      "recommendation": "Описать критерий детекции (какая именно ошибка/флаг), момент отката и поведение при последующих ошибках."
+    },
+    {
+      "id": "F-007",
+      "category": "completeness",
+      "severity": "minor",
+      "requirement_refs": ["NFR/Производительность"],
+      "evidence": "NFR/Производительность: «Операции UI ≤ 3 с до отражения результата ... Активация ≤ 1.5 с на 4 ядрах / 8 ГБ RAM.» — acceptance criteria отсутствуют.",
+      "impact": "NFR не имеет AC и не задаёт условия измерения (холодный/тёплый старт, объём дерева, число VM), из-за чего перф-тесты невозможно сформулировать однозначно.",
+      "recommendation": "Добавить AC и условия измерения (методика, датасет, что считается «активацией» и «операцией UI»)."
+    },
+    {
+      "id": "F-008",
+      "category": "completeness",
+      "severity": "minor",
+      "requirement_refs": ["REQ-13"],
+      "evidence": "REQ-13: «0 или 1–60 секунд; по умолчанию 5» + AC только для 0, 1, 60, 61.",
+      "impact": "Не покрыты граничные/некорректные значения интервала: отрицательное, нецелое, пустое, нечисловое. Непонятно, применяется ли тот же inline error, что и для 61.",
+      "recommendation": "Добавить AC для отрицательных/нецелых/пустых значений."
+    },
+    {
+      "id": "F-009",
+      "category": "completeness",
+      "severity": "minor",
+      "requirement_refs": ["REQ-18"],
+      "evidence": "REQ-18: «... дерево пустое, команды возвращают friendly-ошибку.» — в списке Acceptance criteria этого поведения нет.",
+      "impact": "Поведение команд в degraded-режиме заявлено только в прозе без AC, что снижает тестируемость ветки degraded.",
+      "recommendation": "Добавить AC: в degraded-режиме команды возвращают friendly-ошибку, дерево пустое."
+    },
+    {
+      "id": "F-010",
+      "category": "ambiguity",
+      "severity": "minor",
+      "requirement_refs": ["REQ-04"],
+      "evidence": "REQ-04: «После успешного создания VM должна появиться в дереве быстро.»",
+      "impact": "Слово «быстро» нормативно не определено (в AC уточняется как 3 с), что создаёт расхождение между прозой и AC и провоцирует разные трактовки.",
+      "recommendation": "Убрать «быстро» или привести прозу в соответствие с AC (в течение 3 с)."
+    },
+    {
+      "id": "F-011",
+      "category": "ambiguity",
+      "severity": "minor",
+      "requirement_refs": ["REQ-14"],
+      "evidence": "REQ-14: «env-переменные Extension Host с именами `SECRET|TOKEN|PASSWORD|KEY`».",
+      "impact": "Не задана семантика сопоставления (подстрока vs точное имя, регистрозависимость). Тесты redaction могут расходиться с реализацией.",
+      "recommendation": "Уточнить правила сопоставления (case-insensitive подстрока и т.п.)."
+    },
+    {
+      "id": "F-012",
+      "category": "completeness",
+      "severity": "minor",
+      "requirement_refs": ["REQ-04"],
+      "evidence": "REQ-04: «`iso` опционально: абсолютный путь на гипервизоре;» — отдельных AC для опционального iso нет.",
+      "impact": "Не покрыты клиентская валидация формата пути iso и поведение при отсутствии/несуществовании файла (частично закрыто REQ-16 серверно), а также случай пустого iso.",
+      "recommendation": "Добавить AC для случая с/без iso, включая валидацию и серверную проверку существования файла."
+    }
+  ],
+  "severity_summary": { "blocker": 0, "critical": 0, "major": 6, "minor": 6 },
+  "status": "completed",
+  "blocking_reason": null
+}

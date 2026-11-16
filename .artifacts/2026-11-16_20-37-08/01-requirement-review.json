@@ -1,0 +1,219 @@
+{
+  "artifact_id": "2026-11-16_20-37-08:01-requirement-review",
+  "run_id": "2026-11-16_20-37-08",
+  "requirement_version": "0.5",
+  "requirement_status": "ready_for_review",
+  "confluence_page_id": "4161537",
+  "timestamp": "2026-11-16T20:37:08Z",
+  "requirements": [
+    {
+      "ref": "REQ-01",
+      "title": "Активация расширения",
+      "text": "Расширение активируется по onStartupFinished, при вызове любой команды расширения или при наличии файла `.qemu-manager.json` в корне рабочей области. Файл — только activation trigger, его содержимое не валидируется и не парсится. Acceptance criteria: команда `QEMU: Connect` доступна в Command Palette после установки; cold activation ≤ 1.5 с; ошибка активации → degraded с `degradedReason = \"activation_failed\"`, уведомление с действием «Retry»; отсутствие `.qemu-manager.json` не мешает активации.",
+      "acceptance_criteria": [
+        "команда `QEMU: Connect` доступна в Command Palette после установки",
+        "cold activation ≤ 1.5 с",
+        "ошибка активации → degraded с `degradedReason = \"activation_failed\"`, уведомление с действием «Retry»",
+        "отсутствие `.qemu-manager.json` не мешает активации"
+      ],
+      "in_scope": true
+    },
+    {
+      "ref": "REQ-03",
+      "title": "Дерево виртуальных машин",
+      "text": "VM отображаются в боковой панели, сгруппированные по подключениям. Для каждой VM: имя, состояние running / stopped / paused / suspended / crashed, vCPU, RAM в МБ. Сортировка по умолчанию — по имени, case-insensitive, по возрастанию. Acceptance criteria: подключение без VM показывает placeholder «No VMs»; при временной недоступности данных отображается последнее известное состояние с суффиксом `(stale)`; сортировка и группировка соблюдаются после обновления состояния.",
+      "acceptance_criteria": [
+        "подключение без VM показывает placeholder «No VMs»",
+        "при временной недоступности данных отображается последнее известное состояние с суффиксом `(stale)`",
+        "сортировка и группировка соблюдаются после обновления состояния"
+      ],
+      "in_scope": true
+    },
+    {
+      "ref": "REQ-08",
+      "title": "Запуск VM",
+      "text": "Команда «Start» доступна только для VM в состоянии stopped или crashed. Переход из crashed реализуется как destroy + start. Acceptance criteria: stopped + Start → running в течение 5 с; crashed + Start → destroy, затем start; running в течение 5 с; ошибка libvirt → состояние не меняется, уведомление с действием «Show log».",
+      "acceptance_criteria": [
+        "stopped + Start → running в течение 5 с",
+        "crashed + Start → destroy, затем start; running в течение 5 с",
+        "ошибка libvirt → состояние не меняется, уведомление с действием «Show log»"
+      ],
+      "in_scope": true
+    },
+    {
+      "ref": "REQ-10",
+      "title": "Force stop",
+      "text": "Команда «Force stop» немедленно завершает процесс VM. Перед выполнением показывается подтверждение с именем VM и предупреждением «Unsaved data may be lost». Подтверждение можно отключить настройкой `qemuManager.confirmForceStop` (по умолчанию true). Acceptance criteria: подтверждение содержит имя VM; отмена не меняет состояние; после force stop состояние stopped в течение 3 с.",
+      "acceptance_criteria": [
+        "подтверждение содержит имя VM",
+        "отмена не меняет состояние",
+        "после force stop состояние stopped в течение 3 с"
+      ],
+      "in_scope": true
+    },
+    {
+      "ref": "REQ-11",
+      "title": "Пауза и возобновление",
+      "text": "«Pause» доступна для running. «Resume» — единая контекстная команда: для paused выполняет REQ-11, для suspended выполняет REQ-21. Acceptance criteria: running + Pause → paused в течение 3 с; paused + Resume → running в течение 3 с; suspended + Resume → поведение по REQ-21; ошибка libvirt → состояние не меняется, ошибка показана.",
+      "acceptance_criteria": [
+        "running + Pause → paused в течение 3 с",
+        "paused + Resume → running в течение 3 с",
+        "suspended + Resume → поведение по REQ-21",
+        "ошибка libvirt → состояние не меняется, ошибка показана"
+      ],
+      "in_scope": true
+    },
+    {
+      "ref": "REQ-13",
+      "title": "Автообновление состояния",
+      "text": "Интервал обновления — workspace setting: 0 (только ручное обновление) или 1–60 секунд; по умолчанию 5. При поддержке libvirt events расширение подписывается на события вместо polling. При невозможности подписки — откат к polling, warning в лог без пользовательской ошибки. Кнопка «Refresh» доступна всегда. Acceptance criteria: интервал 0 → только ручное обновление; интервал 1 → polling каждые 1 с; интервал 60 → polling каждые 60 с; интервал 61 → значение отклоняется с inline error; ошибка подписки на события → polling продолжается, warning в логе.",
+      "acceptance_criteria": [
+        "интервал 0 → только ручное обновление",
+        "интервал 1 → polling каждые 1 с",
+        "интервал 60 → polling каждые 60 с",
+        "интервал 61 → значение отклоняется с inline error",
+        "ошибка подписки на события → polling продолжается, warning в логе"
+      ],
+      "in_scope": true
+    },
+    {
+      "ref": "REQ-14",
+      "title": "Обработка ошибок",
+      "text": "Ошибки libvirt / QMP маппятся в friendly-сообщения. Минимальная таблица: VIR_ERR_NO_CONNECT, VIR_ERR_INVALID_CONN → Connection refused (Show log да); VIR_ERR_AUTH_FAILED, VIR_ERR_AUTH_CANCELLED → Authentication failed (да); VIR_ERR_NO_DOMAIN → VM not found (нет); VIR_ERR_OPERATION_UNSUPPORTED, VIR_ERR_NO_SUPPORT → Operation not supported (да); VIR_ERR_DISK_FULL, ENOSPC → Disk full (да); QMP GenericError с No space left → Disk full (да); QMP CommandNotFound, KVMMissingCap → Operation not supported (да); QMP DeviceNotFound → VM not found (нет); unmapped libvirt/QMP → Unexpected error: {code} (да). Redaction обязательна перед записью в Output Channel: passwords, tokens, SSH private keys, URI с embedded credentials `user:pass@host`, env-переменные процесса Extension Host с именами `SECRET|TOKEN|PASSWORD|KEY`. Acceptance criteria: любая ошибка → уведомление без raw stack trace; «Show log» открывает Output Channel и фокусирует последнюю запись; unmapped ошибки попадают в fallback; запись в лог не содержит секретов после redaction.",
+      "acceptance_criteria": [
+        "любая ошибка → уведомление без raw stack trace",
+        "«Show log» открывает Output Channel и фокусирует последнюю запись",
+        "unmapped ошибки попадают в fallback",
+        "запись в лог не содержит секретов после redaction"
+      ],
+      "in_scope": true
+    },
+    {
+      "ref": "REQ-15",
+      "title": "Логирование",
+      "text": "Output Channel «QEMU Manager». Формат: `YYYY-MM-DDTHH:MM:SSZ [LEVEL] [conn:vm] message`. `conn` — display name подключения, `vm` — display name VM. Если запись не связана с VM — `[conn:-]`; если не связана ни с VM, ни с подключением — `[system:-]`. Ring buffer: последние 10 000 строк. Уровень: error / info / debug, по умолчанию info. Acceptance criteria: каждая команда → info или debug; ошибочные ответы → error; буфер ограничен 10 000 строками; изменение уровня применяется немедленно; лог не содержит секретов.",
+      "acceptance_criteria": [
+        "каждая команда → info или debug",
+        "ошибочные ответы → error",
+        "буфер ограничен 10 000 строками",
+        "изменение уровня применяется немедленно",
+        "лог не содержит секретов"
+      ],
+      "in_scope": true
+    },
+    {
+      "ref": "REQ-17",
+      "title": "Горячие клавиши",
+      "text": "По умолчанию Windows/Linux: `Ctrl+Alt+Shift+Q` → Start, `Ctrl+Alt+Shift+W` → Shutdown. macOS: `Cmd+Alt+Shift+Q` → Start, `Cmd+Alt+Shift+W` → Shutdown. Комбинации настраиваются через Keybindings UI VS Code. Команда срабатывает только если выбрана VM и команда применима к её состоянию. Acceptance criteria: дефолтный биндинг выполняет команду для выбранной VM в применимом состоянии; дефолтные биндинги не конфликтуют с built-in VS Code; при неприменимом состоянии VM биндинг не срабатывает; пользовательский биндинг через Keybindings JSON работает.",
+      "acceptance_criteria": [
+        "дефолтный биндинг выполняет команду для выбранной VM в применимом состоянии",
+        "дефолтные биндинги не конфликтуют с built-in VS Code",
+        "при неприменимом состоянии VM биндинг не срабатывает",
+        "пользовательский биндинг через Keybindings JSON работает"
+      ],
+      "in_scope": true
+    },
+    {
+      "ref": "REQ-19",
+      "title": "Телеметрия (opt-in)",
+      "text": "Телеметрия по умолчанию отключена. Включается только явно через first-run notification или `qemuManager.telemetry.enabled`. Payload: тип действия, success/failure, код ошибки, duration_ms, версия расширения, семейство ОС. Payload не содержит имена VM, пути, IP, URI, пользователей, hostname. Acceptance criteria: телеметрия выключена → никаких сетевых вызовов телеметрии; телеметрия включена → payload соответствует схеме; отказ от first-run notification → настройка остаётся false, повторное уведомление не раньше 30 дней.",
+      "acceptance_criteria": [
+        "телеметрия выключена → никаких сетевых вызовов телеметрии",
+        "телеметрия включена → payload соответствует схеме",
+        "отказ от first-run notification → настройка остаётся false, повторное уведомление не раньше 30 дней"
+      ],
+      "in_scope": true
+    },
+    {
+      "ref": "REQ-21",
+      "title": "Suspend и Resume VM",
+      "text": "«Suspend» доступна для running и переводит VM в S3-сон (`VIR_DOMAIN_PMSUSPENDED`). Resume возвращает в running. Пока VM в suspended, Start, Shutdown, Force stop, Pause недоступны с tooltip «Resume VM first». Acceptance criteria: running + Suspend → suspended в течение 5 с; suspended + Resume → running в течение 5 с; suspended + Start / Shutdown / Force stop / Pause → disabled с tooltip; ошибка libvirt → состояние не меняется, уведомление по REQ-14.",
+      "acceptance_criteria": [
+        "running + Suspend → suspended в течение 5 с",
+        "suspended + Resume → running в течение 5 с",
+        "suspended + Start / Shutdown / Force stop / Pause → disabled с tooltip",
+        "ошибка libvirt → состояние не меняется, уведомление по REQ-14"
+      ],
+      "in_scope": true
+    },
+    {
+      "ref": "REQ-22",
+      "title": "Детекция состояния crashed",
+      "text": "crashed соответствует `VIR_DOMAIN_CRASHED`: QEMU-процесс завершился аварийно, но домен остаётся определён. libvirt-режим: events или polling по `virDomainGetState`. QMP-only: event SHUTDOWN с reason `guest-panic` или polling `query-status` с `internal-error` / `shutdown` + reason. Отображение: предупреждающая иконка и tooltip «VM crashed unexpectedly. Use Start to recover.». Acceptance criteria: внешнее убийство QEMU-процесса → crashed в течение интервала обновления; crashed + Start → running в течение 5 с; crashed отображается с предупреждающей иконкой и tooltip.",
+      "acceptance_criteria": [
+        "внешнее убийство QEMU-процесса → crashed в течение интервала обновления",
+        "crashed + Start → running в течение 5 с",
+        "crashed отображается с предупреждающей иконкой и tooltip"
+      ],
+      "in_scope": true
+    }
+  ],
+  "findings": [
+    {
+      "id": "F-001",
+      "category": "completeness",
+      "severity": "major",
+      "requirement_refs": ["REQ-17", "REQ-21"],
+      "evidence": "REQ-17: «`Ctrl+Alt+Shift+W` → Shutdown»; REQ-21: «suspended + Start / Shutdown / Force stop / Pause → disabled с tooltip». Ни один REQ-раздел не определяет команду Shutdown (доступные состояния, целевое состояние, латентность, обработку ошибок, AC).",
+      "impact": "Команда Shutdown выведена в UI (дефолтный биндинг) и учитывается в матрице доступности REQ-21, но не имеет требований: test-designer не может построить ни одного AC, design вынужден вводить недокументированные допущения.",
+      "recommendation": "Добавить REQ для Shutdown: допустимые исходные состояния, целевое состояние (stopped), латентность, поведение при ошибке libvirt (по REQ-14)."
+    },
+    {
+      "id": "F-002",
+      "category": "completeness",
+      "severity": "major",
+      "requirement_refs": ["REQ-10", "REQ-21"],
+      "evidence": "REQ-10: «Команда «Force stop» немедленно завершает процесс VM» — не перечислены состояния, в которых команда доступна; REQ-21 лишь отключает Force stop при suspended. Отдельного AC для режима `qemuManager.confirmForceStop = false` нет.",
+      "impact": "Матрица доступности Force stop неполна (неясно, доступна ли команда для paused/stopped), а ветка с отключённым подтверждением не покрыта AC → неполное покрытие тестами и неоднозначная enablement-логика в UI.",
+      "recommendation": "Перечислить состояния, в которых Force stop доступен, и добавить AC для отключённого подтверждения (немедленное выполнение без диалога)."
+    },
+    {
+      "id": "F-003",
+      "category": "ambiguity",
+      "severity": "major",
+      "requirement_refs": ["REQ-14"],
+      "evidence": "REQ-14: redaction охватывает «env-переменные процесса Extension Host с именами `SECRET|TOKEN|PASSWORD|KEY`».",
+      "impact": "Не определена семантика сопоставления имени (точное совпадение или подстрока, регистр). Точное совпадение может не замаскировать `MY_TOKEN`, подстрочное — замаскировать `MONKEY`; разные интерпретации дают разные AC «лог не содержит секретов» → риск утечки секретов в лог или ложной маскировки.",
+      "recommendation": "Зафиксировать правило сопоставления (например, подстрока, case-insensitive) и перечислить исключения; добавить AC с примерами имён переменных."
+    },
+    {
+      "id": "F-004",
+      "category": "completeness",
+      "severity": "major",
+      "requirement_refs": ["REQ-01", "REQ-08", "REQ-10", "REQ-11", "REQ-21"],
+      "evidence": "REQ-01 AC: «cold activation ≤ 1.5 с»; REQ-08/REQ-10/REQ-11/REQ-21 задают «3 с» / «5 с» — без эталонной конфигурации (CPU/RAM/ОС). Явный раздел NFR в документе отсутствует.",
+      "impact": "Измеримость и воспроизводимость тайминговых AC зависят от окружения; тесты будут флейки, а design не имеет эталона производительности.",
+      "recommendation": "Вынести NFR-раздел и указать эталонную конфигурацию для тайминговых целей либо явно пометить их как ориентировочные."
+    },
+    {
+      "id": "F-005",
+      "category": "ambiguity",
+      "severity": "major",
+      "requirement_refs": ["REQ-13"],
+      "evidence": "REQ-13: «При поддержке libvirt events расширение подписывается на события вместо polling» и одновременно «интервал 0 (только ручное обновление)».",
+      "impact": "Не определено, отключает ли интервал 0 подписку на события и как событийный режим сосуществует с ручным обновлением; AC для interval = 0 неоднозначен, когда доступны libvirt events.",
+      "recommendation": "Уточнить приоритет: interval = 0 → только ручное обновление (без событий) либо события остаются активны; описать взаимодействие режимов."
+    },
+    {
+      "id": "F-006",
+      "category": "completeness",
+      "severity": "major",
+      "requirement_refs": ["REQ-19"],
+      "evidence": "REQ-19 AC: «телеметрия включена → payload соответствует схеме»; сама схема payload в документе не приведена (перечислены лишь поля).",
+      "impact": "Проверяемый AC ссылается на схему, отсутствующую в документе → тест не может быть построен детерминированно без внешнего артефакта.",
+      "recommendation": "Приложить схему payload (поля, типы, обязательность) или заменить ссылку на перечень полей с правилами."
+    },
+    {
+      "id": "F-007",
+      "category": "ambiguity",
+      "severity": "major",
+      "requirement_refs": ["REQ-01"],
+      "evidence": "REQ-01 AC: «ошибка активации → degraded с `degradedReason = \"activation_failed\"`»; термин «degraded» и семантика `degradedReason` в документе не введены, наблюдаемое поведение состояния не описано.",
+      "impact": "Не определено, что означает состояние degraded (какие функции недоступны, как отображается) → неоднозначный AC и непокрытая ветка поведения.",
+      "recommendation": "Ввести определение degraded-состояния и `degradedReason` (перечень значений, отображение, влияние на доступность функций)."
+    }
+  ],
+  "severity_summary": { "blocker": 0, "critical": 0, "major": 7, "minor": 0 },
+  "status": "completed",
+  "blocking_reason": null
+}

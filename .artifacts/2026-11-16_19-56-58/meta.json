@@ -1,0 +1,34 @@
+{
+  "run_id": "2026-11-16_19-56-58",
+  "requirement_version": "0.5",
+  "confluence_page_id": "4161537",
+  "jira_project": "QEMU",
+  "testomat_project_id": "test-cc3c0",
+  "testomat_project_id_source": "argument",
+  "testomat_suite_id": null,
+  "started_at": "2026-11-16T19:56:58Z",
+  "status": "blocked_terminal",
+  "stopped_at": "Gate 1 — Requirement Review Gate",
+  "blocking_reason": "prompt_injection_detected",
+  "preflight_decision": "fresh_start",
+  "archived_previous_run_id": null,
+  "archived_previous_path": null,
+  "human_override": null,
+  "gate_results": {
+    "gate1": "fail",
+    "gate2a": null,
+    "gate2b": null,
+    "gate2c": null
+  },
+  "gate_retries": {
+    "jira": 0,
+    "test": 0
+  },
+  "blocking_findings_present": true,
+  "publish": {
+    "jira": { "status": null, "attempts": 0, "stopped_endpoint": null, "last_error_class": null, "retry_after": null },
+    "testomat": { "status": null, "attempts": 0, "stopped_endpoint": null, "last_error_class": null, "retry_after": null, "pending_not_published": 0 }
+  },
+  "human_decision": null,
+  "finished_at": "2026-11-16T19:58:30Z"
+}

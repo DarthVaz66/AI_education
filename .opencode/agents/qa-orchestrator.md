@@ -22,8 +22,8 @@ tools:
   skill: false
   # MCP: jira-confluence
   jira-confluence_get_confluence_page: false
-  jira-confluence_search_jira_issues: true
-  jira-confluence_create_jira_issue: true
+  jira-confluence_jira_search: true
+  jira-confluence_jira_create_issue: true
   # MCP: testomat.io
   testomat_system_ping: true
   testomat_project_info: true
@@ -661,10 +661,10 @@ preflight-поиском; они остаются orphaned и требуют р�
 
 ### 7.2. Jira preflight + create
 Для каждой задачи со `status = pending | failed`:
-1. `jira-confluence_search_jira_issues` с JQL:
+1. `jira-confluence_jira_search` с JQL:
    `project = "{jira_project}" AND labels = "{label}" AND summary ~ "{summary}"`.
 2. Если найдено — `status = existing`, `external_id = key`. Не создавать.
-3. Иначе — `jira-confluence_create_jira_issue`. Записать `status = created`,
+3. Иначе — `jira-confluence_jira_create_issue`. Записать `status = created`,
    `external_id`. **Немедленно** сохранить state (write-then-continue).
 4. При ошибке — классифицировать (см. «Error classification»): `transient` →
    retry window; `auth`/`validation` → `status = failed`. Повторный create —

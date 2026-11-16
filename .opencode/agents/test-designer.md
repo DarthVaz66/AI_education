@@ -22,8 +22,8 @@ tools:
   # MCP: jira-confluence
   jira-confluence_get_confluence_page: false
   jira-confluence_search_confluence: false
-  jira-confluence_search_jira_issues: false
-  jira-confluence_create_jira_issue: false
+  jira-confluence_jira_search: false
+  jira-confluence_jira_create_issue: false
   # MCP: testomat
   testomat_tests: true
   testomat_suites: true
